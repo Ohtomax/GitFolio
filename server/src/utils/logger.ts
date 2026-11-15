@@ -8,6 +8,7 @@ export function createLogger(level = 'info'): Logger {
       paths: [
         'authorization', 'cookie', 'password', 'token', 'secret',
         'accessToken', 'refreshToken', 'encryptedAccessToken',
+        'clientSecret', 'GITHUB_CLIENT_SECRET', '*.clientSecret', '*.GITHUB_CLIENT_SECRET',
         '*.password', '*.token', '*.secret', '*.accessToken', '*.refreshToken',
         '*.encryptedAccessToken', 'req.headers.authorization', 'req.headers.cookie',
         'req.body', 'res.headers["set-cookie"]',

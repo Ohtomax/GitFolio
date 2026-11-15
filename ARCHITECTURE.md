@@ -743,7 +743,6 @@ User clicks "Deploy"
 | `JWT_SECRET`           | Environment variable  | Min 32 chars, rotatable               |
 | `ENCRYPTION_KEY`       | Environment variable  | Exactly 32 chars for AES-256          |
 | `GITHUB_CLIENT_SECRET` | Environment variable  | GitHub OAuth App secret               |
-| `GITHUB_PRIVATE_KEY`   | PEM file on disk      | GitHub App private key                |
 | `DATABASE_URL`         | Environment variable  | PostgreSQL connection string          |
 | User GitHub Tokens     | PostgreSQL (encrypted)| AES-256-CBC with `ENCRYPTION_KEY`     |
 
@@ -803,7 +802,7 @@ npm run dev                        # Runs client + server concurrently
 Phase 1 implementation and local setup commands are documented in [README.md](README.md). The only API routes currently exposed are `/api/health` (liveness) and `/api/health/ready` (PostgreSQL + Redis readiness); feature routes begin in Phase 2.
 
 ### Phase 2 — Authentication
-- [ ] GitHub OAuth App configuration
+- [ ] GitHub OAuth App configuration — local settings prepared; GitHub registration and credentials pending ([setup](docs/GITHUB_OAUTH_SETUP.md))
 - [ ] Auth module (controller, service, routes)
 - [ ] JWT issuance & verification middleware
 - [ ] GitHub access token encryption/decryption

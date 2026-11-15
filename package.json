@@ -15,6 +15,7 @@
     "build": "npm run build --workspace=@gitfolio/shared && npm run db:generate && npm run build --workspace=@gitfolio/server && npm run build --workspace=@gitfolio/client",
     "typecheck": "npm run build --workspace=@gitfolio/shared && npm run db:generate && npm run typecheck --workspaces --if-present",
     "test": "npm run build --workspace=@gitfolio/shared && npm test --workspace=@gitfolio/server",
+    "oauth:check": "npm run build --workspace=@gitfolio/shared && npm run db:generate && npm run oauth:check --workspace=@gitfolio/server",
     "db:generate": "npm run db:generate --workspace=@gitfolio/server --",
     "db:validate": "npm run db:validate --workspace=@gitfolio/server --",
     "db:migrate": "npm run db:migrate --workspace=@gitfolio/server --",

@@ -22,6 +22,8 @@ If PostgreSQL already occupies port 5432, set `POSTGRES_PORT=5433` and update `D
 
 GitHub credentials, `JWT_SECRET`, and `ENCRYPTION_KEY` may remain empty during Phase 1. Supplied secrets are validated: JWT secrets require at least 32 characters, and encryption keys require exactly 32 UTF-8 bytes. No authentication or protected resource routes are exposed yet.
 
+The first Phase 2 setup step is documented in [GitHub OAuth App configuration](docs/GITHUB_OAUTH_SETUP.md). Local settings are prepared; app registration and credentials still require the GitHub account owner. Run `npm run oauth:check` after saving the credentials to validate the configuration without connecting to the database or Redis.
+
 | Service | Address |
 | --- | --- |
 | Client | `http://localhost:5173` |
@@ -40,6 +42,7 @@ The API connects to PostgreSQL and Redis before listening. Liveness checks the H
 | `npm run build` | Build shared types, generate Prisma Client, and build server and client |
 | `npm run typecheck` | Check all workspaces |
 | `npm test` | Build and run the API/configuration tests |
+| `npm run oauth:check` | Validate local GitHub OAuth settings without printing credentials |
 | `npm run db:validate` | Validate the Prisma schema |
 | `npm run db:deploy` | Apply the committed migrations without resetting data |
 | `npm run db:migrate -- --name describe_change` | Create/apply a migration in a development database |
