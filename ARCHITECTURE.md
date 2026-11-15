@@ -796,9 +796,11 @@ npm run dev                        # Runs client + server concurrently
 - [x] Client Vite + React setup
 - [x] Server Express project structure
 - [x] Shared package with Zod
-- [ ] Prisma schema & initial migration
-- [ ] Core server bootstrap (Express app, middleware stack)
-- [ ] Environment config module
+- [x] Prisma schema & initial migration
+- [x] Core server bootstrap (Express app, middleware stack)
+- [x] Environment config module
+
+Phase 1 implementation and local setup commands are documented in [README.md](README.md). The only API routes currently exposed are `/api/health` (liveness) and `/api/health/ready` (PostgreSQL + Redis readiness); feature routes begin in Phase 2.
 
 ### Phase 2 — Authentication
 - [ ] GitHub OAuth App configuration

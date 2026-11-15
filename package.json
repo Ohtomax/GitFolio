@@ -8,13 +8,21 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "predev": "npm run build --workspace=@gitfolio/shared && npm run db:generate",
+    "dev": "concurrently --kill-others-on-fail --names shared,server,client \"npm run dev --workspace=@gitfolio/shared\" \"npm run dev:server\" \"npm run dev:client\"",
     "dev:client": "npm run dev --workspace=client",
-    "dev:server": "npm run dev --workspace=server"
+    "dev:server": "npm run dev --workspace=server",
+    "build": "npm run build --workspace=@gitfolio/shared && npm run db:generate && npm run build --workspace=@gitfolio/server && npm run build --workspace=@gitfolio/client",
+    "typecheck": "npm run build --workspace=@gitfolio/shared && npm run db:generate && npm run typecheck --workspaces --if-present",
+    "test": "npm run build --workspace=@gitfolio/shared && npm test --workspace=@gitfolio/server",
+    "db:generate": "npm run db:generate --workspace=@gitfolio/server --",
+    "db:validate": "npm run db:validate --workspace=@gitfolio/server --",
+    "db:migrate": "npm run db:migrate --workspace=@gitfolio/server --",
+    "db:deploy": "npm run db:deploy --workspace=@gitfolio/server --",
+    "db:status": "npm run db:status --workspace=@gitfolio/server --",
+    "db:studio": "npm run db:studio --workspace=@gitfolio/server --"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
   }
-
-  
 }

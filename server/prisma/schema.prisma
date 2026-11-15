@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ProjectStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum DeploymentStatus {
+  PENDING
+  BUILDING
+  PUSHING
+  DEPLOYING
+  LIVE
+  FAILED
+}
+
+model User {
+  id                   String       @id @default(uuid()) @db.Uuid
+  githubId             String       @unique
+  login                String
+  email                String?
+  name                 String?
+  avatarUrl            String?
+  encryptedAccessToken String       @db.Text
+  createdAt            DateTime     @default(now()) @db.Timestamptz(3)
+  updatedAt            DateTime     @updatedAt @db.Timestamptz(3)
+  projects             Project[]
+  deployments          Deployment[]
+}
+
+model Project {
+  id          String        @id @default(uuid()) @db.Uuid
+  userId      String        @db.Uuid
+  templateId  String        @db.Uuid
+  name        String
+  slug        String
+  repoName    String?
+  themeConfig Json          @default("{}") @db.JsonB
+  status      ProjectStatus @default(DRAFT)
+  createdAt   DateTime      @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime      @updatedAt @db.Timestamptz(3)
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  template    Template      @relation(fields: [templateId], references: [id], onDelete: Restrict)
+  sections    Section[]
+  deployments Deployment[]
+
+  // The composite key also enforces deployment ownership at the database boundary.
+  @@unique([id, userId])
+  @@unique([userId, slug])
+  @@index([userId, updatedAt])
+  @@index([templateId])
+}
+
+model Section {
+  id        String   @id @default(uuid()) @db.Uuid
+  projectId String   @db.Uuid
+  type      String
+  sortOrder Int      @default(0)
+  content   Json     @default("{}") @db.JsonB
+  visible   Boolean  @default(true)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, sortOrder])
+}
+
+model Template {
+  id            String    @id @default(uuid()) @db.Uuid
+  name          String
+  description   String
+  category      String
+  thumbnailUrl  String?
+  defaultConfig Json      @default("{}") @db.JsonB
+  isReact       Boolean   @default(false)
+  createdAt     DateTime  @default(now()) @db.Timestamptz(3)
+  projects      Project[]
+
+  @@index([category, isReact])
+}
+
+model Deployment {
+  id          String           @id @default(uuid()) @db.Uuid
+  projectId   String           @db.Uuid
+  userId      String           @db.Uuid
+  status      DeploymentStatus @default(PENDING)
+  commitSha   String?
+  pagesUrl    String?
+  logs        Json             @default("[]") @db.JsonB
+  startedAt   DateTime         @default(now()) @db.Timestamptz(3)
+  completedAt DateTime?        @db.Timestamptz(3)
+  project     Project          @relation(fields: [projectId, userId], references: [id, userId], onDelete: Cascade)
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, startedAt])
+  @@index([userId, startedAt])
+  @@index([status, startedAt])
+}
