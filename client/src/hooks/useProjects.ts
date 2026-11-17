@@ -1,5 +1,5 @@
 import { queryOptions, useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
-import { ProjectQuerySchema, type CreateProjectInput, type Project, type ProjectQuery, type UpdateProjectInput } from '@gitfolio/shared';
+import { IdParamsSchema, ProjectQuerySchema, type CreateProjectInput, type Project, type ProjectQuery, type UpdateProjectInput } from '@gitfolio/shared';
 import { projectService } from '../services/project.service.ts';
 import { useAuthStore } from '../stores/auth.store.ts';
 
@@ -18,7 +18,7 @@ export function projectListOptions(userId: string, filters: Partial<ProjectQuery
 }
 export function projectDetailOptions(userId: string, id: string) {
   return queryOptions({ queryKey: projectKeys.detail(userId, id),
-    queryFn: ({ signal }) => projectService.get(id, signal), enabled: Boolean(userId && id), staleTime: 5 * 60000 });
+    queryFn: ({ signal }) => projectService.get(id, signal), enabled: Boolean(userId) && IdParamsSchema.safeParse({ id }).success, staleTime: 5 * 60000 });
 }
 const stillSignedIn = (userId: string) => useAuthStore.getState().user?.id === userId;
 
