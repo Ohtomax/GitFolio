@@ -3,6 +3,10 @@ export { DEPLOYMENT_MESSAGES, type DeploymentLogCode } from './constants/deploym
 export { DeploymentLogCodeSchema, StartDeploymentSchema, DeploymentQuerySchema, DeploymentSchema, DeploymentPageSchema,
   PublishCapabilitySchema, type StartDeploymentInput, type Deployment, type DeploymentQuery, type DeploymentPage, type PublishCapability } from './validation/deployment.schema.js';
 export type { ApiResponse } from './types/api.types.js';
+export { BUILTIN_TEMPLATES, PORTFOLIO_CSS, buildPortfolioTree, portfolioVariables, accentText, contrastRatio, serializePortfolioTree,
+  mountPortfolioInteractions, type PortfolioDocument, type PortfolioElement, type PortfolioNode } from './portfolio/index.js';
+export { ProjectVisualSchema } from './validation/section-content.schema.js';
+export { PortfolioLayoutSchema } from './validation/template.schema.js';
 export { PortfolioUrlSchema, EditorItemSchema, SectionContentSchema, EditorSectionSchema, SaveEditorSchema,
   type SectionContent, type EditorItem, type EditorSection, type SaveEditorInput } from './validation/editor.schema.js';
 export { ProjectNameSchema, ProjectSlugSchema, RepoNameSchema, ProjectStatusSchema,

@@ -17,7 +17,7 @@ export function createTemplateRepository(database: PrismaClient): TemplateReposi
     async list(query) {
       const where: Prisma.TemplateWhereInput = query.category ? { category: query.category } : {};
       const [items, total] = await database.$transaction([
-        database.template.findMany({ where, select: templateSummarySelect,
+        database.template.findMany({ where, select: templateSelect,
           orderBy: [{ name: 'asc' }, { id: 'asc' }], skip: (query.page - 1) * query.pageSize, take: query.pageSize }),
         database.template.count({ where }),
       ]);

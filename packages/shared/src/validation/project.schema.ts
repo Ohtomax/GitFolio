@@ -27,6 +27,7 @@ export const ProjectSummarySchema = z.object({
   slug: ProjectSlugSchema, repoName: RepoNameSchema.nullable(), status: ProjectStatusSchema,
   createdAt: z.string().datetime(), updatedAt: z.string().datetime(),
   sectionCount: z.number().int().nonnegative(), template: TemplateSummarySchema,
+  preview: ThemeConfigSchema.optional(),
 });
 export const ProjectSectionSchema = EditorSectionSchema.extend({ sortOrder: z.number().int().nonnegative() });
 export const ProjectSchema = ProjectSummarySchema.extend({

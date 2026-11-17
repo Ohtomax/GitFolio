@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { SectionContentSchema } from './section-content.schema.js';
 
 export const IdParamsSchema = z.object({ id: z.string().uuid() }).strict();
 export const PaginationQuerySchema = z.object({
@@ -10,21 +11,26 @@ export const PageMetaSchema = z.object({
   total: z.number().int().nonnegative(), totalPages: z.number().int().nonnegative(),
 });
 export const TemplateCategorySchema = z.enum(['minimal', 'developer', 'professional', 'creative']);
+export const PortfolioLayoutSchema = z.enum(['classic', 'minimal', 'terminal', 'editorial', 'bento', 'executive']);
+const color = z.string().regex(/^#[0-9a-fA-F]{6}$/);
 export const ThemeConfigSchema = z.object({
   colors: z.object({
     accent: z.string().regex(/^#[0-9a-fA-F]{6}$/),
     background: z.string().regex(/^#[0-9a-fA-F]{6}$/),
     text: z.string().regex(/^#[0-9a-fA-F]{6}$/),
+    muted: color.optional(), surface: color.optional(), border: color.optional(),
   }).strict(),
   font: z.enum(['sans', 'serif', 'mono']),
   spacing: z.enum(['compact', 'comfortable', 'spacious']),
+  layout: PortfolioLayoutSchema.optional(), headingFont: z.enum(['sans', 'serif', 'mono']).optional(),
+  demo: z.boolean().optional(),
 }).strict();
-export const SectionTypeSchema = z.enum(['hero', 'about', 'projects', 'skills', 'experience', 'education', 'contact']);
+export const SectionTypeSchema = z.enum(['hero', 'about', 'projects', 'skills', 'experience', 'education', 'contact', 'writing', 'now']);
 export const TemplateConfigSchema = z.object({
   theme: ThemeConfigSchema,
   sections: z.array(z.object({
     type: SectionTypeSchema,
-    content: z.object({ heading: z.string().max(120), description: z.string().max(2000) }).strict(),
+    content: SectionContentSchema,
     visible: z.boolean(),
   }).strict()).min(1).max(50),
 }).strict();
@@ -32,6 +38,7 @@ export const TemplateQuerySchema = PaginationQuerySchema.extend({ category: Temp
 export const TemplateSummarySchema = z.object({
   id: z.string().uuid(), name: z.string(), description: z.string(), category: TemplateCategorySchema,
   thumbnailUrl: z.string().url().nullable(), isReact: z.boolean(),
+  preview: ThemeConfigSchema.optional(),
 });
 export const TemplateSchema = TemplateSummarySchema.extend({ defaultConfig: TemplateConfigSchema });
 export const TemplatePageSchema = PageMetaSchema.extend({ items: z.array(TemplateSummarySchema).max(50) });

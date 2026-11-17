@@ -1,10 +1,15 @@
 import Mustache from 'mustache';
-import { ProjectSchema, type Project, type ThemeConfig } from '@gitfolio/shared';
+import { ProjectSchema, PORTFOLIO_CSS, buildPortfolioTree, serializePortfolioTree, portfolioVariables, mountPortfolioInteractions, type Project, type ThemeConfig } from '@gitfolio/shared';
 import { validateArtifact, type GeneratedFile } from './artifact.js';
+import { portfolioFontStyles } from './portfolio-fonts.js';
 
 const fonts = { sans: 'ui-sans-serif, system-ui, sans-serif', serif: 'ui-serif, Georgia, serif', mono: 'ui-monospace, monospace' };
 const spacing = { compact: '1.5rem', comfortable: '2.5rem', spacious: '4rem' };
 export function portfolioStyles(theme: ThemeConfig) {
+  if (theme.layout && theme.layout !== 'classic') {
+    const variables = Object.entries(portfolioVariables(theme)).map(([key, value]) => `${key}:${value}`).join(';');
+    return `${portfolioFontStyles(theme)}\n:root{${variables};color:var(--pf-text);background:var(--pf-bg)}body{margin:0}*{box-sizing:border-box}\n${PORTFOLIO_CSS}`;
+  }
   const channels = [1, 3, 5].map((index) => parseInt(theme.colors.accent.slice(index, index + 2), 16) / 255)
     .map((value) => value <= .04045 ? value / 12.92 : ((value + .055) / 1.055) ** 2.4);
   const luminance = channels[0] * .2126 + channels[1] * .7152 + channels[2] * .0722;
@@ -25,6 +30,15 @@ const pageTemplate = `<!doctype html>
 `;
 export function generateStaticSite(input: Project): GeneratedFile[] {
   const project = ProjectSchema.parse(input);
+  if (project.themeConfig.layout && project.themeConfig.layout !== 'classic') {
+    const tree = buildPortfolioTree({ ...project, sections: [...project.sections].sort((a, b) => a.sortOrder - b.sortOrder) });
+    const html = Mustache.render('<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{{name}}</title><link rel="stylesheet" href="./style.css"><script src="./script.js" defer></script></head><body>{{{content}}}</body></html>\n',
+      { name: project.name, content: serializePortfolioTree(tree) });
+    // Only the application-generated semantic tree is unescaped above. Every user
+    // string and attribute was escaped by serializePortfolioTree, including URLs.
+    return validateArtifact([{ path: 'index.html', content: html }, { path: 'style.css', content: portfolioStyles(project.themeConfig) },
+      { path: 'script.js', content: `(${mountPortfolioInteractions.toString()})(document);\n` }, { path: '.nojekyll', content: '' }]);
+  }
   const sections = [...project.sections].sort((a, b) => a.sortOrder - b.sortOrder).filter((section) => section.visible).map((section) => {
     const list = ['projects', 'skills', 'experience', 'education'].includes(section.type);
     return { id: section.id, type: section.type, ...section.content,

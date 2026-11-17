@@ -3,7 +3,7 @@ import { ArrowDown, ArrowUp, Eye, EyeOff, Plus } from 'lucide-react';
 import { SectionTypeSchema, type Project } from '@gitfolio/shared';
 import { useEditor, useEditorApi } from './EditorProvider.tsx';
 
-export const sectionNames = { hero: 'Hero', about: 'About', projects: 'Projects', skills: 'Skills', experience: 'Experience', education: 'Education', contact: 'Contact' } as const;
+export const sectionNames = { hero: 'Hero', about: 'About', projects: 'Projects', skills: 'Skills', experience: 'Experience', education: 'Education', contact: 'Contact', writing: 'Writing', now: 'Now' } as const;
 export function SectionNavigation({ disabled }: { disabled: boolean }) {
   const store = useEditorApi();
   const sections = useEditor((state) => state.document.sections);

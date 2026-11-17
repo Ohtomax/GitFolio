@@ -6,7 +6,7 @@ import type { ProjectRepository, StoredProject, StoredProjectSummary } from './p
 
 function summary(stored: StoredProjectSummary): ProjectSummary {
   const { _count, createdAt, updatedAt, ...metadata } = stored;
-  const parsed = ProjectSummarySchema.safeParse({ ...metadata, createdAt: createdAt.toISOString(),
+  const parsed = ProjectSummarySchema.safeParse({ ...metadata, ...(stored.themeConfig ? { preview: stored.themeConfig } : {}), createdAt: createdAt.toISOString(),
     updatedAt: updatedAt.toISOString(), sectionCount: _count.sections });
   if (!parsed.success) throw new ServiceError(503, 'PROJECT_UNAVAILABLE', 'This project is temporarily unavailable.');
   return parsed.data;

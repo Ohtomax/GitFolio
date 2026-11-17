@@ -1,4 +1,4 @@
-import { TemplateConfigSchema, type TemplateConfig } from '@gitfolio/shared';
+import { BUILTIN_TEMPLATES, TemplateConfigSchema, type TemplateConfig } from '@gitfolio/shared';
 import type { Prisma, PrismaClient } from '@prisma/client';
 
 const sections: TemplateConfig['sections'] = [
@@ -23,15 +23,37 @@ const definitions = [
     isReact: false, accent: '#7c3aed', background: '#f5f3ff', text: '#2e1065', font: 'sans', spacing: 'comfortable' },
 ] as const;
 
-export const templateSeedData = definitions.map((definition) => {
+export const legacyTemplateSeedData = definitions.map((definition) => {
   const { accent, background, text, font, spacing, ...metadata } = definition;
   const defaultConfig = TemplateConfigSchema.parse({
     theme: { colors: { accent, background, text }, font, spacing }, sections,
   });
   return { ...metadata, thumbnailUrl: null, defaultConfig } satisfies Prisma.TemplateCreateManyInput;
 });
+export const templateSeedData = [
+  ...legacyTemplateSeedData.map((legacy) => {
+    const preset = BUILTIN_TEMPLATES.find((item) => item.id === legacy.id);
+    return preset ? { id: preset.id, name: preset.name, category: preset.category, description: preset.description,
+      isReact: preset.isReact, thumbnailUrl: preset.thumbnailUrl, defaultConfig: TemplateConfigSchema.parse(preset.defaultConfig) } : legacy;
+  }),
+  ...BUILTIN_TEMPLATES.filter((preset) => !legacyTemplateSeedData.some((legacy) => legacy.id === preset.id))
+    .map(({ preview: _preview, ...preset }) => preset),
+] satisfies Prisma.TemplateCreateManyInput[];
 
 export async function seedTemplates(database: Pick<PrismaClient, 'template'>) {
-  // Stable IDs and skipDuplicates preserve existing catalog edits and project references.
-  return database.template.createMany({ data: templateSeedData, skipDuplicates: true });
+  const created = await database.template.createMany({ data: templateSeedData, skipDuplicates: true });
+  let updated = 0;
+  for (const legacy of legacyTemplateSeedData) {
+    const replacement = BUILTIN_TEMPLATES.find((preset) => preset.id === legacy.id);
+    if (!replacement) continue;
+    // Compare the complete old fingerprint atomically. Edited catalog rows and project
+    // snapshots are never overwritten, including during concurrent seeding.
+    const result = await database.template.updateMany({ where: { id: legacy.id, name: legacy.name,
+      description: legacy.description, category: legacy.category, isReact: legacy.isReact,
+      thumbnailUrl: legacy.thumbnailUrl, defaultConfig: { equals: legacy.defaultConfig as Prisma.InputJsonValue } },
+      data: { name: replacement.name, description: replacement.description, category: replacement.category,
+        isReact: replacement.isReact, thumbnailUrl: replacement.thumbnailUrl, defaultConfig: replacement.defaultConfig } });
+    updated += result.count;
+  }
+  return { ...created, updated };
 }

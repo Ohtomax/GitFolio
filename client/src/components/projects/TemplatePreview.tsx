@@ -1,4 +1,5 @@
-import type { TemplateCategory, TemplateSummary } from '@gitfolio/shared';
+import { BUILTIN_TEMPLATES, type TemplateCategory, type TemplateSummary, type ThemeConfig } from '@gitfolio/shared';
+import { DesignedPortfolio } from '../editor/DesignedPortfolio.tsx';
 
 const palettes: Record<TemplateCategory, { surface: string; text: string; accent: string; card: string; font: string }> = {
   minimal: { surface: 'bg-stone-50', text: 'text-stone-900', accent: 'bg-lime-500', card: 'bg-stone-200/70', font: 'font-sans' },
@@ -6,7 +7,13 @@ const palettes: Record<TemplateCategory, { surface: string; text: string; accent
   professional: { surface: 'bg-amber-50', text: 'text-stone-800', accent: 'bg-amber-700', card: 'bg-amber-200/70', font: 'font-serif' },
   creative: { surface: 'bg-violet-50', text: 'text-violet-950', accent: 'bg-violet-500', card: 'bg-violet-200/70', font: 'font-sans' },
 };
-export function TemplatePreview({ template }: { template: TemplateSummary }) {
+export function TemplatePreview({ template, theme }: { template: TemplateSummary; theme?: ThemeConfig }) {
+  const preview = theme ?? template.preview;
+  const design = preview?.layout && preview.layout !== 'classic' ? BUILTIN_TEMPLATES.find((preset) => preset.defaultConfig.theme.layout === preview.layout) : undefined;
+  if (design && preview) {
+    const document = { themeConfig: preview, sections: design.defaultConfig.sections.map((section, index) => ({ ...section, id: `preview-${index}` })) };
+    return <div aria-hidden="true" className="pf-thumbnail"><DesignedPortfolio document={document} thumbnail /></div>;
+  }
   const palette = palettes[template.category];
   return <div aria-hidden="true" className={`aspect-[16/10] overflow-hidden p-6 sm:p-7 ${palette.surface} ${palette.text} ${palette.font}`}>
     <div className="mb-6 flex items-center justify-between text-[8px] uppercase tracking-[0.15em]"><span className="font-semibold">Your name.</span><span className="opacity-50">Work &nbsp; About &nbsp; Contact</span></div>

@@ -5,7 +5,7 @@ import { saveProjectEditor } from './project-editor.repository.js';
 
 const projectSummarySelect = {
   id: true, templateId: true, name: true, slug: true, repoName: true, status: true, createdAt: true, updatedAt: true,
-  template: { select: templateSummarySelect }, _count: { select: { sections: true } },
+  themeConfig: true, template: { select: templateSummarySelect }, _count: { select: { sections: true } },
 } satisfies Prisma.ProjectSelect;
 export const projectSelect = { ...projectSummarySelect, themeConfig: true, editorRevision: true,
   sections: { select: { id: true, type: true, sortOrder: true, content: true, visible: true },

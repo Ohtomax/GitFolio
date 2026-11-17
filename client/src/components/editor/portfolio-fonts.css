@@ -1,0 +1,8 @@
+@font-face{font-family:Geist;src:url('../../../../assets/portfolio-fonts/geist.woff2') format('woff2');font-style:normal;font-weight:100 900;font-display:swap}
+@font-face{font-family:'Geist Mono';src:url('../../../../assets/portfolio-fonts/geist-mono.woff2') format('woff2');font-style:normal;font-weight:100 900;font-display:swap}
+@font-face{font-family:Newsreader;src:url('../../../../assets/portfolio-fonts/newsreader.woff2') format('woff2');font-style:normal;font-weight:200 800;font-display:swap}
+@font-face{font-family:Manrope;src:url('../../../../assets/portfolio-fonts/manrope.woff2') format('woff2');font-style:normal;font-weight:200 800;font-display:swap}
+@font-face{font-family:'Source Sans 3';src:url('../../../../assets/portfolio-fonts/source-sans-3.woff2') format('woff2');font-style:normal;font-weight:200 900;font-display:swap}
+.pf-thumbnail{container-type:inline-size;aspect-ratio:16/10;overflow:hidden;position:relative;pointer-events:none;user-select:none}
+.pf-thumbnail-content{width:1000px;transform:scale(calc(100cqi / 1000px));transform-origin:top left;position:absolute;left:0;top:0}
+.pf-thumbnail .pf-section{padding-top:2rem;padding-bottom:2rem}.pf-thumbnail .pf-footer,.pf-thumbnail .pf-demo{display:none}

@@ -1,21 +1,9 @@
 import { z } from 'zod';
 import { SectionTypeSchema, ThemeConfigSchema } from './template.schema.js';
+import { SectionContentSchema } from './section-content.schema.js';
+export { PortfolioUrlSchema, EditorItemSchema, SectionContentSchema } from './section-content.schema.js';
+import type { EditorItemSchema } from './section-content.schema.js';
 
-export const PortfolioUrlSchema = z.string().trim().max(2048).refine((value) => {
-  if (value === '') return true;
-  if (/^mailto:[^\s<>@?]+@[^\s<>@?]+\.[^\s<>@?]+$/.test(value)) return true;
-  try { const url = new URL(value); return ['https:', 'http:'].includes(url.protocol) && !url.username && !url.password; }
-  catch { return false; }
-}, 'Use an http://, https://, or mailto: link.');
-export const EditorItemSchema = z.object({
-  title: z.string().max(120), subtitle: z.string().max(160).optional(),
-  description: z.string().max(2000).optional(), url: PortfolioUrlSchema.optional(),
-}).strict();
-export const SectionContentSchema = z.object({
-  heading: z.string().max(120), description: z.string().max(5000), eyebrow: z.string().max(100).optional(),
-  buttonLabel: z.string().max(80).optional(), buttonUrl: PortfolioUrlSchema.optional(),
-  items: z.array(EditorItemSchema).max(20).optional(),
-}).strict();
 export const EditorSectionSchema = z.object({
   id: z.string().uuid(), type: SectionTypeSchema, content: SectionContentSchema, visible: z.boolean(),
 }).strict();
