@@ -4,6 +4,7 @@ import { createDatabase } from '../config/database.js';
 import type { Environment } from '../config/env.schema.js';
 import { createRedis } from '../config/redis.js';
 import { createApp } from './app.js';
+import { createAuthModule } from '../modules/auth/auth.module.js';
 
 export async function startServer(environment: Environment, logger: Logger) {
   const database = createDatabase(environment);
@@ -22,6 +23,7 @@ export async function startServer(environment: Environment, logger: Logger) {
 
     const app = createApp(environment, {
       logger,
+      authRouter: createAuthModule(environment, database, redis),
       checkReadiness: async () => {
         await Promise.all([database.$queryRaw`SELECT 1`, redis.ping()]);
       },

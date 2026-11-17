@@ -46,8 +46,8 @@ export const EnvironmentSchema = z.object({
   GITHUB_CALLBACK_URL: optionalSecret(serviceUrl(['http:', 'https:'])),
   JWT_SECRET: optionalSecret(z.string().min(32)),
   JWT_EXPIRES_IN: z.string().regex(/^\d+(ms|s|m|h|d|w|y)$/).default('7d'),
-  ENCRYPTION_KEY: optionalSecret(z.string().refine((value) => Buffer.byteLength(value, 'utf8') === 32, {
-    message: 'Expected exactly 32 UTF-8 bytes',
+  ENCRYPTION_KEY: optionalSecret(z.string().refine((value) => /^[a-fA-F0-9]{64}$/.test(value) || Buffer.byteLength(value, 'utf8') === 32, {
+    message: 'Expected 64 hexadecimal characters or exactly 32 UTF-8 bytes',
   })),
 }).superRefine((environment, context) => {
   const hasClientId = environment.GITHUB_CLIENT_ID !== undefined;
@@ -64,7 +64,7 @@ export const EnvironmentSchema = z.object({
   if (!hasClientId && !hasClientSecret && !environment.GITHUB_CALLBACK_URL) return;
 
   // OAuth codes return to the frontend route specified in the architecture plan.
-  // The auth module will exchange them server-side in a later Phase 2 step.
+  // The auth module exchanges codes server-side after browser-bound state validation.
   try {
     const callback = new URL(environment.GITHUB_CALLBACK_URL ?? '/auth/callback', environment.CLIENT_URL);
     const clientOrigin = new URL(environment.CLIENT_URL).origin;

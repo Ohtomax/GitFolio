@@ -1,6 +1,6 @@
 import type { HealthResponse } from '@gitfolio/shared';
 import cors from 'cors';
-import express from 'express';
+import express, { type Router } from 'express';
 import helmet from 'helmet';
 import type { Logger } from 'pino';
 import type { Environment } from '../config/env.schema.js';
@@ -12,6 +12,7 @@ import { ServiceError } from '../utils/service-error.js';
 export interface AppDependencies {
   logger: Logger;
   checkReadiness: () => Promise<void>;
+  authRouter?: Router;
 }
 
 export function createApp(environment: Environment, dependencies: AppDependencies) {
@@ -31,6 +32,7 @@ export function createApp(environment: Environment, dependencies: AppDependencie
     methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     exposedHeaders: ['X-Request-Id'],
+    credentials: true,
   }));
   app.use('/api', apiLimiter(environment));
   app.use(express.json({ limit: '1mb' }));
@@ -49,6 +51,12 @@ export function createApp(environment: Environment, dependencies: AppDependencie
     });
   });
 
+  app.use('/api/auth', (_request, response, next) => {
+    response.setHeader('Cache-Control', 'no-store');
+    next();
+  }, dependencies.authRouter ?? ((_request, _response, next) => {
+    next(new ServiceError(503, 'AUTH_NOT_CONFIGURED', 'Sign-in is not configured.'));
+  }));
   app.use(notFound);
   app.use(errorHandler(dependencies.logger));
   return app;

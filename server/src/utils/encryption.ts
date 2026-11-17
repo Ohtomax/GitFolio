@@ -9,7 +9,7 @@ export interface EncryptionService {
 
 /** Authenticated, versioned ciphertext. Context prevents swapping tokens between users or fields. */
 export function createEncryptionService(secret: string): EncryptionService {
-  const key = Buffer.from(secret, 'utf8');
+  const key = /^[a-fA-F0-9]{64}$/.test(secret) ? Buffer.from(secret, 'hex') : Buffer.from(secret, 'utf8');
   if (key.length !== 32) throw new Error('Encryption requires a 32-byte key.');
 
   return {

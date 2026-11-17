@@ -14,6 +14,8 @@ test('AES-256-GCM round trips tokens with a fresh nonce for each encryption', ()
   assert.ok(!first.includes(token));
   assert.equal(encryption.decrypt(first, context), token);
   assert.equal(encryption.decrypt(encryption.encrypt('', context), context), '');
+  const hexKey = createEncryptionService('ab'.repeat(32));
+  assert.equal(hexKey.decrypt(hexKey.encrypt(token, context), context), token);
   assert.equal(encryption.decrypt(encryption.encrypt('Unicode ✓', context), context), 'Unicode ✓');
 });
 
