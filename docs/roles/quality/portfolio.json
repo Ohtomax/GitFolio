@@ -1,0 +1,223 @@
+{
+  "name": "UI/UX & QA / Design Systems and Quality",
+  "themeConfig": {
+    "colors": {
+      "accent": "#6D28D9",
+      "background": "#F7F6F2",
+      "text": "#272332",
+      "muted": "#625D6B",
+      "surface": "#FFFFFF",
+      "border": "#D8D2E0",
+      "primary": "#C24136",
+      "success": "#166534",
+      "warning": "#854D0E",
+      "danger": "#B91C1C"
+    },
+    "font": "sans",
+    "spacing": "spacious",
+    "layout": "quality",
+    "headingFont": "sans",
+    "demo": true
+  },
+  "sections": [
+    {
+      "type": "hero",
+      "content": {
+        "heading": "Design for people. Prove it in the details.",
+        "description": "I connect a carefully considered interface with the checks that keep it dependable. From the first research conversation to the final keyboard interaction, quality belongs in the design.",
+        "eyebrow": "Mina Ortiz / Product designer & quality engineer",
+        "subtitle": "Design systems · Product research · Test automation",
+        "buttonLabel": "Make quality part of your product ↗",
+        "buttonUrl": "mailto:mina@example.com",
+        "tags": [
+          "Figma",
+          "Design tokens",
+          "Playwright",
+          "Accessibility"
+        ],
+        "metrics": [
+          {
+            "value": "99.4%",
+            "label": "Example automated pass rate"
+          },
+          {
+            "value": "96%",
+            "label": "Example Jest coverage"
+          },
+          {
+            "value": "100%",
+            "label": "Fixture keyboard checks"
+          }
+        ]
+      },
+      "visible": true,
+      "id": "50000000-0003-4000-8000-000000000001",
+      "sortOrder": 0
+    },
+    {
+      "type": "projects",
+      "content": {
+        "heading": "A better interface starts with a better question.",
+        "description": "Research findings, before/after decisions, and the quality checks that followed.",
+        "items": [
+          {
+            "title": "Atlas Workspace / Onboarding with less friction",
+            "subtitle": "Discovery → Interaction design → E2E validation",
+            "description": "Research sessions in a synthetic usability study pointed to unclear progress and repeated data entry. Reframed the flow around one decision at a time, persistent context, and recoverable validation.",
+            "url": "https://example.com/mina/atlas",
+            "tags": [
+              "User interviews",
+              "Journey mapping",
+              "Playwright"
+            ],
+            "metrics": [
+              {
+                "value": "2m 14s",
+                "label": "Before / fixture task time"
+              },
+              {
+                "value": "48s",
+                "label": "After / fixture task time"
+              },
+              {
+                "value": "6",
+                "label": "Fields removed"
+              }
+            ]
+          },
+          {
+            "title": "Prism / A design system with a definition of done",
+            "subtitle": "Tokens → Components → Accessible states",
+            "description": "Built a small component foundation with documented interaction states, semantic tokens, and automated checks for focus order and validation messaging.",
+            "url": "https://example.com/mina/prism",
+            "tags": [
+              "Figma",
+              "Storybook",
+              "Jest",
+              "WCAG"
+            ],
+            "metrics": [
+              {
+                "value": "38",
+                "label": "Example components"
+              },
+              {
+                "value": "96%",
+                "label": "Fixture test coverage"
+              }
+            ],
+            "embedUrl": "https://www.figma.com/design/nrPSsILSYjesyc5UHjYYa4",
+            "embedLabel": "Public Figma documentation example · Embedding reference, not fictional project work"
+          }
+        ]
+      },
+      "visible": true,
+      "id": "50000000-0003-4000-8000-000000000002",
+      "sortOrder": 1
+    },
+    {
+      "type": "interactive",
+      "content": {
+        "heading": "Small choices. A coherent system.",
+        "description": "Switch the palette and typography to inspect how semantic tokens reshape the same component.",
+        "widget": {
+          "kind": "tokens",
+          "title": "A workspace that feels like yours.",
+          "description": "Shared foundations make room for a product’s personality without losing predictable behavior.",
+          "buttonLabel": "Create a workspace"
+        }
+      },
+      "visible": true,
+      "id": "50000000-0003-4000-8000-000000000003",
+      "sortOrder": 2
+    },
+    {
+      "type": "skills",
+      "content": {
+        "heading": "Quality you can explain.",
+        "description": "Illustrative scorecards for the demo interface. Coverage is useful context, paired with behavior and accessibility reviews.",
+        "items": [
+          {
+            "title": "Automated behavior",
+            "description": "Playwright E2E paths, resilient fixtures, deterministic state, and failure recovery.",
+            "metrics": [
+              {
+                "value": "99.4%",
+                "label": "E2E fixture pass rate"
+              },
+              {
+                "value": "96%",
+                "label": "Jest line coverage"
+              }
+            ]
+          },
+          {
+            "title": "Inclusive interaction",
+            "description": "Keyboard navigation, clear errors, contrast checks, and manual review of critical flows.",
+            "metrics": [
+              {
+                "value": "100%",
+                "label": "Keyboard fixture checks"
+              },
+              {
+                "value": "100%",
+                "label": "Preset text contrast checks"
+              }
+            ]
+          },
+          {
+            "title": "Design foundations",
+            "description": "Research synthesis, interaction models, semantic tokens, responsive patterns, and component documentation."
+          }
+        ]
+      },
+      "visible": true,
+      "id": "50000000-0003-4000-8000-000000000004",
+      "sortOrder": 3
+    },
+    {
+      "type": "experience",
+      "content": {
+        "heading": "From intent to implementation.",
+        "description": "",
+        "items": [
+          {
+            "title": "Design Technologist · Fieldnotes Studio",
+            "subtitle": "2023 — Present",
+            "description": "Bridge product design and frontend engineering, build interaction prototypes, and make accessibility checks part of the component workflow."
+          },
+          {
+            "title": "QA Automation Engineer · Common Thread",
+            "subtitle": "2020 — 2023",
+            "description": "Built E2E fixtures, clarified acceptance criteria, and helped teams diagnose product regressions through better test evidence."
+          }
+        ]
+      },
+      "visible": true,
+      "id": "50000000-0003-4000-8000-000000000005",
+      "sortOrder": 4
+    },
+    {
+      "type": "about",
+      "content": {
+        "heading": "Craft has a verification step.",
+        "description": "I’m Mina. I care about the way an interface looks, the way it behaves when something goes wrong, and the way a teammate understands how to extend it. My work makes those concerns part of the same conversation."
+      },
+      "visible": true,
+      "id": "50000000-0003-4000-8000-000000000006",
+      "sortOrder": 5
+    },
+    {
+      "type": "contact",
+      "content": {
+        "heading": "Let’s make the thoughtful choice repeatable.",
+        "description": "I’m interested in product design, design engineering, and quality teams that connect craft with strong feedback loops.",
+        "buttonLabel": "mina@example.com ↗",
+        "buttonUrl": "mailto:mina@example.com"
+      },
+      "visible": true,
+      "id": "50000000-0003-4000-8000-000000000007",
+      "sortOrder": 6
+    }
+  ]
+}

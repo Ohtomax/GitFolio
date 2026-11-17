@@ -8,7 +8,7 @@ export { ROLE_LAYOUTS, isRoleLayout, type RoleLayout, type RoleWidget, type Role
 export { RoleWidgetSchema } from './validation/role-widget.schema.js';
 export { BUILTIN_TEMPLATES, PORTFOLIO_CSS, buildPortfolioTree, portfolioVariables, accentText, contrastRatio, serializePortfolioTree,
   mountPortfolioInteractions, portfolioRendererSource, type PortfolioDocument, type PortfolioElement, type PortfolioNode } from './portfolio/index.js';
-export { ProjectVisualSchema } from './validation/section-content.schema.js';
+export { ProjectVisualSchema, FigmaUrlSchema } from './validation/section-content.schema.js';
 export { PortfolioLayoutSchema } from './validation/template.schema.js';
 export { PortfolioUrlSchema, EditorItemSchema, SectionContentSchema, EditorSectionSchema, SaveEditorSchema,
   type SectionContent, type EditorItem, type EditorSection, type SaveEditorInput } from './validation/editor.schema.js';

@@ -12,7 +12,7 @@ export type SandboxWidget = { kind: 'sandbox'; title: string; description: strin
 export type FlowExample = { id: string; label: string; route: string; query: string; result: string; latency: string; explanation: string }
 export type FlowWidget = { kind: 'flow'; flows: FlowExample[] }
 export type RoleWidget = ApiWidget | SecurityWidget | TokenWidget | SandboxWidget | FlowWidget;
-export type RoleItem = { title: string; subtitle?: string; description?: string; url?: string; tags?: string[]; visual?: string; metrics?: RoleMetric[] }
+export type RoleItem = { title: string; subtitle?: string; description?: string; url?: string; tags?: string[]; visual?: string; metrics?: RoleMetric[]; embedUrl?: string; embedLabel?: string }
 export interface RoleSection {
   id: string; type: string; visible: boolean; sortOrder?: number;
   content: { heading: string; description: string; eyebrow?: string; subtitle?: string; buttonLabel?: string; buttonUrl?: string; tags?: string[]; metrics?: RoleMetric[]; items?: RoleItem[]; widget?: RoleWidget };

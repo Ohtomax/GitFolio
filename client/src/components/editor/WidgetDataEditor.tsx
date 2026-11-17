@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { BUILTIN_TEMPLATES, RoleWidgetSchema, type RoleWidget } from '@gitfolio/shared';
 
-export function WidgetDataEditor({ value, disabled, onChange }: { value?: RoleWidget; disabled: boolean; onChange: (widget: RoleWidget) => void }) {
+export function WidgetDataEditor({ value, layout, disabled, onChange }: { value?: RoleWidget; layout?: string; disabled: boolean; onChange: (widget: RoleWidget) => void }) {
   const original = JSON.stringify(value ?? {},null,2);
   const [draft,setDraft] = useState(original);
   let candidate: RoleWidget | undefined;
   try { const parsed = RoleWidgetSchema.safeParse(JSON.parse(draft) as unknown); if(parsed.success)candidate=parsed.data; } catch { /* Preserve incomplete local input until Apply. */ }
-  const presets = BUILTIN_TEMPLATES.flatMap((template) => template.defaultConfig.sections.flatMap((section) => section.content.widget ? [{name:template.name,widget:section.content.widget}] : []));
+  const presets = BUILTIN_TEMPLATES.filter((template) => template.defaultConfig.theme.layout===layout).flatMap((template) => template.defaultConfig.sections.flatMap((section) => section.content.widget ? [{name:template.name,widget:section.content.widget}] : []));
   return <fieldset disabled={disabled} className="space-y-3 rounded-xl border border-stone-200 p-3"><legend className="px-1 text-xs font-semibold text-stone-600">Interactive demo</legend>
     <p className="text-xs leading-5 text-stone-500">Demo controls use the data below. They run locally and never execute requests, scans, commands, or SQL.</p>
     <label className="block text-xs text-stone-600">Choose demo<select aria-label="Choose demo" className="mt-2 w-full rounded-lg border border-stone-300 bg-white p-2 text-xs" value={value?.kind ?? ''} onChange={(event) => { const preset=presets.find((item) => item.widget.kind===event.target.value);if(preset)onChange(structuredClone(preset.widget)); }}><option value="">Select a demo</option>{presets.map((preset) => <option key={preset.widget.kind} value={preset.widget.kind}>{preset.name}</option>)}</select></label>
