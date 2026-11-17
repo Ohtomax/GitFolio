@@ -3,5 +3,5 @@
   "ext": "ts,js,json",
   "ignore": ["src/**/*.spec.ts", "src/generators/role-sources.json"],
   "delay": 1500,
-  "exec": "npm run build && node dist/index.js"
+  "exec": "tsc && node dist/index.js"
 }
