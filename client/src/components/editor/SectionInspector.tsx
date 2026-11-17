@@ -23,7 +23,7 @@ export function SectionInspector({ disabled }: { disabled: boolean }) {
       ? <textarea value={value} rows={5} maxLength={maxLength} disabled={disabled} className={inputClass} onChange={(event) => content({ [key]: event.target.value }, `${selectedId}:${key}`)} onBlur={() => store.getState().endGroup()} />
       : <input value={value} maxLength={maxLength} disabled={disabled} aria-invalid={invalid} className={inputClass} onChange={(event) => content({ [key]: event.target.value }, `${selectedId}:${key}`)} onBlur={() => store.getState().endGroup()} />}{invalid && <span className="mt-1 block text-red-700">Use an http://, https://, or mailto: link.</span>}</label>;
   }
-  const listSection = ['projects', 'skills', 'experience', 'education', 'writing', 'now'].includes(selected.type);
+  const listSection = ['projects', 'skills', 'experience', 'education', 'writing', 'now', 'contact'].includes(selected.type);
   const items = selected.content.items ?? [];
   function updateItem(index: number, key: keyof EditorItem, value: string) {
     content({ items: items.map((item, itemIndex) => itemIndex === index ? { ...item, [key]: value } : item) }, `${selectedId}:item:${index}:${key}`);

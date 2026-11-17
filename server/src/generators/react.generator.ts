@@ -64,6 +64,7 @@ export function generateReactProject(input: Project): GeneratedFile[] {
       ...(['hero', 'contact'].includes(section.type) ? { buttonLabel: section.content.buttonLabel, buttonUrl: section.content.buttonUrl } : {}),
       ...(['projects', 'skills', 'experience', 'education', 'writing', 'now'].includes(section.type) ? { items: section.content.items } : {}),
       ...(designed ? { subtitle: section.content.subtitle, tags: section.content.tags,
+        ...(section.type === 'contact' ? { items: section.content.items } : {}),
         ...(section.type === 'hero' ? { metrics: section.content.metrics } : {}) } : {}) },
   }));
   return validateArtifact([

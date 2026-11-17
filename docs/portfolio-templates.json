@@ -486,5 +486,196 @@
         }
       ]
     }
+  },
+  {
+    "id": "10000000-0000-4000-8000-000000000004",
+    "name": "The Bento / Creative Technologist",
+    "description": "An expressive, asymmetric collection of work, experiments, and small personal details for people who design in code.",
+    "category": "creative",
+    "thumbnailUrl": null,
+    "isReact": false,
+    "defaultConfig": {
+      "theme": {
+        "colors": {
+          "accent": "#5B21B6",
+          "background": "#F5F2FF",
+          "text": "#211632",
+          "muted": "#61536F",
+          "surface": "#FFFFFF",
+          "border": "#D9D1E8"
+        },
+        "font": "sans",
+        "spacing": "comfortable",
+        "layout": "bento",
+        "headingFont": "sans",
+        "demo": true
+      },
+      "sections": [
+        {
+          "type": "hero",
+          "content": {
+            "heading": "Useful things. A little more human.",
+            "description": "I’m Nico. I turn fuzzy ideas into interfaces with a clear point of view — playful when they can be, dependable when they need to be.",
+            "eyebrow": "Nico Santos / Design engineer",
+            "subtitle": "Designing in code · Copenhagen, DK",
+            "buttonLabel": "Let’s make something ↗",
+            "buttonUrl": "mailto:nico@example.com",
+            "tags": [
+              "Design × Engineering",
+              "Independent"
+            ],
+            "metrics": [
+              {
+                "value": "24",
+                "label": "Experiments shipped"
+              },
+              {
+                "value": "∞",
+                "label": "Things left to explore"
+              }
+            ]
+          },
+          "visible": true
+        },
+        {
+          "type": "now",
+          "content": {
+            "heading": "A little of right now.",
+            "description": "Small signals from the studio. Open a card to read more.",
+            "items": [
+              {
+                "title": "Current focus",
+                "subtitle": "Interfaces that explain themselves",
+                "description": "Exploring motion as feedback, clearer empty states, and small details that help people feel in control."
+              },
+              {
+                "title": "On repeat",
+                "subtitle": "A quiet instrumental playlist",
+                "description": "A personal studio note, not a live music feed. Usually something slow enough to leave room for a good idea."
+              }
+            ]
+          },
+          "visible": true
+        },
+        {
+          "type": "projects",
+          "content": {
+            "heading": "Made with intent. And curiosity.",
+            "description": "A mix of shipped interfaces, design tools, and useful little experiments.",
+            "items": [
+              {
+                "title": "Orbit — your day, with breathing room",
+                "subtitle": "Product design + frontend · 2026",
+                "description": "A daily planning concept that treats focus as a limited resource. Designed the interaction language and built the responsive prototype.",
+                "url": "https://example.com/orbit",
+                "visual": "mobile",
+                "tags": [
+                  "React",
+                  "Interaction design"
+                ]
+              },
+              {
+                "title": "Type Foundry — words with presence",
+                "subtitle": "Creative tool · 2026",
+                "description": "An accessible type playground for comparing rhythm, scale, and real reading conditions.",
+                "url": "https://example.com/type-foundry",
+                "visual": "typography",
+                "tags": [
+                  "Typography",
+                  "CSS"
+                ]
+              },
+              {
+                "title": "Patchwork — one system, many voices",
+                "subtitle": "Design engineering · 2025",
+                "description": "A component library that keeps its foundations consistent and leaves room for a product’s personality.",
+                "url": "https://example.com/patchwork",
+                "visual": "dashboard",
+                "tags": [
+                  "Design tokens",
+                  "Storybook",
+                  "Accessibility"
+                ]
+              }
+            ]
+          },
+          "visible": true
+        },
+        {
+          "type": "about",
+          "content": {
+            "heading": "Equal parts sketchbook and source code.",
+            "description": "I feel most at home between a design file and a working prototype. My process is hands-on: make something small, put it in front of someone, notice the friction, and make it better.\n\nOutside the studio: film photos, secondhand bookshops, and a growing collection of tiny side projects."
+          },
+          "visible": true
+        },
+        {
+          "type": "skills",
+          "content": {
+            "heading": "My everyday kit.",
+            "description": "Enough range to take an idea from the sketch to the browser.",
+            "items": [
+              {
+                "title": "Always in the loop",
+                "description": "Prototyping · Accessibility · Design systems · Visual storytelling"
+              }
+            ],
+            "tags": [
+              "Figma",
+              "React",
+              "TypeScript",
+              "CSS",
+              "Motion",
+              "Storybook"
+            ]
+          },
+          "visible": true
+        },
+        {
+          "type": "experience",
+          "content": {
+            "heading": "Places I’ve made things.",
+            "description": "",
+            "items": [
+              {
+                "title": "Independent Design Engineer",
+                "subtitle": "2024 — Present",
+                "description": "Partner with small product teams on early concepts, high-fidelity prototypes, and the last 10% of the interface."
+              },
+              {
+                "title": "UI Engineer · Small Hours Studio",
+                "subtitle": "2021 — 2024",
+                "description": "Built expressive websites and a shared component foundation for a multidisciplinary design team."
+              }
+            ]
+          },
+          "visible": true
+        },
+        {
+          "type": "contact",
+          "content": {
+            "heading": "Good things start with a hello.",
+            "description": "Have an idea that could use a little design and a lot of care? My inbox is open.",
+            "buttonLabel": "Say hello ↗",
+            "buttonUrl": "mailto:nico@example.com",
+            "items": [
+              {
+                "title": "Email ↗",
+                "url": "mailto:nico@example.com"
+              },
+              {
+                "title": "Code & experiments ↗",
+                "url": "https://example.com/nico/code"
+              },
+              {
+                "title": "Design notes ↗",
+                "url": "https://example.com/nico/notes"
+              }
+            ]
+          },
+          "visible": true
+        }
+      ]
+    }
   }
 ]

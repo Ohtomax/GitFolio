@@ -70,5 +70,12 @@ for (const template of BUILTIN_TEMPLATES) test(`${template.name} publishes respo
     await page.getByRole('button', { name: 'Run command' }).click();
     assert.equal(await page.locator('[data-shell-output] script').count(), 0);
   }
+  if (template.defaultConfig.theme.layout === 'bento') {
+    const widget = page.locator('details').first();
+    await widget.locator('summary').focus();
+    await page.keyboard.press('Enter');
+    assert.equal(await widget.evaluate((node) => node.open), true);
+    assert.equal(await widget.locator('.pf-description').isVisible(), true);
+  }
   assert.deepEqual(errors, []);
 });
