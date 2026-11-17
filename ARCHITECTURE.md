@@ -913,7 +913,7 @@ Phase 1 implementation and local setup commands are documented in [README.md](RE
 - [x] Credential-safe `npm run oauth:check` command and [registration guide](docs/GITHUB_OAUTH_SETUP.md)
 - [ ] GitHub OAuth App registration and local credentials — credentials are missing; registration is unverified as of this review
 - [ ] Auth module (controller, service, routes), including one-time state and PKCE
-- [ ] JWT issuance & verification middleware
+- [x] JWT issuance & verification middleware
 - [x] GitHub access token encryption/decryption using AES-256-GCM
 - [x] GitHub token expiration, refresh-token rotation, and supporting storage
 - [ ] Client auth store (Zustand)
