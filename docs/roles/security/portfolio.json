@@ -1,0 +1,222 @@
+{
+  "name": "Cybersecurity / Threat Intel & Audit",
+  "themeConfig": {
+    "colors": {
+      "accent": "#7DE9B7",
+      "background": "#0A1010",
+      "text": "#E3F4EC",
+      "muted": "#A0BDB1",
+      "surface": "#111E1C",
+      "border": "#2D4941",
+      "primary": "#E4BE6A",
+      "success": "#7DE9B7",
+      "warning": "#F2CB74",
+      "danger": "#FF9C9C"
+    },
+    "font": "mono",
+    "spacing": "compact",
+    "layout": "security",
+    "headingFont": "sans",
+    "demo": true
+  },
+  "sections": [
+    {
+      "type": "hero",
+      "content": {
+        "heading": "Find the weakness. Make the fix stick.",
+        "description": "I connect technical findings to practical remediation: clear reproduction conditions, a realistic threat model, and a fix the owning team can verify. Every finding below is a training example.",
+        "eyebrow": "Avery Morgan / Application security engineer",
+        "subtitle": "AppSec · Cloud security · Detection engineering",
+        "buttonLabel": "Discuss a security role ↗",
+        "buttonUrl": "mailto:avery@example.com",
+        "tags": [
+          "OSCP / sample profile",
+          "CISSP / sample profile",
+          "Responsible disclosure"
+        ],
+        "metrics": [
+          {
+            "value": "42",
+            "label": "Illustrative audits completed"
+          },
+          {
+            "value": "94%",
+            "label": "Example remediation closure"
+          },
+          {
+            "value": "< 24h",
+            "label": "Critical triage target"
+          }
+        ]
+      },
+      "visible": true,
+      "id": "50000000-0002-4000-8000-000000000001",
+      "sortOrder": 0
+    },
+    {
+      "type": "interactive",
+      "content": {
+        "heading": "Threat findings, with a path to closure.",
+        "description": "Search by target, identifier, or finding. Filter severity and open a local breakdown of the scope, risk, and remediation.",
+        "widget": {
+          "kind": "security",
+          "findings": [
+            {
+              "id": "LAB-2026-001",
+              "title": "Dependency exposure / CVE-2021-44228 study",
+              "severity": "Critical",
+              "target": "Isolated Java training service",
+              "status": "Patched",
+              "summary": "A public Log4j vulnerability used as a dependency-response exercise. This is a lab case study, not an original CVE disclosure or credit claim.",
+              "resolution": "Inventory the affected dependency, follow the vendor security advisory, rebuild the training service with a supported fixed release, and verify the deployed dependency inventory.",
+              "reference": "https://logging.apache.org/log4j/2.x/security.html"
+            },
+            {
+              "id": "LAB-2026-002",
+              "title": "Cross-tenant object authorization gap",
+              "severity": "High",
+              "target": "Synthetic multi-tenant API",
+              "status": "Mitigated",
+              "summary": "An isolated test fixture allowed an authenticated account to request an object owned by a different tenant. The exercise focused on authorization boundaries rather than exploit tooling.",
+              "resolution": "Enforce tenant ownership in repository queries, add negative authorization tests for every object route, and review adjacent endpoints for the same missing boundary."
+            },
+            {
+              "id": "LAB-2026-003",
+              "title": "Overly permissive storage policy",
+              "severity": "Medium",
+              "target": "Disposable cloud storage fixture",
+              "status": "In review",
+              "summary": "A policy review identified broader read permissions than the demo workflow needed. No production assets or personal records were accessed.",
+              "resolution": "Replace broad grants with scoped roles, verify access with separate test identities, and record the intended policy in infrastructure code."
+            }
+          ]
+        }
+      },
+      "visible": true,
+      "id": "50000000-0002-4000-8000-000000000002",
+      "sortOrder": 1
+    },
+    {
+      "type": "projects",
+      "content": {
+        "heading": "Research that leaves a usable artifact.",
+        "description": "Lab tooling, detection notes, and reproducible security reviews.",
+        "items": [
+          {
+            "title": "Boundary Map / Authorization test harness",
+            "subtitle": "AppSec tooling · 2026",
+            "description": "A fixture-driven harness for checking horizontal and vertical access boundaries across API routes. Produces a readable authorization matrix and actionable regression cases.",
+            "url": "https://example.com/avery/boundary-map",
+            "tags": [
+              "TypeScript",
+              "API security",
+              "OWASP"
+            ],
+            "metrics": [
+              {
+                "value": "128",
+                "label": "Example boundary checks"
+              },
+              {
+                "value": "0",
+                "label": "Production targets scanned"
+              }
+            ]
+          },
+          {
+            "title": "Signal Notebook / Detection research",
+            "subtitle": "SOC research · 2025",
+            "description": "Documented synthetic event sequences, detection assumptions, false-positive tradeoffs, and response checklists for a small training environment.",
+            "url": "https://example.com/avery/signal-notebook",
+            "tags": [
+              "Python",
+              "Sigma",
+              "Threat modeling"
+            ],
+            "metrics": [
+              {
+                "value": "16",
+                "label": "Synthetic scenarios"
+              },
+              {
+                "value": "8",
+                "label": "Reviewed runbooks"
+              }
+            ]
+          }
+        ]
+      },
+      "visible": true,
+      "id": "50000000-0002-4000-8000-000000000003",
+      "sortOrder": 2
+    },
+    {
+      "type": "skills",
+      "content": {
+        "heading": "A practical security toolkit.",
+        "description": "Evidence before alarm. Ownership before handoff.",
+        "items": [
+          {
+            "title": "Assess & validate",
+            "description": "Threat modeling · Burp Suite · API authorization testing · Dependency review · Fuzzing in isolated labs"
+          },
+          {
+            "title": "Detect & respond",
+            "description": "Python · Sigma · SIEM queries · Incident timelines · Reproducible investigation notes"
+          },
+          {
+            "title": "Govern & improve",
+            "description": "SOC 2 evidence mapping · ISO 27001 control context · Risk registers · Remediation verification"
+          }
+        ]
+      },
+      "visible": true,
+      "id": "50000000-0002-4000-8000-000000000004",
+      "sortOrder": 3
+    },
+    {
+      "type": "experience",
+      "content": {
+        "heading": "Security work, in context.",
+        "description": "",
+        "items": [
+          {
+            "title": "Application Security Engineer · Cedar Shield",
+            "subtitle": "2023 — Present",
+            "description": "Partner with product teams on secure design reviews, authorization controls, and remediation tracking."
+          },
+          {
+            "title": "Security Analyst · Harbor Response",
+            "subtitle": "2020 — 2023",
+            "description": "Investigated security signals and improved the clarity of escalation notes, detection assumptions, and recovery playbooks."
+          }
+        ]
+      },
+      "visible": true,
+      "id": "50000000-0002-4000-8000-000000000005",
+      "sortOrder": 4
+    },
+    {
+      "type": "about",
+      "content": {
+        "heading": "A good report changes the system.",
+        "description": "I’m Avery. I value careful scoping, defensible evidence, and collaboration with the people who own the fix. A useful finding explains the risk, respects the environment, and gives the team a clear way to confirm the problem is closed.\n\nSample credentials, organizations, and findings in this profile are illustrative. I do not claim a real security clearance, hall-of-fame credit, or original CVE discovery."
+      },
+      "visible": true,
+      "id": "50000000-0002-4000-8000-000000000006",
+      "sortOrder": 5
+    },
+    {
+      "type": "contact",
+      "content": {
+        "heading": "Let’s make the secure path the easy path.",
+        "description": "I’m interested in AppSec and security engineering teams that value clear communication, strong ownership, and measurable remediation.",
+        "buttonLabel": "avery@example.com ↗",
+        "buttonUrl": "mailto:avery@example.com"
+      },
+      "visible": true,
+      "id": "50000000-0002-4000-8000-000000000007",
+      "sortOrder": 6
+    }
+  ]
+}

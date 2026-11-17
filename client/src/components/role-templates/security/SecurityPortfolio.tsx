@@ -1,0 +1,12 @@
+import type {RolePortfolioProps} from '../shared/contracts.ts';
+import {RoleRoot,RoleMain,RoleNavigation,RoleSectionFrame,sectionsOf,heroOf,Intro,Action,Tags,Metrics,ItemTitle,SupportingSection} from '../shared/RoleFrame.tsx';
+import {SecurityExplorer} from './SecurityExplorer.tsx';
+export function SecurityPortfolio(props:RolePortfolioProps){const {document}=props,hero=heroOf(document),interactive=Boolean(props.interactive&&!props.thumbnail);
+  return <RoleRoot {...props}><div className="rp-security-layout"><aside className="rp-security-rail"><div className="rp-security-emblem" aria-hidden="true">◇</div><p className="rp-brand">{hero?.content.eyebrow}</p><p className="rp-meta">THREAT RESEARCH / DEFENSIBLE EVIDENCE</p><RoleNavigation {...props}/><div className="mt-6 border-t border-[var(--rp-border)] pt-5"><p className="text-[10px] uppercase tracking-widest text-[var(--rp-accent)]">Profile credentials</p><Tags tags={hero?.content.tags}/><p className="rp-demo-note">Illustrative profile credentials. No security clearance is represented.</p></div></aside>
+    <RoleMain className="min-w-0">{sectionsOf(document).map((section)=><RoleSectionFrame key={section.id} {...props} section={section} className={`rp-security-section rp-security-section-${section.type}`}>
+      {section.type==='hero'?<><p className="rp-kicker flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-[var(--rp-success)]" aria-hidden="true"/>Assessment mindset / Remediation first</p><h1>{section.content.heading}</h1><p className="rp-subtitle">{section.content.subtitle}</p><p className="rp-copy">{section.content.description}</p><Metrics items={section.content.metrics}/><Action section={section} interactive={interactive}/></>
+      :section.type==='interactive'?<><Intro section={section} eyebrow="RESEARCH / AUDIT LOG"/>{section.content.widget?.kind==='security'&&<SecurityExplorer data={section.content.widget} interactive={interactive}/>}</>
+      :section.type==='projects'?<><Intro section={section} eyebrow="TOOLS / NOTES / REPRODUCIBILITY"/><div className="rp-security-research">{section.content.items?.map((item,index)=><article key={index}><p className="mb-3 text-[10px] text-[var(--rp-accent)]">RESEARCH ARTIFACT / 0{index+1}</p><ItemTitle item={item} interactive={interactive}/><p className="rp-copy">{item.description}</p><Metrics compact items={item.metrics}/><Tags tags={item.tags}/></article>)}</div></>
+      :<SupportingSection section={section} interactive={interactive}/>}
+    </RoleSectionFrame>)}</RoleMain></div></RoleRoot>;
+}

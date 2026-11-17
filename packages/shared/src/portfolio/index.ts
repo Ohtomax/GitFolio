@@ -10,8 +10,9 @@ import { editorialTemplate, renderEditorial, EDITORIAL_CSS } from './editorial.j
 import { bentoTemplate, renderBento, BENTO_CSS } from './bento.js';
 import { executiveTemplate, renderExecutive, EXECUTIVE_CSS } from './executive.js';
 import { backendTemplate } from './roles/backend.js';
+import { securityTemplate } from './roles/security.js';
 
-export const BUILTIN_TEMPLATES: Template[] = [minimalTemplate, terminalTemplate, editorialTemplate, bentoTemplate, executiveTemplate, backendTemplate];
+export const BUILTIN_TEMPLATES: Template[] = [minimalTemplate, terminalTemplate, editorialTemplate, bentoTemplate, executiveTemplate, backendTemplate, securityTemplate];
 export const PORTFOLIO_CSS = PORTFOLIO_BASE_CSS + MINIMAL_CSS + TERMINAL_CSS + EDITORIAL_CSS + BENTO_CSS + EXECUTIVE_CSS;
 export function buildPortfolioTree(document: PortfolioDocument): PortfolioElement {
   if (document.themeConfig.layout === 'minimal') return renderMinimal(document);
