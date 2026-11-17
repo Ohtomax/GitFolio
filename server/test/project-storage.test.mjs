@@ -22,8 +22,8 @@ test('real PostgreSQL preserves seed IDs, enforces owner-scoped CRUD, and stores
     const service = createProjectService(createProjectRepository(database), createTemplateRepository(database));
     const input = { name: 'Fixture portfolio', slug: 'same-slug', templateId: templateSeedData[0].id };
     const created = await service.create(ownerId, input);
-    assert.equal(created.sectionCount, 5);
-    assert.equal(created.themeConfig.colors.accent, '#65a30d');
+    assert.equal(created.sectionCount, templateSeedData[0].defaultConfig.sections.length);
+    assert.equal(created.themeConfig.colors.accent, templateSeedData[0].defaultConfig.theme.colors.accent);
     assert.equal((await service.create(otherId, input)).slug, input.slug);
     await assert.rejects(service.create(ownerId, input), { code: 'P2002' });
     await assert.rejects(service.get(otherId, created.id), { code: 'PROJECT_NOT_FOUND' });

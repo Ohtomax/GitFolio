@@ -2,14 +2,20 @@ import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import test from 'node:test';
 import { TemplateConfigSchema, TemplatePageSchema } from '@gitfolio/shared';
-import { templateSeedData, seedTemplates } from '../dist/modules/template/template.seed.js';
+import { templateSeedData, legacyTemplateSeedData, seedTemplates } from '../dist/modules/template/template.seed.js';
 import { createTemplateService } from '../dist/modules/template/template.service.js';
 import { createTemplateRouter } from '../dist/modules/template/template.route.js';
 import { featureFixture } from './helpers/features.mjs';
 
 test('catalog seeds valid defaults, uses stable IDs, and preserves existing rows on repeat runs', async () => {
   const rows = new Map();
-  const database = { template: { async createMany({ data, skipDuplicates }) {
+  const database = { template: { async updateMany({ where, data }) {
+    const row = rows.get(where.id);
+    const matches = row && Object.entries(where).every(([key, value]) => key === 'defaultConfig'
+      ? JSON.stringify(row[key]) === JSON.stringify(value.equals) : row[key] === value);
+    if (matches) rows.set(row.id, { ...row, ...structuredClone(data) });
+    return { count: Number(Boolean(matches)) };
+  }, async createMany({ data, skipDuplicates }) {
     assert.equal(skipDuplicates, true);
     let count = 0;
     for (const item of data) {
@@ -19,11 +25,17 @@ test('catalog seeds valid defaults, uses stable IDs, and preserves existing rows
     }
     return { count };
   } } };
-  assert.equal((await seedTemplates(database)).count, 4);
+  assert.equal((await seedTemplates(database)).count, templateSeedData.length);
   rows.get(templateSeedData[0].id).name = 'Preserved catalog edit';
   assert.equal((await seedTemplates(database)).count, 0);
   assert.equal(rows.get(templateSeedData[0].id).name, 'Preserved catalog edit');
-  assert.equal(new Set(templateSeedData.map((row) => row.id)).size, 4);
+  assert.equal(new Set(templateSeedData.map((row) => row.id)).size, templateSeedData.length);
+  for (const row of legacyTemplateSeedData) rows.set(row.id, structuredClone(row));
+  rows.get(legacyTemplateSeedData[1].id).defaultConfig.sections[0].content.heading = 'A custom catalog identity';
+  const result = await seedTemplates(database);
+  assert.equal(result.count, 0);
+  assert.equal(rows.get(templateSeedData[0].id).name, templateSeedData[0].name);
+  assert.equal(rows.get(legacyTemplateSeedData[1].id).defaultConfig.sections[0].content.heading, 'A custom catalog identity');
 });
 
 test('template endpoints require a real session, validate queries, and return bounded public metadata', async (t) => {
@@ -31,7 +43,7 @@ test('template endpoints require a real session, validate queries, and return bo
   let received;
   const service = createTemplateService({ async list(query) {
     calls++; received = query;
-    return { items: templateSeedData.map(({ defaultConfig, ...metadata }) => metadata), total: 4 };
+    return { items: templateSeedData, total: templateSeedData.length };
   }, async findById(id) { return templateSeedData.find((row) => row.id === id) ?? null; } });
   const f = await featureFixture(t, (guard) => ({ templateRouter: createTemplateRouter(service, guard) }));
   assert.equal((await fetch(f.url + '/templates')).status, 401);

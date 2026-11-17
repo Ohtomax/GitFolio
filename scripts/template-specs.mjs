@@ -1,0 +1,68 @@
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { BUILTIN_TEMPLATES, contrastRatio, portfolioVariables } from '../packages/shared/dist/index.js';
+
+const root = new URL('../docs/templates/', import.meta.url);
+mkdirSync(root, { recursive: true });
+const intents = {
+  minimal: ['Frontend and full-stack engineers', 'A broad impact hero, two-column project gallery, skills tag cloud, paired career entries, split About, and a simple direct-contact close. Quiet 8px cards and deliberate whitespace.'],
+  terminal: ['Systems, infrastructure, DevOps, and security engineers', 'A compact command-line session, dated experience log, repository grid, tools inventory, and a local command-based contact form. Prompts and window chrome carry the identity.'],
+  editorial: ['Engineering managers, writers, researchers, and architects', 'A narrow reading column with a serif narrative, numbered case-study essays, dated publications, an understated CV, and a letter-like contact close.'],
+  bento: ['Design engineers, creative developers, and interactive designers', 'An asymmetric 12-column composition: large identity tile, focus/music widgets, visual project gallery, stack tile, career tile, and a vivid connect tile.'],
+  executive: ['Technical leaders, enterprise consultants, and fractional CTOs', 'A persistent identity/navigation rail, decisive value proposition, semantic architecture table, career timeline, advisory capabilities, and a consultation CTA.'],
+};
+const names = { hero: 'Hero', about: 'About', projects: 'Projects', experience: 'Experience', skills: 'Skills', contact: 'Contact', writing: 'Writing', now: 'Now', education: 'Education' };
+for (const template of BUILTIN_TEMPLATES) {
+  const { theme, sections } = template.defaultConfig;
+  const [persona, composition] = intents[theme.layout];
+  const vars = portfolioVariables(theme);
+  const lines = [`# ${template.name}`, '', `Category: \`${template.category}\` · Audience: ${persona} · Output: ${template.isReact ? 'React with GitHub Actions' : 'static HTML/CSS/JS'}`, '', template.description, '', composition, '', '## Design tokens', '', '| Token | Exact value |', '| --- | --- |',
+    ...Object.entries(theme.colors).map(([key, value]) => `| ${key} | \`${value}\` |`),
+    `| Body family | ${vars['--pf-font']} |`, `| Heading family | ${vars['--pf-heading-font']} |`, `| Font styles | body: ${theme.font}; heading: ${theme.headingFont ?? theme.font} |`, `| Density | ${theme.spacing} |`, '',
+    'Text, muted text, and accent contrast against the background / card surface:', '', '| Foreground | Background | Surface |', '| --- | --- | --- |',
+    ...['text','muted','accent'].map((key) => `| ${key} | ${contrastRatio(theme.colors[key],theme.colors.background).toFixed(2)}:1 | ${contrastRatio(theme.colors[key],theme.colors.surface).toFixed(2)}:1 |`), '',
+    'The preset text combinations exceed 4.5:1. Decorative borders are not used to convey essential information. Custom colors need a new contrast check; this palette check alone is not a full WCAG conformance audit.', '',
+    '## Default content and order', '', sections.map((s) => names[s.type]).join(' → '), '', 'All identities, organizations, metrics, and work below are fictional examples. Links use example.com. The default footer labels them as illustrative; replace them before removing that label in Theme controls.', ''];
+  sections.forEach((section, index) => {
+    const c = section.content;
+    lines.push(`### ${index+1}. ${names[section.type]} — ${c.heading}`, '');
+    if(c.eyebrow) lines.push(`Eyebrow: ${c.eyebrow}`, '');
+    if(c.subtitle) lines.push(`Subtitle: ${c.subtitle}`, '');
+    if(c.description) lines.push(c.description, '');
+    if(c.tags?.length) lines.push(`Tags: ${c.tags.join(' · ')}`, '');
+    if(c.metrics?.length) lines.push(...c.metrics.map((m) => `- **${m.value}** — ${m.label}`), '');
+    c.items?.forEach((item) => {
+      lines.push(`- **${item.title}**${item.subtitle ? ` — ${item.subtitle}` : ''}`, ...(item.description ? [`  ${item.description}`] : []), ...(item.tags?.length ? [`  Stack: ${item.tags.join(' · ')}`] : []), ...(item.url ? [`  Link: ${item.url}`] : []), ...(item.visual ? [`  Decorative cover: ${item.visual}`] : []));
+    });
+    if(c.items?.length) lines.push('');
+    if(c.buttonLabel) lines.push(`CTA: [${c.buttonLabel}](${c.buttonUrl})`, '');
+  });
+  writeFileSync(new URL(`${theme.layout}.md`, root), lines.join('\n')+'\n');
+}
+writeFileSync(new URL('../docs/portfolio-templates.json', import.meta.url), JSON.stringify(BUILTIN_TEMPLATES, null, 2)+'\n');
+const index = `# GitFolio portfolio templates
+
+Five original design families for different kinds of technical work. Choose one in **New project**; the picker, editor, static output, and React output share a semantic renderer and styles. Each preset has a distinct composition, type pairing, content order, density, and contact treatment.
+
+${BUILTIN_TEMPLATES.map((t) => `- [${t.name}](templates/${t.defaultConfig.theme.layout}.md) — ${t.description}`).join('\n')}
+
+The linked specifications contain exact tokens, measured palette contrast, section order, and every default heading, description, entry, link, metric, and CTA. [Machine-readable specifications](portfolio-templates.json) mirror the canonical definitions in packages/shared/src/portfolio. After editing a preset, build the shared workspace and run **node scripts/template-specs.mjs** to refresh the documents.
+
+## Research and design decisions
+
+- [Vercel Geist](https://vercel.com/geist/introduction) informed the emphasis on clear type and high-contrast foundations. The minimalist composition is original.
+- [Linear’s UI redesign](https://linear.app/now/how-we-redesigned-the-linear-ui) describes reducing visual noise while strengthening hierarchy and alignment. Those principles inform the executive information structure and controlled density.
+- [Brittany Chiang’s portfolio](https://brittanychiang.com/) demonstrates the value of dated experience and work evidence with technology context. These templates use original biographies and sample work.
+- ReadCV and Bento.me are historical style references supplied in the brief. Their current pages were inaccessible during research; no live review or copied layout is claimed.
+- [WCAG contrast guidance](https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html) defines the 4.5:1 normal-text threshold used in the automated palette checks.
+
+Layouts collapse in source order at narrow container widths. They use semantic headings, navigation and skip links, visible keyboard focus, safe external links, and reduced-motion support. Fonts are bundled locally with their SIL Open Font Licenses; uncovered scripts use system fallbacks. Project cover graphics are decorative original CSS compositions, not invented product screenshots. Contact links are usable without JavaScript. Terminal commands are local help/email/links/clear utilities; the Bento focus widgets use native details controls and do not pretend to stream live music.
+
+## Updating an existing installation
+
+Run **npm run db:seed** after building. Stable catalog IDs preserve project references. The seeder upgrades a built-in row only when its complete metadata and default JSON still match the untouched legacy version. Custom catalog edits are preserved. Existing project content and theme snapshots are never rewritten: themes without an explicit layout continue using the classic renderer. No database migration is needed for these JSON fields.
+
+For newly created portfolios, replace the sample identity, links, organizations, and metrics through the editor. Writing, Now widgets, tags, metrics, cover graphics, font pairing, muted text, card surfaces, and borders are editable. Remove the illustrative-content footer only after replacing the examples. Publication still uses the existing deployment confirmation and GitHub authorization flow; no portfolio is published by seeding or choosing a template.
+
+These designs support a clear path from introduction to work evidence and contact. Conversion improvements have not been measured and are not claimed.
+`;
+writeFileSync(new URL('../docs/PORTFOLIO_TEMPLATES.md', import.meta.url),index);

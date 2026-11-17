@@ -1,0 +1,164 @@
+[
+  {
+    "id": "10000000-0000-4000-8000-000000000001",
+    "name": "The Modern Minimalist",
+    "description": "A precise, spacious portfolio that puts product impact, thoughtful engineering, and shipped work first.",
+    "category": "minimal",
+    "thumbnailUrl": null,
+    "isReact": false,
+    "defaultConfig": {
+      "theme": {
+        "colors": {
+          "accent": "#1D4ED8",
+          "background": "#FAFAFA",
+          "text": "#111113",
+          "muted": "#62626B",
+          "surface": "#FFFFFF",
+          "border": "#D8D8DF"
+        },
+        "font": "sans",
+        "spacing": "spacious",
+        "layout": "minimal",
+        "headingFont": "sans",
+        "demo": true
+      },
+      "sections": [
+        {
+          "type": "hero",
+          "content": {
+            "heading": "Complex products. Effortless experiences.",
+            "description": "I bring clarity to ambitious web products — from the first interaction to the systems that keep them fast. Currently building tools that give teams their time back.",
+            "eyebrow": "Alex Rivera / Product engineer",
+            "subtitle": "Frontend & full-stack engineer · Lisbon, Portugal",
+            "buttonLabel": "Let’s talk about your product ↗",
+            "buttonUrl": "mailto:alex@example.com",
+            "tags": [
+              "React",
+              "TypeScript",
+              "Node.js"
+            ],
+            "metrics": [
+              {
+                "value": "38%",
+                "label": "Faster onboarding"
+              },
+              {
+                "value": "12",
+                "label": "Products shipped"
+              },
+              {
+                "value": "6 years",
+                "label": "Turning ideas into interfaces"
+              }
+            ]
+          },
+          "visible": true
+        },
+        {
+          "type": "projects",
+          "content": {
+            "heading": "A few things I’ve shipped.",
+            "description": "Selected work at the intersection of useful, usable, and well built.",
+            "items": [
+              {
+                "title": "Atlas — a calmer workspace",
+                "subtitle": "Product engineering · 2026",
+                "description": "Rebuilt a fragmented operations dashboard around the decisions people make every day. Cut first-run setup from 13 steps to 5.",
+                "url": "https://example.com/atlas",
+                "visual": "dashboard",
+                "tags": [
+                  "React",
+                  "PostgreSQL",
+                  "Design systems"
+                ]
+              },
+              {
+                "title": "Relay — less waiting, more doing",
+                "subtitle": "Full-stack engineering · 2025",
+                "description": "A background-job console that makes slow tasks observable. Designed resilient queues, clear failure states, and one-click recovery.",
+                "url": "https://example.com/relay",
+                "visual": "code",
+                "tags": [
+                  "TypeScript",
+                  "Redis",
+                  "Node.js"
+                ]
+              }
+            ]
+          },
+          "visible": true
+        },
+        {
+          "type": "skills",
+          "content": {
+            "heading": "The right tools. Used well.",
+            "description": "A focused stack, with strong fundamentals underneath.",
+            "items": [
+              {
+                "title": "Interface craft",
+                "description": "Accessible components, resilient state, and details that make complex workflows feel obvious."
+              },
+              {
+                "title": "Product systems",
+                "description": "Typed APIs, relational data models, and observable background work."
+              }
+            ],
+            "tags": [
+              "TypeScript",
+              "React",
+              "Next.js",
+              "Node.js",
+              "PostgreSQL",
+              "Testing Library",
+              "Accessibility",
+              "Performance"
+            ]
+          },
+          "visible": true
+        },
+        {
+          "type": "experience",
+          "content": {
+            "heading": "Built with good teams.",
+            "description": "",
+            "items": [
+              {
+                "title": "Senior Product Engineer · Northstar Labs",
+                "subtitle": "2023 — Present",
+                "description": "Own the frontend platform and partner with design to turn customer research into focused, measurable releases."
+              },
+              {
+                "title": "Software Engineer · Common Ground",
+                "subtitle": "2020 — 2023",
+                "description": "Shipped collaboration tools, introduced component testing, and made the core workflow usable with a keyboard."
+              }
+            ]
+          },
+          "visible": true
+        },
+        {
+          "type": "about",
+          "content": {
+            "heading": "Care is a technical skill.",
+            "description": "I’m Alex, an engineer who enjoys the space between a thoughtful design and a dependable system. I ask what people are trying to do before deciding what to build.\n\nAway from the screen, I’m usually finding a new walking route, making coffee, or learning how something works."
+          },
+          "visible": true
+        },
+        {
+          "type": "contact",
+          "content": {
+            "heading": "Have a good problem?",
+            "description": "I’m interested in small, ambitious teams building products people rely on. Tell me what you’re working on — I’ll bring a considered reply.",
+            "subtitle": "Let’s make something useful.",
+            "buttonLabel": "alex@example.com ↗",
+            "buttonUrl": "mailto:alex@example.com",
+            "tags": [
+              "Open to thoughtful collaborations"
+            ]
+          },
+          "visible": true
+        }
+      ]
+    }
+  }
+]
