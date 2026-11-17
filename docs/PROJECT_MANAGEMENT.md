@@ -25,3 +25,7 @@ All `/api/projects` routes require a verified JWT/session. The owner ID comes ex
 | DELETE | `/api/projects/:id` | Deletes the owned project and cascading database records; does not delete a GitHub repository |
 
 Lists use the same pagination envelope as templates, with a maximum page size of 50. Slugs are lowercase, use single hyphens, and are unique per owner. Duplicate slugs return `409 PROJECT_SLUG_TAKEN`. `PUBLISHED` is read-only in Phase 3; publishing and section/theme editing belong to later phases. Project creation copies defaults into independent database JSON/section records rather than linking mutable template content. No new schema migration is needed for Phase 3; the foundation already defines these tables.
+
+## Client data layer
+
+`useProjects`, `useProject`, `useCreateProject`, `useUpdateProject`, and `useDeleteProject` use the validated project service and same-origin `apiFetch`. `useTemplates` and `useTemplate` load the catalog and selected defaults. Queries use five-minute freshness and forward cancellation signals. Project query keys include the signed-in user's ID; pagination placeholders are reused only within the same owner. Successful mutations invalidate list queries and update/remove relevant details. A mutation completing after sign-out cannot repopulate user caches. The auth flow continues to clear all query data on sign-in/sign-out.

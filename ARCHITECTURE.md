@@ -933,7 +933,7 @@ Phase 1 implementation and local setup commands are documented in [README.md](RE
 - [x] Template module (seeded templates)
 - [ ] Dashboard page (project list, create button)
 - [ ] New Project page (template picker, setup form)
-- [ ] TanStack Query hooks for projects & templates
+- [x] TanStack Query hooks for projects & templates
 
 ### Phase 4 — Portfolio Editor
 

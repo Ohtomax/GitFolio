@@ -17,6 +17,14 @@ const messages: Record<string, string> = {
   GITHUB_REAUTH_REQUIRED: 'GitHub authorization expired. Please sign in again.',
   GITHUB_UNAVAILABLE: 'GitHub is unavailable right now. Please try again.',
   RATE_LIMITED: 'Too many attempts. Please wait a few minutes and try again.',
+  PROJECT_SLUG_TAKEN: 'You already have a project with this slug. Choose another one.',
+  PROJECT_NOT_FOUND: 'This project could not be found.',
+  TEMPLATE_NOT_FOUND: 'This template is no longer available. Choose another one.',
+  TEMPLATES_UNAVAILABLE: 'Templates are temporarily unavailable. Please try again.',
+  PROJECT_UNAVAILABLE: 'This project is temporarily unavailable. Please try again.',
+  INVALID_PROJECT_REQUEST: 'Check the project fields and try again.',
+  INVALID_TEMPLATE_REQUEST: 'Check the template selection and filters.',
+  PROJECT_CONFLICT: 'The project changed while saving. Refresh and try again.',
 };
 export function isBackendUrl(path: string): boolean {
   if (!path.startsWith('/api/') || path.includes('\\') || path.includes('#')) return false;
