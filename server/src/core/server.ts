@@ -9,6 +9,9 @@ import { createTemplateRepository } from '../modules/template/template.repositor
 import { createTemplateService } from '../modules/template/template.service.js';
 import { createTemplateRouter } from '../modules/template/template.route.js';
 import { seedTemplates } from '../modules/template/template.seed.js';
+import { createProjectRepository } from '../modules/project/project.repository.js';
+import { createProjectService } from '../modules/project/project.service.js';
+import { createProjectRouter } from '../modules/project/project.route.js';
 
 export async function startServer(environment: Environment, logger: Logger) {
   const database = createDatabase(environment);
@@ -31,6 +34,7 @@ export async function startServer(environment: Environment, logger: Logger) {
       logger,
       authRouter: createAuthModule(environment, database, redis),
       templateRouter: createTemplateRouter(createTemplateService(createTemplateRepository(database)), guard),
+      projectRouter: createProjectRouter(createProjectService(createProjectRepository(database), createTemplateRepository(database)), guard),
       checkReadiness: async () => {
         await Promise.all([database.$queryRaw`SELECT 1`, redis.ping()]);
       },

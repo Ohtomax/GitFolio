@@ -1,5 +1,9 @@
 export { DEPLOY_STATUSES, type DeployStatus } from './constants/deploy-status.js';
 export type { ApiResponse } from './types/api.types.js';
+export { ProjectNameSchema, ProjectSlugSchema, RepoNameSchema, ProjectStatusSchema,
+  CreateProjectSchema, UpdateProjectSchema, ProjectQuerySchema, ProjectSummarySchema,
+  ProjectSectionSchema, ProjectSchema, ProjectPageSchema, type CreateProjectInput,
+  type UpdateProjectInput, type ProjectQuery, type ProjectSummary, type Project, type ProjectPage } from './validation/project.schema.js';
 export { IdParamsSchema, PaginationQuerySchema, PageMetaSchema, TemplateCategorySchema,
   ThemeConfigSchema, SectionTypeSchema, TemplateConfigSchema, TemplateQuerySchema,
   TemplateSummarySchema, TemplateSchema, TemplatePageSchema,

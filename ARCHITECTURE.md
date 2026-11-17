@@ -929,7 +929,7 @@ Phase 1 implementation and local setup commands are documented in [README.md](RE
 
 ### Phase 3 — Project Management
 
-- [ ] Project module CRUD (controller → service → repository)
+- [x] Project module CRUD (controller → service → repository)
 - [x] Template module (seeded templates)
 - [ ] Dashboard page (project list, create button)
 - [ ] New Project page (template picker, setup form)
