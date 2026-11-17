@@ -946,7 +946,7 @@ Phase 1 implementation and local setup commands are documented in [README.md](RE
 - [ ] Theme customization (colors, fonts, spacing)
 - [ ] Live preview pane
 - [ ] Auto-save with debounced mutations
-- [ ] Editor Zustand store for undo/redo
+- [x] Editor Zustand store for undo/redo
 
 ### Phase 5 — Deployment Engine
 
