@@ -6,6 +6,7 @@ Five original design families for different kinds of technical work. Choose one 
 - [The Terminal / Cyberpunk](templates/terminal.md) — A compact, phosphor-lit command-line portfolio for engineers who make complex systems dependable.
 - [The Editorial / Thought Leader](templates/editorial.md) — A warm, literary portfolio where considered writing, narrative case studies, and a clear point of view lead the conversation.
 - [The Bento / Creative Technologist](templates/bento.md) — An expressive, asymmetric collection of work, experiments, and small personal details for people who design in code.
+- [The Enterprise / Executive](templates/executive.md) — A disciplined, evidence-focused portfolio for technical leaders connecting architecture decisions to business outcomes.
 
 The linked specifications contain exact tokens, measured palette contrast, section order, and every default heading, description, entry, link, metric, and CTA. [Machine-readable specifications](portfolio-templates.json) mirror the canonical definitions in packages/shared/src/portfolio. After editing a preset, build the shared workspace and run **node scripts/template-specs.mjs** to refresh the documents.
 
