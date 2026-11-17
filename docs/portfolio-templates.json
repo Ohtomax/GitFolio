@@ -329,5 +329,162 @@
         }
       ]
     }
+  },
+  {
+    "id": "10000000-0000-4000-8000-000000000003",
+    "name": "The Editorial / Thought Leader",
+    "description": "A warm, literary portfolio where considered writing, narrative case studies, and a clear point of view lead the conversation.",
+    "category": "professional",
+    "thumbnailUrl": null,
+    "isReact": false,
+    "defaultConfig": {
+      "theme": {
+        "colors": {
+          "accent": "#7B3F2A",
+          "background": "#F6F1E8",
+          "text": "#292520",
+          "muted": "#6B6259",
+          "surface": "#FFFCF7",
+          "border": "#CFC5B7"
+        },
+        "font": "sans",
+        "spacing": "spacious",
+        "layout": "editorial",
+        "headingFont": "serif",
+        "demo": true
+      },
+      "sections": [
+        {
+          "type": "hero",
+          "content": {
+            "heading": "Better questions. More thoughtful systems.",
+            "description": "I help teams find the useful question inside a complicated problem — and build the judgment, architecture, and working habits to answer it well.",
+            "eyebrow": "Mara Chen / Engineering leader & writer",
+            "subtitle": "Notes on software, teams, and the decisions between them.",
+            "buttonLabel": "Start a conversation",
+            "buttonUrl": "mailto:mara@example.com"
+          },
+          "visible": true
+        },
+        {
+          "type": "about",
+          "content": {
+            "heading": "A little context.",
+            "description": "Early in my career, I thought the hardest part of software was choosing the right technology. A decade of building products and leading teams taught me to look closer: Who needs this? What are we assuming? What will be difficult to change?\n\nToday I work with organizations navigating technical and human complexity. I write down decisions, make tradeoffs visible, and create space for the people closest to a problem to shape the answer. The work is part architecture, part research, and a great deal of listening.",
+            "subtitle": "Engineering is a practice of paying attention."
+          },
+          "visible": true
+        },
+        {
+          "type": "writing",
+          "content": {
+            "heading": "Thinking in public.",
+            "description": "Field notes for people who care about how software gets made.",
+            "items": [
+              {
+                "title": "The architecture diagram is a conversation",
+                "subtitle": "October 2026 · 8 min read",
+                "description": "Why the most useful diagram makes uncertainty visible, rather than making the system look finished.",
+                "url": "https://example.com/writing/architecture-conversation"
+              },
+              {
+                "title": "A team’s pace is not its velocity",
+                "subtitle": "August 2026 · 6 min read",
+                "description": "On sustainable delivery, smaller bets, and the quiet cost of work in progress.",
+                "url": "https://example.com/writing/team-pace"
+              },
+              {
+                "title": "Decision records for decisions that matter",
+                "subtitle": "May 2026 · 11 min read",
+                "description": "A practical way to leave context for the person who will revisit your choice a year from now.",
+                "url": "https://example.com/writing/decision-records"
+              }
+            ]
+          },
+          "visible": true
+        },
+        {
+          "type": "projects",
+          "content": {
+            "heading": "Selected deep dives.",
+            "description": "The question, the constraints, and what changed.",
+            "items": [
+              {
+                "title": "Making a platform team a useful internal product",
+                "subtitle": "Case study · Platform strategy · 2025–2026",
+                "description": "A growing engineering organization had a platform team, a roadmap, and very few repeat users. I led interviews with six product teams, mapped the recurring friction, and reframed the platform around a small set of dependable journeys. The result was a paved path teams could adopt incrementally, with ownership and feedback built into the operating model.",
+                "url": "https://example.com/cases/platform-as-product",
+                "tags": [
+                  "Discovery",
+                  "Developer experience",
+                  "Operating models"
+                ]
+              },
+              {
+                "title": "A migration that left room to learn",
+                "subtitle": "Case study · Systems architecture · 2024",
+                "description": "Rather than replace an aging service in one launch, we identified a seam, established a reversible routing layer, and moved one workflow at a time. This essay covers the decision record, the experiment that changed our plan, and why a clear rollback story mattered more than a perfect target diagram.",
+                "url": "https://example.com/cases/reversible-migration",
+                "tags": [
+                  "Architecture",
+                  "Risk",
+                  "Incremental delivery"
+                ]
+              }
+            ]
+          },
+          "visible": true
+        },
+        {
+          "type": "experience",
+          "content": {
+            "heading": "A brief working history.",
+            "description": "",
+            "items": [
+              {
+                "title": "Director of Engineering · Fieldwork",
+                "subtitle": "2023 — Present",
+                "description": "Build the conditions for teams to make good decisions, develop technical leaders, and turn strategy into a manageable sequence of bets."
+              },
+              {
+                "title": "Staff Engineer · Open Ledger Studio",
+                "subtitle": "2018 — 2023",
+                "description": "Led cross-team architecture work and mentored engineers through migrations, incident reviews, and the transition to technical leadership."
+              }
+            ]
+          },
+          "visible": true
+        },
+        {
+          "type": "skills",
+          "content": {
+            "heading": "Areas of practice.",
+            "description": "",
+            "items": [
+              {
+                "title": "Systems & strategy",
+                "description": "Architecture reviews, platform thinking, technical due diligence, and decision records."
+              },
+              {
+                "title": "People & communication",
+                "description": "Engineering leadership, research synthesis, facilitation, mentoring, and longform technical writing."
+              }
+            ]
+          },
+          "visible": true
+        },
+        {
+          "type": "contact",
+          "content": {
+            "heading": "A letter is a good place to start.",
+            "description": "If you’re working through a question that would benefit from another perspective, I’d like to hear it. I welcome thoughtful notes about engineering leadership, technical strategy, and ideas worth writing about.",
+            "subtitle": "Dear future collaborator,",
+            "buttonLabel": "Write to mara@example.com ↗",
+            "buttonUrl": "mailto:mara@example.com"
+          },
+          "visible": true
+        }
+      ]
+    }
   }
 ]
