@@ -1,7 +1,7 @@
 import { TemplateSchema } from '../validation/template.schema.js';
 import { el, main, pageFrame, sectionShell, sectionHeading, entry, itemsFor, action, tags, navigation, link, type PortfolioDocument } from './tree.js';
 
-export const editorialTemplate = TemplateSchema.parse({
+export const editorialTemplate = /* @__PURE__ */ TemplateSchema.parse({
   id: '10000000-0000-4000-8000-000000000003', name: 'The Editorial / Thought Leader', category: 'professional', isReact: false, thumbnailUrl: null,
   description: 'A warm, literary portfolio where considered writing, narrative case studies, and a clear point of view lead the conversation.',
   defaultConfig: { theme: { layout: 'editorial', demo: true, colors: { background: '#F6F1E8', text: '#292520', accent: '#7B3F2A', muted: '#6B6259', surface: '#FFFCF7', border: '#CFC5B7' }, font: 'sans', headingFont: 'serif', spacing: 'spacious' }, sections: [

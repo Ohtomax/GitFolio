@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react';
-import type { ThemeConfig } from '@gitfolio/shared';
+import { portfolioVariables, type ThemeConfig } from '@gitfolio/shared';
 import './portfolio.css';
 
 export function accentTextColor(hex: string): '#000000' | '#ffffff' {
@@ -15,7 +15,8 @@ export function ThemeSurface({ theme, children, className = '', label }: {
 }) {
   // Arbitrary validated theme colors require CSS variables; dimensions and layout use static classes.
   const variables = { '--portfolio-bg': theme.colors.background, '--portfolio-text': theme.colors.text,
-    '--portfolio-accent': theme.colors.accent, '--portfolio-on-accent': accentTextColor(theme.colors.accent) } as CSSProperties;
+    '--portfolio-accent': theme.colors.accent, '--portfolio-on-accent': accentTextColor(theme.colors.accent),
+    ...(theme.layout && theme.layout !== 'classic' ? { ...portfolioVariables(theme), fontFamily: portfolioVariables(theme)['--pf-font'] } : {}) } as CSSProperties;
   return <div role={label ? 'region' : undefined} aria-label={label} style={variables}
-    className={`portfolio-surface ${fonts[theme.font]} ${spacing[theme.spacing]} ${className}`}>{children}</div>;
+    className={`portfolio-surface ${theme.layout && theme.layout !== 'classic' ? 'portfolio-designed-theme' : ''} ${fonts[theme.font]} ${spacing[theme.spacing]} ${className}`}>{children}</div>;
 }

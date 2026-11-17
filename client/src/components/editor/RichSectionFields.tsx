@@ -12,6 +12,6 @@ export function RichSectionFields({ section, disabled, onChange }: { section: Ed
   </>;
 }
 export function EntryPresentationFields({ item, index, disabled, onChange }: { item: EditorItem; index: number; disabled: boolean; onChange: (item: Partial<EditorItem>) => void }) {
-  return <><label className="block text-xs text-stone-500">Entry {index + 1} cover graphic<select className={input} value={item.visual ?? ''} disabled={disabled} onChange={(event) => onChange({ visual: event.target.value ? ProjectVisualSchema.parse(event.target.value) : undefined })}><option value="">None</option>{ProjectVisualSchema.options.map((visual) => <option value={visual} key={visual}>{visual}</option>)}</select></label>
+  return <><label className="block text-xs text-stone-500">Entry {index + 1} cover graphic<select aria-label={`Entry ${index + 1} cover graphic`} className={input} value={item.visual ?? ''} disabled={disabled} onChange={(event) => onChange({ visual: event.target.value ? ProjectVisualSchema.parse(event.target.value) : undefined })}><option value="">None</option>{ProjectVisualSchema.options.map((visual) => <option value={visual} key={visual}>{visual}</option>)}</select></label>
     <label className="block text-xs text-stone-500">Entry {index + 1} tags (one per line)<textarea rows={2} className={input} value={(item.tags ?? []).join('\n')} disabled={disabled} onChange={(event) => onChange({ tags: tagValues(event.target.value) })} /></label></>;
 }

@@ -1,7 +1,7 @@
 import { TemplateSchema } from '../validation/template.schema.js';
 import { el, main, pageFrame, sectionShell, sectionHeading, entry, itemsFor, action, metrics, tags, navigation, link, type PortfolioDocument } from './tree.js';
 
-export const executiveTemplate = TemplateSchema.parse({
+export const executiveTemplate = /* @__PURE__ */ TemplateSchema.parse({
   id: '10000000-0000-4000-8000-000000000005', name: 'The Enterprise / Executive', category: 'professional', isReact: true, thumbnailUrl: null,
   description: 'A disciplined, evidence-focused portfolio for technical leaders connecting architecture decisions to business outcomes.',
   defaultConfig: { theme: { layout: 'executive', demo: true, colors: { background: '#0B1220', text: '#F8FAFC', accent: '#7DD3FC', muted: '#A8B5C9', surface: '#132139', border: '#334866' }, font: 'sans', headingFont: 'sans', spacing: 'comfortable' }, sections: [

@@ -55,11 +55,11 @@ test('project CRUD creates independent template defaults, returns safe DTOs, and
   assert.equal(response.headers.get('cache-control'), 'no-store');
   const project = ProjectSchema.parse((await response.json()).data);
   assert.equal(project.status, 'DRAFT');
-  assert.equal(project.sectionCount, 5);
-  assert.deepEqual(project.sections.map((section) => section.sortOrder), [0, 1, 2, 3, 4]);
+  assert.equal(project.sectionCount, templateSeedData[0].defaultConfig.sections.length);
+  assert.deepEqual(project.sections.map((section) => section.sortOrder), templateSeedData[0].defaultConfig.sections.map((_, index) => index));
   assert.ok(!('userId' in project));
   f.templates[0].defaultConfig.theme.colors.accent = '#000000';
-  assert.equal((await (await f.request('/projects/' + project.id)).json()).data.themeConfig.colors.accent, '#65a30d');
+  assert.equal((await (await f.request('/projects/' + project.id)).json()).data.themeConfig.colors.accent, project.themeConfig.colors.accent);
   const patched = await f.request('/projects/' + project.id, { method: 'PATCH', body: JSON.stringify({ name: 'Updated portfolio', status: 'ARCHIVED' }) });
   assert.equal(patched.status, 200);
   assert.equal((await patched.json()).data.name, 'Updated portfolio');
@@ -141,6 +141,6 @@ test('Prisma repository applies ownership in every query and creates defaults in
   await repository.create(userId, { name: 'Portfolio', slug: 'portfolio', templateId: templateSeedData[0].id }, templateSeedData[0].defaultConfig);
   const created = calls.find((item) => item.operation === 'create');
   assert.equal(created.args.data.userId, userId);
-  assert.equal(created.args.data.sections.create.length, 5);
+  assert.equal(created.args.data.sections.create.length, templateSeedData[0].defaultConfig.sections.length);
   assert.deepEqual(created.args.data.themeConfig, templateSeedData[0].defaultConfig.theme);
 });

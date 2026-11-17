@@ -161,7 +161,9 @@ test('selected template defaults must load before creating a project', async (t)
 });
 
 test('template pagination and keyboard selection work on the new project page', async (t) => {
-  const f = await projectsFixture(t, browser, { templates: [...templateFixtures, {
+  const f = await projectsFixture(t, browser, { templates: [...templateFixtures,
+    { ...templateFixtures[0], id: '10000000-0000-4000-8000-000000000006', name: 'Catalog fixture six' },
+    { ...templateFixtures[0], id: '10000000-0000-4000-8000-000000000007', name: 'Catalog fixture seven' }, {
     ...templateFixtures[0], id: '10000000-0000-4000-8000-000000000005', name: 'Extra template',
   }] });
   await f.goto('/projects/new');

@@ -55,5 +55,16 @@ export async function seedTemplates(database: Pick<PrismaClient, 'template'>) {
         isReact: replacement.isReact, thumbnailUrl: replacement.thumbnailUrl, defaultConfig: replacement.defaultConfig } });
     updated += result.count;
   }
-  return { ...created, updated };
+  const reservedIds = BUILTIN_TEMPLATES.flatMap((preset) => [preset.id, preset.id.replace(/^10000000/, '20000000')]);
+  const stored = await database.template.findMany({ where: { id: { in: reservedIds } }, select: { id: true, defaultConfig: true } });
+  const layouts = new Set(stored.flatMap((row) => {
+    const config = TemplateConfigSchema.safeParse(row.defaultConfig);
+    return config.success && config.data.theme.layout ? [config.data.theme.layout] : [];
+  }));
+  const missingDesigns = BUILTIN_TEMPLATES.filter((preset) => !layouts.has(preset.defaultConfig.theme.layout!));
+  // An edited legacy row keeps its ID and content. Add the new design under a
+  // second reserved ID instead of making that archetype unavailable.
+  const additional = missingDesigns.length ? await database.template.createMany({ skipDuplicates: true,
+    data: missingDesigns.map(({ preview: _preview, ...preset }) => ({ ...preset, id: preset.id.replace(/^10000000/, '20000000') })) }) : { count: 0 };
+  return { count: created.count + additional.count, updated };
 }

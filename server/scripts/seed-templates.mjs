@@ -6,7 +6,7 @@ let database;
 try {
   database = createDatabase(loadEnvironment());
   const result = await seedTemplates(database);
-  process.stdout.write(`Template catalog ready; ${result.count} missing templates added. Existing records preserved.\n`);
+  process.stdout.write(`Template catalog ready; ${result.count} templates added, ${result.updated} untouched legacy templates upgraded. Custom catalog edits and project drafts preserved.\n`);
 } catch {
   process.stderr.write('Template seeding failed. Check local configuration, migrations, and PostgreSQL availability.\n');
   process.exitCode = 1;

@@ -57,7 +57,9 @@ export async function projectsFixture(t, browser, options = {}) {
       const selected = state.templates.find((item) => item.id === input.templateId);
       if (!selected) return fail(route, 'TEMPLATE_NOT_FOUND', 404);
       const project = { ...projectFixtureData(input.name), ...input, template: selected, templateId: selected.id,
-        repoName: input.repoName ?? null, themeConfig: structuredClone(selected.defaultConfig.theme) };
+        repoName: input.repoName ?? null, themeConfig: structuredClone(selected.defaultConfig.theme),
+        sectionCount: selected.defaultConfig.sections.length,
+        sections: selected.defaultConfig.sections.map((section, sortOrder) => ({ ...structuredClone(section), id: randomUUID(), sortOrder })) };
       state.projects.unshift(project); return ok(route, project, 201);
     }
     if (id) {
@@ -85,7 +87,7 @@ export async function projectsFixture(t, browser, options = {}) {
     const filtered = state.projects.filter((item) => (!status || item.status === status) && (!search || item.name.toLowerCase().includes(search)));
     filtered.sort((a, b) => url.searchParams.get('sort') === 'name' ? a.name.localeCompare(b.name) : b.updatedAt.localeCompare(a.updatedAt));
     const pageNumber = Number(url.searchParams.get('page') || 1), pageSize = Number(url.searchParams.get('pageSize') || 12);
-    return ok(route, { items: filtered.slice((pageNumber - 1) * pageSize, pageNumber * pageSize).map(({ themeConfig, sections, ...item }) => item),
+    return ok(route, { items: filtered.slice((pageNumber - 1) * pageSize, pageNumber * pageSize).map(({ themeConfig, sections, ...item }) => ({ ...item, preview: themeConfig })),
       total: filtered.length, page: pageNumber, pageSize, totalPages: Math.ceil(filtered.length / pageSize) });
   });
   const baseUrl = process.env.GITFOLIO_BROWSER_BASE_URL ?? 'http://127.0.0.1:5173';

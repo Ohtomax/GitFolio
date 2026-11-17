@@ -1,7 +1,7 @@
 import { TemplateSchema } from '../validation/template.schema.js';
 import { el, main, pageFrame, sectionShell, sectionHeading, entry, itemsFor, art, action, metrics, tags, navigation, type PortfolioDocument } from './tree.js';
 
-export const minimalTemplate = TemplateSchema.parse({
+export const minimalTemplate = /* @__PURE__ */ TemplateSchema.parse({
   id: '10000000-0000-4000-8000-000000000001', name: 'The Modern Minimalist', category: 'minimal', isReact: false, thumbnailUrl: null,
   description: 'A precise, spacious portfolio that puts product impact, thoughtful engineering, and shipped work first.',
   defaultConfig: {

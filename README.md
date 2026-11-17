@@ -27,7 +27,7 @@ If PostgreSQL already occupies port 5432, set `POSTGRES_PORT=5433` and update `D
 
 Register the development app using [GitHub OAuth App configuration](docs/GITHUB_OAUTH_SETUP.md), then run `npm run oauth:check` to validate the local configuration without connecting to the database or Redis. Open `http://localhost:5173/login` and use **Continue with GitHub** to reach `/dashboard`; `/account` remains available from workspace navigation. [Authentication](docs/AUTHENTICATION.md) documents routes, cookies, encryption, refresh, and recovery behavior.
 
-The API seeds four missing starter templates automatically at startup. Select **New project**, choose a template, enter the project details, and create a draft. The dashboard supports search, status filters, pagination, metadata editing, archive/restore, and confirmed deletion. Existing template records and project content are preserved on repeat seeding. Run `npm run db:seed` to initialize the catalog without starting the API. See [Project management](docs/PROJECT_MANAGEMENT.md) for API contracts and verification boundaries. Phase 3 uses the existing database schema and requires no new migration.
+The API seeds five distinct portfolio templates automatically at startup: Modern Minimalist, Terminal, Editorial, Bento, and Executive. Full tokens, default content, and research notes are in [Portfolio templates](docs/PORTFOLIO_TEMPLATES.md). Select **New project**, choose a template, enter the project details, and create a draft. The dashboard supports search, status filters, pagination, metadata editing, archive/restore, and confirmed deletion. Custom catalog edits and existing project drafts are preserved; untouched legacy catalog rows receive the new presets. Run `npm run db:seed` to initialize the catalog without starting the API. See [Project management](docs/PROJECT_MANAGEMENT.md) for API contracts and verification boundaries. Phase 3 uses the existing database schema and requires no new migration.
 
 Select a project's **Edit** link to add/edit/reorder/hide sections, customize colors/fonts/spacing, and preview at desktop/tablet/mobile widths. Edits save after an 800 ms pause; manual save and retry remain available. Undo/redo affects the local draft, and stale saves require a confirmed reload. **Phase 4 adds `20261118000000_editor_revision`: existing installations must run `npm run db:deploy` after PostgreSQL is running.** See [Portfolio editor](docs/PORTFOLIO_EDITOR.md) for persistence, navigation protection, and recovery limits.
 
@@ -59,7 +59,7 @@ The API connects to PostgreSQL and Redis before listening. Liveness checks the H
 | `npm run oauth:check` | Validate local GitHub OAuth settings without printing credentials |
 | `npm run db:validate` | Validate the Prisma schema |
 | `npm run db:deploy` | Apply the committed migrations without resetting data |
-| `npm run db:seed` | Add missing starter templates while preserving existing catalog rows |
+| `npm run db:seed` | Add missing presets and upgrade untouched legacy defaults while preserving custom edits and drafts |
 | `npm run db:migrate -- --name describe_change` | Create/apply a migration in a development database |
 | `npm run db:status` | Inspect migration status |
 | `npm run db:studio` | Open Prisma Studio locally |

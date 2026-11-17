@@ -79,3 +79,57 @@ for (const template of BUILTIN_TEMPLATES) test(`${template.name} publishes respo
   }
   assert.deepEqual(errors, []);
 });
+
+test('all five catalog designs can be selected and created with their own saved defaults', async (t) => {
+  const f = await projectsFixture(t, browser, { templates: BUILTIN_TEMPLATES.map((preset) => ({ ...preset, preview: preset.defaultConfig.theme })) });
+  await f.goto('/projects/new');
+  await f.page.getByRole('radio').first().waitFor();
+  assert.equal(await f.page.getByRole('radio').count(), 5);
+  const thumbnails = f.page.locator('.pf-thumbnail');
+  assert.equal(await thumbnails.count(), 5);
+  for (let index = 0; index < 5; index++) {
+    const box = await thumbnails.nth(index).locator('.pf-page').boundingBox();
+    const frame = await thumbnails.nth(index).boundingBox();
+    assert.ok(box.width <= frame.width + 1 && box.width > frame.width - 2, 'thumbnail scales to its card');
+  }
+  if (process.env.GITFOLIO_TEMPLATE_SCREENSHOTS) await f.page.screenshot({ path: join(process.env.GITFOLIO_TEMPLATE_SCREENSHOTS, 'catalog.png'), fullPage: true });
+  for (const [index, template] of BUILTIN_TEMPLATES.entries()) {
+    if (index > 0) await f.goto('/projects/new');
+    const radio = f.page.getByRole('radio', { name: template.name, exact: true });
+    await radio.focus(); await radio.press('Space');
+    await f.page.getByRole('button', { name: 'Continue', exact: true }).click();
+    await f.page.getByLabel('Project name', { exact: true }).fill(`Design example ${index + 1}`);
+    await f.page.getByRole('button', { name: 'Create project', exact: true }).click();
+    await f.page.waitForURL('**/dashboard');
+    const created = f.state.projects.find((project) => project.templateId === template.id);
+    assert.deepEqual(created.themeConfig, template.defaultConfig.theme);
+    assert.deepEqual(created.sections.map(({ id, sortOrder, ...section }) => section), template.defaultConfig.sections);
+  }
+  assert.equal(f.state.creates, 5);
+});
+
+test('new metric, cover, contact links, and paired type controls persist through the editor', async (t) => {
+  const template = BUILTIN_TEMPLATES.find((preset) => preset.defaultConfig.theme.layout === 'bento');
+  const project = { ...projectFixtureData('Rich content'), templateId: template.id, template, themeConfig: structuredClone(template.defaultConfig.theme),
+    sections: template.defaultConfig.sections.map((section, sortOrder) => ({ ...structuredClone(section), id: randomUUID(), sortOrder })) };
+  const f = await projectsFixture(t, browser, { projects: [project], templates: BUILTIN_TEMPLATES });
+  await f.goto(`/projects/${project.id}/edit`);
+  await f.page.getByLabel('Metric 1 value', { exact: true }).fill('32');
+  const preview = f.page.getByRole('region', { name: 'Portfolio preview', exact: true });
+  await preview.getByRole('button', { name: 'Select projects section', exact: true }).click();
+  await f.page.getByLabel('Entry 1 cover graphic', { exact: true }).selectOption('architecture');
+  await preview.getByRole('button', { name: 'Select contact section', exact: true }).click();
+  await f.page.getByLabel('Entry 2 link', { exact: true }).fill('https://example.com/my-work');
+  await f.page.getByRole('button', { name: /^theme$/i }).click();
+  await f.page.getByLabel('Heading font', { exact: true }).selectOption('serif');
+  await f.page.getByLabel('Label sample content as illustrative', { exact: true }).uncheck();
+  await f.page.getByRole('button', { name: 'Save changes', exact: true }).click();
+  await f.page.getByText('All changes saved', { exact: true }).waitFor();
+  await f.page.reload();
+  await preview.locator('.pf-metrics dd').getByText('32', { exact: true }).waitFor();
+  assert.equal(await preview.locator('.pf-art-architecture').count(), 1);
+  assert.equal(await preview.locator('.pf-demo').count(), 0);
+  assert.ok((await preview.locator('h1').evaluate((node) => getComputedStyle(node).fontFamily)).includes('Newsreader'));
+  await f.page.getByRole('button', { name: 'Preview', exact: true }).click();
+  assert.equal(await preview.getByRole('link', { name: 'Code & experiments ↗', exact: true }).getAttribute('href'), 'https://example.com/my-work');
+});

@@ -22,8 +22,12 @@ Layouts collapse in source order at narrow container widths. They use semantic h
 
 ## Updating an existing installation
 
-Run **npm run db:seed** after building. Stable catalog IDs preserve project references. The seeder upgrades a built-in row only when its complete metadata and default JSON still match the untouched legacy version. Custom catalog edits are preserved. Existing project content and theme snapshots are never rewritten: themes without an explicit layout continue using the classic renderer. No database migration is needed for these JSON fields.
+Run **npm run db:seed** after building. Stable catalog IDs preserve project references. The seeder upgrades a built-in row only when its complete metadata and default JSON still match the untouched legacy version. Custom catalog edits are preserved; when an edited legacy row occupies a preset ID, the new design is added under a second reserved ID so all five archetypes remain available. Existing project content and theme snapshots are never rewritten: themes without an explicit layout continue using the classic renderer. No database migration is needed for these JSON fields.
 
 For newly created portfolios, replace the sample identity, links, organizations, and metrics through the editor. Writing, Now widgets, tags, metrics, cover graphics, font pairing, muted text, card surfaces, and borders are editable. Remove the illustrative-content footer only after replacing the examples. Publication still uses the existing deployment confirmation and GitHub authorization flow; no portfolio is published by seeding or choosing a template.
 
 These designs support a clear path from introduction to work evidence and contact. Conversion improvements have not been measured and are not claimed.
+
+## Validation
+
+Verified locally on 2026-11-18: all workspace builds and type checks; 70 backend tests with disposable PostgreSQL/Redis services; 28 client unit tests; and 50 browser tests. Coverage includes all five creation flows, editor save/reload, rich fields, keyboard controls, legacy draft preservation, edited catalog rows, safe URLs, hidden-content omission, palette contrast, and reflow from 320px to 1440px. Each generated React project also built independently and matched its static counterpart in a browser at desktop/mobile widths, including edits made directly to portfolio.json. GitHub publishing was not invoked for this design task.

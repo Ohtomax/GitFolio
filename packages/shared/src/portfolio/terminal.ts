@@ -1,7 +1,7 @@
 import { TemplateSchema } from '../validation/template.schema.js';
 import { el, main, pageFrame, sectionShell, sectionHeading, entry, itemsFor, action, metrics, tags, navigation, type PortfolioDocument } from './tree.js';
 
-export const terminalTemplate = TemplateSchema.parse({
+export const terminalTemplate = /* @__PURE__ */ TemplateSchema.parse({
   id: '10000000-0000-4000-8000-000000000002', name: 'The Terminal / Cyberpunk', category: 'developer', isReact: true, thumbnailUrl: null,
   description: 'A compact, phosphor-lit command-line portfolio for engineers who make complex systems dependable.',
   defaultConfig: { theme: { layout: 'terminal', demo: true, colors: { background: '#0B0F0C', text: '#E4F1E8', accent: '#86EFAC', muted: '#A0B4A6', surface: '#101812', border: '#2C4332' }, font: 'mono', headingFont: 'mono', spacing: 'compact' }, sections: [

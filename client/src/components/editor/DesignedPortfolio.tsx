@@ -1,4 +1,4 @@
-import { createElement, useEffect, useMemo, useRef, type CSSProperties, type ReactNode } from 'react';
+import { createElement, useEffect, useInsertionEffect, useMemo, useRef, type CSSProperties, type ReactNode } from 'react';
 import { buildPortfolioTree, portfolioVariables, mountPortfolioInteractions, PORTFOLIO_CSS,
   type PortfolioNode, type PortfolioDocument } from '@gitfolio/shared';
 import './portfolio-fonts.css';
@@ -7,6 +7,12 @@ export function DesignedPortfolio({ document, selectedId, onSelect, interactive 
   document: PortfolioDocument; selectedId?: string | null; onSelect?: (id: string) => void; interactive?: boolean; thumbnail?: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  useInsertionEffect(() => {
+    if (window.document.getElementById('gitfolio-portfolio-designs')) return;
+    const style = window.document.createElement('style');
+    style.id = 'gitfolio-portfolio-designs'; style.textContent = PORTFOLIO_CSS;
+    window.document.head.append(style);
+  }, []);
   const tree = useMemo(() => buildPortfolioTree(document), [document]);
   useEffect(() => { if (interactive && ref.current) return mountPortfolioInteractions(ref.current); }, [tree, interactive]);
   function render(node: PortfolioNode, key: number | string): ReactNode {
@@ -30,6 +36,6 @@ export function DesignedPortfolio({ document, selectedId, onSelect, interactive 
   }
   return <div ref={ref} className={thumbnail ? 'pf-thumbnail-content' : 'min-h-[400px] shadow-sm'}
     style={portfolioVariables(document.themeConfig) as CSSProperties} role={thumbnail ? undefined : 'region'} aria-label={thumbnail ? undefined : 'Portfolio preview'}>
-    <style>{PORTFOLIO_CSS}</style>{render(tree, 'page')}
+    {render(tree, 'page')}
   </div>;
 }

@@ -1,7 +1,7 @@
 import { TemplateSchema } from '../validation/template.schema.js';
 import { el, main, pageFrame, sectionShell, sectionHeading, entry, itemsFor, art, action, metrics, tags, navigation, link, type PortfolioDocument } from './tree.js';
 
-export const bentoTemplate = TemplateSchema.parse({
+export const bentoTemplate = /* @__PURE__ */ TemplateSchema.parse({
   id: '10000000-0000-4000-8000-000000000004', name: 'The Bento / Creative Technologist', category: 'creative', isReact: false, thumbnailUrl: null,
   description: 'An expressive, asymmetric collection of work, experiments, and small personal details for people who design in code.',
   defaultConfig: { theme: { layout: 'bento', demo: true, colors: { background: '#F5F2FF', text: '#211632', accent: '#5B21B6', muted: '#61536F', surface: '#FFFFFF', border: '#D9D1E8' }, font: 'sans', headingFont: 'sans', spacing: 'comfortable' }, sections: [

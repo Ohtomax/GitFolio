@@ -7,3 +7,5 @@
 .portfolio-surface .portfolio-action { display: inline-block; border-radius: .65rem; padding: .75rem 1.1rem; background: var(--portfolio-accent); color: var(--portfolio-on-accent); font-size: .8rem; font-weight: 600; }
 .portfolio-surface .portfolio-card { border: 1px solid color-mix(in srgb, var(--portfolio-text) 18%, transparent); border-radius: .85rem; padding: 1.25rem; }
 .portfolio-surface .portfolio-nav { border-bottom: 1px solid color-mix(in srgb, var(--portfolio-text) 14%, transparent); }
+.portfolio-designed-theme h3 { font-family: var(--pf-heading-font); }
+.portfolio-designed-theme .portfolio-muted { color: var(--pf-muted); opacity: 1; }

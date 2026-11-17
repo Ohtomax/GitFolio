@@ -9,7 +9,7 @@ import { featureFixture } from './helpers/features.mjs';
 
 test('catalog seeds valid defaults, uses stable IDs, and preserves existing rows on repeat runs', async () => {
   const rows = new Map();
-  const database = { template: { async updateMany({ where, data }) {
+  const database = { template: { async findMany({ where }) { return [...rows.values()].filter((row) => where.id.in.includes(row.id)); }, async updateMany({ where, data }) {
     const row = rows.get(where.id);
     const matches = row && Object.entries(where).every(([key, value]) => key === 'defaultConfig'
       ? JSON.stringify(row[key]) === JSON.stringify(value.equals) : row[key] === value);
@@ -33,9 +33,11 @@ test('catalog seeds valid defaults, uses stable IDs, and preserves existing rows
   for (const row of legacyTemplateSeedData) rows.set(row.id, structuredClone(row));
   rows.get(legacyTemplateSeedData[1].id).defaultConfig.sections[0].content.heading = 'A custom catalog identity';
   const result = await seedTemplates(database);
-  assert.equal(result.count, 0);
+  assert.equal(result.count, 1);
   assert.equal(rows.get(templateSeedData[0].id).name, templateSeedData[0].name);
   assert.equal(rows.get(legacyTemplateSeedData[1].id).defaultConfig.sections[0].content.heading, 'A custom catalog identity');
+  assert.equal(rows.get('20000000-0000-4000-8000-000000000002').defaultConfig.theme.layout, 'terminal');
+  assert.equal((await seedTemplates(database)).count, 0);
 });
 
 test('template endpoints require a real session, validate queries, and return bounded public metadata', async (t) => {
