@@ -18,6 +18,7 @@
     "oauth:check": "npm run build --workspace=@gitfolio/shared && npm run db:generate && npm run oauth:check --workspace=@gitfolio/server",
     "auth:setup": "node server/scripts/setup-auth.mjs",
     "db:generate": "npm run db:generate --workspace=@gitfolio/server --",
+    "db:seed": "npm run build --workspace=@gitfolio/shared && npm run db:generate && npm run db:seed --workspace=@gitfolio/server",
     "db:validate": "npm run db:validate --workspace=@gitfolio/server --",
     "db:migrate": "npm run db:migrate --workspace=@gitfolio/server --",
     "db:deploy": "npm run db:deploy --workspace=@gitfolio/server --",

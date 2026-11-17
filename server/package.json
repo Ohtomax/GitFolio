@@ -16,7 +16,8 @@
     "db:deploy": "node scripts/prisma.mjs migrate deploy",
     "db:status": "node scripts/prisma.mjs migrate status",
     "db:push": "node scripts/prisma.mjs db push",
-    "db:studio": "node scripts/prisma.mjs studio"
+    "db:studio": "node scripts/prisma.mjs studio",
+    "db:seed": "npm run build && node scripts/seed-templates.mjs"
   },
   "dependencies": {
     "@gitfolio/shared": "*",

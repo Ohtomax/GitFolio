@@ -4,7 +4,11 @@ import { createDatabase } from '../config/database.js';
 import type { Environment } from '../config/env.schema.js';
 import { createRedis } from '../config/redis.js';
 import { createApp } from './app.js';
-import { createAuthModule } from '../modules/auth/auth.module.js';
+import { createAuthModule, createFeatureGuard } from '../modules/auth/auth.module.js';
+import { createTemplateRepository } from '../modules/template/template.repository.js';
+import { createTemplateService } from '../modules/template/template.service.js';
+import { createTemplateRouter } from '../modules/template/template.route.js';
+import { seedTemplates } from '../modules/template/template.seed.js';
 
 export async function startServer(environment: Environment, logger: Logger) {
   const database = createDatabase(environment);
@@ -21,9 +25,12 @@ export async function startServer(environment: Environment, logger: Logger) {
       if (connection.status === 'rejected') throw connection.reason;
     }
 
+    await seedTemplates(database);
+    const guard = createFeatureGuard(environment, redis);
     const app = createApp(environment, {
       logger,
       authRouter: createAuthModule(environment, database, redis),
+      templateRouter: createTemplateRouter(createTemplateService(createTemplateRepository(database)), guard),
       checkReadiness: async () => {
         await Promise.all([database.$queryRaw`SELECT 1`, redis.ping()]);
       },

@@ -10,6 +10,16 @@ import { createAuthRepository } from './auth.repository.js';
 import { createAuthRouter } from './auth.route.js';
 import { createAuthService, type OAuthStateStore } from './auth.service.js';
 import { createSessionService, type SessionStore } from './session.service.js';
+import { verifyToken } from '../../middleware/auth.js';
+import { ServiceError } from '../../utils/service-error.js';
+import type { RequestHandler } from 'express';
+
+export function createFeatureGuard(environment: Environment, redis: Redis): RequestHandler {
+  if (!environment.JWT_SECRET) return (_request, _response, next) => {
+    next(new ServiceError(503, 'AUTH_NOT_CONFIGURED', 'Sign-in is not configured.'));
+  };
+  return verifyToken(createSessionService(environment, createRedisAuthStores(redis).sessions), environment);
+}
 
 export function createRedisAuthStores(redis: Redis) {
   const key = (state: string) => `auth:oauth:${createHash('sha256').update(state).digest('hex')}`;
