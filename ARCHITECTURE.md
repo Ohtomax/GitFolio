@@ -917,7 +917,7 @@ Phase 1 implementation and local setup commands are documented in [README.md](RE
 - [x] GitHub access token encryption/decryption using AES-256-GCM
 - [x] GitHub token expiration, refresh-token rotation, and supporting storage
 - [x] Client auth store (Zustand)
-- [ ] Login page & OAuth callback component
+- [x] Login page & OAuth callback component
 - [ ] AuthGuard route wrapper
 
 ### Phase 3 — Project Management
