@@ -33,3 +33,13 @@ Lists use the same pagination envelope as templates, with a maximum page size of
 ## Dashboard
 
 Successful sign-in now defaults to `/dashboard`; explicit protected return destinations are preserved. The dashboard lists six projects per page, searches by name, filters by status, and sorts by update time/name using the API. Empty, loading, error/retry, and mobile states are provided. Manage opens project metadata settings; archive/restore retain content, while delete requires confirmation. `/account` remains available from workspace navigation. The portfolio editor and publishing actions remain separate later phases.
+
+## Creating a project
+
+`/projects/new` is protected by AuthGuard. Choose a catalog template, then enter a name, unique slug, and optional future repository name. Slug/repository suggestions follow the name until manually edited. The client and API validate the same shared schemas; duplicate slugs display a recoverable error and preserve the form. Creation returns to the dashboard and invalidates its list. Template loading/failure/empty states are handled, and creating is disabled while selected defaults are unavailable. The endpoint creates a local draft with copied sections/theme; it does not create a GitHub repository or publish a site.
+
+## Verification
+
+`npm test` covers seeded defaults, repeated seeding, request validation, ownership across CRUD operations, CSRF checks, conflict responses, query partitioning/invalidation, and logout races. `npm run test:browser --workspace=@gitfolio/client` covers the rendered workflow with synthetic HTTP responses, including template selection, keyboard controls, creation, reload, updates, archiving/restoring, confirmed deletion, pagination/search, errors, and narrow screens. See README for browser prerequisites.
+
+The optional real-storage test requires `GITFOLIO_TEST_DATABASE_URL` pointing to a migrated disposable database whose name starts with `gitfolio_phase1_test_`. It verifies the actual Prisma repositories, uniqueness, owner constraints, section creation/cascades, and repeated seeding. Browser fixtures do not establish real PostgreSQL/Redis persistence or GitHub OAuth consent. Existing local credentials and user records are never replaced by test fixtures.

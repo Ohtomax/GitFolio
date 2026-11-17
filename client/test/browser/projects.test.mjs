@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { before, after, test } from 'node:test';
 import { fileURLToPath } from 'node:url';
-import { projectFixtureData, projectsFixture } from './helpers/projects.mjs';
+import { projectFixtureData, projectsFixture, templateFixtures } from './helpers/projects.mjs';
 
 const { chromium } = await import(process.env.GITFOLIO_PLAYWRIGHT_MODULE ?? 'playwright');
 let browser;
@@ -81,4 +81,112 @@ test('dashboard keeps private content behind AuthGuard and renders the desktop p
   await f.goto('/dashboard');
   await f.page.getByRole('heading', { name: 'Personal portfolio', exact: true }).waitFor();
   await f.page.screenshot({ path: fileURLToPath(new URL('../../../.local/phase3-dashboard.png', import.meta.url)), fullPage: true });
+});
+
+test('new project filters templates, preserves custom slugs, creates once, and survives dashboard reload', async (t) => {
+  const f = await projectsFixture(t, browser);
+  await f.goto('/dashboard');
+  await f.page.getByRole('link', { name: 'Create your first project' }).click();
+  await f.page.waitForURL('**/projects/new');
+  assert.equal(await f.page.getByRole('button', { name: 'Continue', exact: true }).isEnabled(), false);
+  await f.page.getByRole('button', { name: 'Developer', exact: true }).click();
+  await f.page.getByRole('radio', { name: /Terminal/ }).waitFor();
+  assert.equal(await f.page.getByRole('radio').count(), 1);
+  await f.page.getByText('Terminal', { exact: true }).click();
+  await f.page.getByRole('button', { name: 'Continue', exact: true }).click();
+  await f.page.getByLabel('Project name', { exact: true }).fill('My Résumé');
+  assert.equal(await f.page.getByLabel('Project slug', { exact: true }).inputValue(), 'my-resume');
+  await f.page.getByLabel('Project slug', { exact: true }).fill('my-custom-slug');
+  await f.page.getByLabel('Project name', { exact: true }).fill('Updated portfolio');
+  assert.equal(await f.page.getByLabel('Project slug', { exact: true }).inputValue(), 'my-custom-slug');
+  await f.page.getByLabel('Repository name (optional)', { exact: true }).fill('my-repo');
+  await f.page.getByRole('button', { name: 'Create project', exact: true }).click();
+  await f.page.waitForURL('**/dashboard');
+  await f.page.getByRole('heading', { name: 'Updated portfolio', exact: true }).waitFor();
+  assert.equal(f.state.creates, 1);
+  assert.equal(f.state.projects[0].templateId, templateFixtures[1].id);
+  assert.equal(f.state.projects[0].repoName, 'my-repo');
+  await f.page.reload();
+  await f.page.getByRole('heading', { name: 'Updated portfolio', exact: true }).waitFor();
+});
+
+test('project setup validates locally and preserves input while recovering from a duplicate slug', async (t) => {
+  const f = await projectsFixture(t, browser, { rejectCreate: true });
+  await f.goto('/projects/new');
+  await f.page.getByText('Canvas', { exact: true }).click();
+  await f.page.getByRole('button', { name: 'Continue', exact: true }).click();
+  await f.page.getByRole('button', { name: 'Create project', exact: true }).click();
+  await f.page.getByText('Enter a project name.', { exact: true }).waitFor();
+  assert.equal(f.state.creates, 0);
+  await f.page.getByLabel('Project name', { exact: true }).fill('Fresh portfolio');
+  await f.page.getByRole('button', { name: 'Create project', exact: true }).click();
+  await f.page.getByRole('alert').getByText(/already have a project with this slug/).waitFor();
+  assert.equal(await f.page.getByLabel('Project name', { exact: true }).inputValue(), 'Fresh portfolio');
+  f.state.rejectCreate = false;
+  await f.page.getByLabel('Project slug', { exact: true }).fill('fresh-copy');
+  await f.page.getByRole('button', { name: 'Create project', exact: true }).click();
+  await f.page.waitForURL('**/dashboard');
+  await f.page.getByRole('heading', { name: 'Fresh portfolio', exact: true }).waitFor();
+  assert.equal(f.state.creates, 2);
+  assert.equal(f.state.projects[0].slug, 'fresh-copy');
+});
+
+test('template catalog outages and empty results are recoverable', async (t) => {
+  const f = await projectsFixture(t, browser, { failTemplates: true });
+  await f.goto('/projects/new');
+  await f.page.getByRole('heading', { name: 'Templates couldn’t load.' }).waitFor();
+  assert.equal(await f.page.getByRole('button', { name: 'Continue', exact: true }).isEnabled(), false);
+  f.state.failTemplates = false;
+  await f.page.getByRole('button', { name: 'Try again' }).click();
+  await f.page.getByRole('radio', { name: /Canvas/ }).waitFor();
+  const empty = await projectsFixture(t, browser, { templates: [] });
+  await empty.goto('/projects/new');
+  await empty.page.getByRole('heading', { name: 'No templates found.' }).waitFor();
+  assert.equal(await empty.page.getByRole('button', { name: 'Continue', exact: true }).isEnabled(), false);
+});
+
+test('selected template defaults must load before creating a project', async (t) => {
+  const f = await projectsFixture(t, browser, { failTemplateDetail: true });
+  await f.goto('/projects/new');
+  await f.page.getByText('Canvas', { exact: true }).click();
+  await f.page.getByRole('button', { name: 'Continue', exact: true }).click();
+  await f.page.getByRole('heading', { name: 'Your template couldn’t load.' }).waitFor();
+  assert.equal(await f.page.getByRole('button', { name: 'Create project', exact: true }).isEnabled(), false);
+  f.state.failTemplateDetail = false;
+  await f.page.getByRole('button', { name: 'Retry template' }).click();
+  await f.page.getByRole('heading', { name: 'Canvas', exact: true }).waitFor();
+  await f.page.getByLabel('Project name', { exact: true }).fill('Recovered project');
+  await f.page.getByRole('button', { name: 'Create project', exact: true }).click();
+  await f.page.waitForURL('**/dashboard');
+});
+
+test('template pagination and keyboard selection work on the new project page', async (t) => {
+  const f = await projectsFixture(t, browser, { templates: [...templateFixtures, {
+    ...templateFixtures[0], id: '10000000-0000-4000-8000-000000000005', name: 'Extra template',
+  }] });
+  await f.goto('/projects/new');
+  await f.page.getByRole('button', { name: 'Next templates', exact: true }).click();
+  const radio = f.page.getByRole('radio', { name: /Extra template/ });
+  await radio.focus();
+  await radio.press('Space');
+  assert.equal(await radio.isChecked(), true);
+  await f.page.getByRole('button', { name: 'Continue', exact: true }).click();
+  await f.page.getByRole('heading', { name: 'Extra template', exact: true }).waitFor();
+});
+
+test('new project stays guarded and both setup steps fit small screens', async (t) => {
+  const anonymous = await projectsFixture(t, browser, { authenticated: false });
+  await anonymous.goto('/projects/new');
+  await anonymous.page.waitForURL('**/login');
+  assert.equal(anonymous.state.templateRequests, 0);
+  const f = await projectsFixture(t, browser);
+  await f.goto('/projects/new');
+  await f.page.getByRole('radio', { name: /Canvas/ }).waitFor();
+  await f.page.screenshot({ path: fileURLToPath(new URL('../../../.local/phase3-templates.png', import.meta.url)), fullPage: true });
+  await f.page.setViewportSize({ width: 320, height: 900 });
+  assert.ok(await f.page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+  await f.page.getByText('Canvas', { exact: true }).click();
+  await f.page.getByRole('button', { name: 'Continue', exact: true }).click();
+  await f.page.getByLabel('Project name', { exact: true }).waitFor();
+  assert.ok(await f.page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
 });

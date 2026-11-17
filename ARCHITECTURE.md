@@ -2,7 +2,7 @@
 
 > A planned full-stack SaaS for designing static or React portfolios and publishing them to GitHub Pages through a browser-based workflow.
 
-**Status reviewed: November 17, 2026 (Asia/Manila).** Phase 1 and the Phase 2 authentication code are implemented. GitHub OAuth App registration and live sign-in verification remain pending by request. The diagrams and feature contracts below describe the target architecture unless explicitly marked as implemented.
+**Status reviewed: November 17, 2026 (Asia/Manila).** Phases 1–3 are implemented in source, including authentication and project management. Live GitHub consent and service-backed integration verification remain separate checks. The diagrams and feature contracts below describe the target architecture unless explicitly marked as implemented.
 
 For the product objective, user workflow, benefits, and limitations, read [System Overview](SYSTEM_OVERVIEW.md). For installation commands, read [README.md](README.md).
 
@@ -41,10 +41,11 @@ These statuses are based on the checked-in source, rather than the presence of a
 | Express foundation | Implemented | [App middleware and health routes](server/src/core/app.ts), [service connections and shutdown](server/src/core/server.ts), [entry point](server/src/index.ts) |
 | Environment configuration | Implemented | [Zod environment schema](server/src/config/env.schema.ts), root `.env` loader, and Prisma CLI wrapper |
 | Database structure | Schema and initial migration implemented | [Five Prisma models](server/prisma/schema.prisma) and [initial migration](server/prisma/migrations/20261116000000_init/migration.sql); application to a normal development or production database is not established by these files |
-| Shared package | Implemented foundation | [Exports](packages/shared/src/index.ts): deployment statuses, API response types, API error schema, and health response schema |
+| Shared package | Implemented | [Exports](packages/shared/src/index.ts): API/auth/project/template schemas, pagination, theme/section defaults, and deployment statuses |
 | GitHub OAuth configuration | Local preparation implemented | [Server-only OAuth configuration](server/src/config/github-oauth.ts), callback validation, secret redaction, [configuration checker](server/scripts/check-github-oauth.mjs), and [registration guide](docs/GITHUB_OAUTH_SETUP.md) |
 | GitHub authentication | Code implemented; registration/live consent pending | [Auth module](server/src/modules/auth/auth.module.ts), one-time state/PKCE, JWT verification/revocation, AES-256-GCM, and token refresh; [details](docs/AUTHENTICATION.md) |
-| Portfolio management and publishing | Planned | No project/template feature endpoints, editor, GitHub repository/Pages provider, site generator, BullMQ queue, or deployment worker is implemented |
+| Project management | Implemented | [Project module](server/src/modules/project/project.route.ts), [seeded catalog](server/src/modules/template/template.seed.ts), dashboard, template picker/setup form, and query hooks; [guide](docs/PROJECT_MANAGEMENT.md) |
+| Editor and publishing | Planned | No section/theme editor, GitHub repository/Pages provider, site generator, BullMQ queue, or deployment worker is implemented |
 | Production operation | Planned | No production deployment or end-to-end GitHub Pages publishing has been verified |
 
 ### Current executable behavior
@@ -52,7 +53,8 @@ These statuses are based on the checked-in source, rather than the presence of a
 - `npm run dev` builds the shared package, generates Prisma Client, and starts the shared, server, and client watchers.
 - The API connects to both PostgreSQL and Redis before listening. Redis is already a startup dependency; queue processing itself is still planned.
 - `GET /api/health` checks the HTTP process. `GET /api/health/ready` queries PostgreSQL and pings Redis, returning HTTP 503 if a dependency check fails. Both routes are under the API rate limiter.
-- The frontend displays the GitHub login page, processes OAuth callbacks, and protects `/account` with AuthGuard. Vite proxies `/api` to Express for same-origin cookies.
+- The frontend processes OAuth callbacks and protects `/account`, `/dashboard`, and `/projects/new` with AuthGuard. Successful sign-in defaults to the dashboard. Vite proxies `/api` to Express for same-origin cookies.
+- `/api/projects` implements owner-scoped CRUD and paginated search/filtering. `/api/templates` supplies an authenticated catalog with validated defaults. Four missing templates are seeded at startup; `npm run db:seed` is also available.
 - `/api/auth/github`, `/api/auth/github/callback`, `/api/auth/me`, and `/api/auth/logout` implement authentication. Missing OAuth credentials or application secrets disable auth safely with HTTP 503.
 - `npm run oauth:check` validates local configuration without connecting to PostgreSQL or Redis. It does not verify GitHub-issued credentials or perform sign-in.
 
@@ -60,7 +62,7 @@ These statuses are based on the checked-in source, rather than the presence of a
 
 Automated tests exist for HTTP behavior, configuration, OAuth callback rules, credential redaction, database relationships, and server lifecycle. Database and full server integration tests require explicitly supplied disposable service URLs and may be skipped during a normal test run. A committed migration, a passing configuration check, and a working live deployment are separate pieces of evidence.
 
-Unit/HTTP tests and browser tests with synthetic API responses validate the auth implementation. GitHub registration, real consent, live service migrations, and deployment are separate verification steps and remain unverified in this environment.
+Unit/HTTP tests and browser tests with synthetic API responses validate authentication and project management. Real database/Redis integrations require explicitly supplied disposable service URLs and are skipped when unavailable. GitHub consent and production deployment remain separate verification steps.
 
 ---
 
@@ -86,7 +88,7 @@ GitHub Pages serves static websites and has plan, usage, and content restriction
 
 ## 2. High-Level Architecture
 
-**Planned product architecture.** The foundation and authentication module are implemented. Project management, the editor, and the deployment pipeline shown here are future work.
+**Planned product architecture.** The foundation, authentication, templates, and project management are implemented. The editor and deployment pipeline shown here remain future work.
 
 ```
 ┌───────────────────────────────────────────────────────────────────┐
@@ -257,7 +259,7 @@ gitfolio/
 
 ## 5. Client Architecture
 
-The login, OAuth callback, account page, auth store, session hooks, and AuthGuard are implemented. The frontend development server is pinned to port 5173. Dashboard, editor, project, and deployment screens remain planned.
+The login, callback, account, dashboard, template picker/setup form, auth store, feature query hooks, and AuthGuard are implemented. The frontend development server is pinned to port 5173. Editor and deployment screens remain planned.
 
 ### 5.1 Routing
 
@@ -265,8 +267,8 @@ The login, OAuth callback, account page, auth store, session hooks, and AuthGuar
 |------------------------------|---------------------|--------------------------------------|
 | `/` and `/login`             | Login               | GitHub sign-in, implemented          |
 | `/auth/callback`             | OAuth Callback      | Handles GitHub OAuth redirect        |
-| `/dashboard`                 | Dashboard           | List of user's portfolio projects    |
-| `/projects/new`              | New Project         | Template selection & project setup   |
+| `/dashboard`                 | Dashboard           | Implemented owner list, search/filter/pagination, metadata editing, archive/restore/delete |
+| `/projects/new`              | New Project         | Implemented template selection and validated project setup |
 | `/projects/:id/edit`         | Editor              | Visual portfolio editor              |
 | `/projects/:id/deploy`       | Deploy              | Deploy trigger & status tracking     |
 | `/projects/:id/settings`     | Project Settings    | Repo name, custom domain, etc.       |
@@ -336,7 +338,7 @@ modules/<feature>/
 
 ### 6.2 Module Breakdown
 
-Authentication is implemented; the other module responsibilities below remain planned.
+Authentication, project CRUD, and the template catalog are implemented. Editing content, revision tracking, user profile updates, and deployment remain planned.
 
 #### Auth Module
 - **OAuth Flow**: Redirect → GitHub → Callback → Token exchange
@@ -356,7 +358,7 @@ Authentication is implemented; the other module responsibilities below remain pl
 
 #### Template Module
 - **Template Catalog**: Serve pre-built portfolio templates
-- **Template Previews**: Screenshot / live preview URLs
+- **Template Previews**: Category-based React/CSS previews in the picker and dashboard; generated-site previews remain planned
 - **Customization Schema**: Define which parts of a template are editable
 
 #### Deploy Module
@@ -405,17 +407,19 @@ packages/shared/src/
 ├── index.ts                    # Public package exports
 ├── constants/deploy-status.ts  # Status tuple and DeployStatus type
 ├── types/api.types.ts          # ApiResponse<T> success/error envelope
-├── validation/api.schema.ts    # ApiErrorSchema and HealthResponseSchema
-└── validation/auth.schema.ts   # Auth user/session and OAuth callback schemas
+├── validation/api.schema.ts       # ApiErrorSchema and HealthResponseSchema
+├── validation/auth.schema.ts      # Auth user/session and OAuth callback schemas
+├── validation/template.schema.ts  # Template defaults, pagination, theme/section shapes
+└── validation/project.schema.ts   # Create/update/query and project response DTOs
 ```
 
-Project, template, and deployment payload schemas, limits, category constants, and pagination contracts will be added with their feature modules. Shared browser validation complements server validation; it does not replace server enforcement.
+Auth, project, and template schemas and pagination contracts are implemented. Deployment payload schemas remain planned. Shared browser validation complements server validation; it does not replace server enforcement.
 
 ---
 
 ## 8. Database Schema
 
-**Implemented schema:** [schema.prisma](server/prisma/schema.prisma), [initial migration](server/prisma/migrations/20261116000000_init/migration.sql), and [token lifecycle migration](server/prisma/migrations/20261117000000_github_token_lifecycle/migration.sql). Auth encrypts values before writing; schema files alone do not prove that a live database has been migrated. CRUD and template seeds remain planned.
+**Implemented schema:** [schema.prisma](server/prisma/schema.prisma), [initial migration](server/prisma/migrations/20261116000000_init/migration.sql), and [token lifecycle migration](server/prisma/migrations/20261117000000_github_token_lifecycle/migration.sql). Auth encrypts private account fields before writing; schema files alone do not prove that a live database has been migrated. Phase 3 implements CRUD and template seeds using the existing tables, with no new schema migration.
 
 ### Entity Relationship Diagram
 
@@ -693,9 +697,9 @@ http://127.0.0.1:3001/api
 
 These paths are relative to `/api`. Health and auth responses have `Cache-Control: no-store` and pass through the API limiter. Unknown endpoints return the shared JSON 404 response, except disabled auth groups, which return HTTP 503.
 
-### Planned Feature Endpoints
+### Feature Endpoints
 
-Auth endpoints below are implemented. Project/template/deployment/user CRUD contracts remain planned.
+Auth, project, and template endpoints below are implemented. Deployment and user profile-update contracts remain planned. All project/template routes require authentication; project queries and mutations are owner-scoped.
 
 #### Auth
 
@@ -720,8 +724,8 @@ Auth endpoints below are implemented. Project/template/deployment/user CRUD cont
 
 | Method | Endpoint                         | Auth | Description               |
 |--------|----------------------------------|------|---------------------------|
-| GET    | `/templates`                     | No   | List all templates        |
-| GET    | `/templates/:id`                 | No   | Get template detail       |
+| GET    | `/templates`                     | Yes  | Paginated seeded catalog  |
+| GET    | `/templates/:id`                 | Yes  | Get template and defaults |
 
 #### Deployments
 
@@ -740,7 +744,7 @@ Auth endpoints below are implemented. Project/template/deployment/user CRUD cont
 
 ### Standard Response Envelope
 
-The implemented shared contract contains `success` plus `data`, or `success` plus an error's `code` and `message`. The optional pagination `meta` and validation `details` below are planned additions when feature APIs need them.
+The implemented shared contract contains `success` plus `data`, or `success` plus an error's `code` and `message`. Project/template list data contains `items`, `page`, `pageSize`, `total`, and `totalPages`. The optional outer `meta` and validation `details` below remain illustrative future additions.
 
 ```typescript
 // Success
@@ -830,7 +834,7 @@ User clicks "Deploy"
 | **Token theft** | AES-256-GCM for access/refresh tokens, HttpOnly JWT cookies, Redis revocation, and secret log redaction | Production key management and recovery verification |
 | **Request abuse** | API limiter plus a dedicated sign-in limiter | Deploy-specific limits and safe proxy configuration for production |
 | **Transport security** | OAuth callback configuration requires HTTPS in production | HTTPS termination and trusted-proxy behavior in the actual production deployment |
-| **Ownership** | JWT verification, current-user profile queries, and composite deployment/project ownership foreign key | Ownership-scoped queries on future project/deploy operations |
+| **Ownership** | JWT verification, current-user profile queries, owner-scoped project CRUD, and composite deployment/project ownership foreign key | Ownership-scoped queries on future deployment operations |
 | **Operational logging** | Request IDs and safe metadata; URLs, headers, and bodies omitted from request logs | Continue sanitizing feature errors, job logs, and provider responses |
 | **Dependencies** | Package manifests/lockfile are present | Dependency review/update automation; existing tracked `node_modules` still need repository cleanup |
 
@@ -927,12 +931,12 @@ Phase 1 implementation and local setup commands are documented in [README.md](RE
 - [x] Login page & OAuth callback component
 - [x] AuthGuard route wrapper
 
-### Phase 3 — Project Management
+### Phase 3 — Project Management *(Implemented)*
 
 - [x] Project module CRUD (controller → service → repository)
 - [x] Template module (seeded templates)
 - [x] Dashboard page (project list, create button)
-- [ ] New Project page (template picker, setup form)
+- [x] New Project page (template picker, setup form)
 - [x] TanStack Query hooks for projects & templates
 
 ### Phase 4 — Portfolio Editor

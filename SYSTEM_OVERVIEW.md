@@ -39,7 +39,7 @@ This audience assessment is a product judgment based on the proposed workflow. N
 
 ## 3. Current implementation
 
-The repository contains the technical foundation and authentication implementation:
+The repository contains the technical foundation, authentication, and project-management implementation:
 
 - An npm workspace monorepo with React/Vite, Express/TypeScript, and a shared types/validation package.
 - A Prisma schema and initial migration for users, templates, projects, sections, and deployments.
@@ -48,9 +48,9 @@ The repository contains the technical foundation and authentication implementati
 - Docker Compose configuration for local PostgreSQL and Redis, plus setup instructions and development/check commands.
 - Server-side OAuth settings, callback validation, initial sign-in scopes, secret redaction, and a configuration checker.
 
-The frontend has GitHub login/callback pages, a connected-account page, and an auth guard. The backend implements one-time state, PKCE, encrypted token storage/refresh, and revocable JWT sessions. GitHub app registration and real consent remain pending by request. Project creation, a template catalog, the editor, generated portfolio files, GitHub publishing, and deployment progress screens remain planned.
+The frontend has GitHub login/callback pages, a connected-account page, AuthGuard, a project dashboard, and a template picker/setup form. The backend implements one-time state, PKCE, encrypted token storage/refresh, revocable JWT sessions, owner-scoped project CRUD, and four seeded templates. Real GitHub consent remains a separate verification step. The editor, generated portfolio files, GitHub publishing, and deployment progress screens remain planned.
 
-Having a `Project` or `Deployment` database model does not mean a user can create a portfolio or deploy one. The application code that connects those actions is still planned.
+Users can create and manage portfolio drafts with copied template themes and sections. Editing those sections and publishing a live portfolio remain later phases.
 
 ## 4. Planned user workflow
 
@@ -122,8 +122,8 @@ flowchart TD
 
 | Component | Responsibility | Current state |
 | --- | --- | --- |
-| React client | Forms, dashboard, editing, previews, progress | Login/callback/account and AuthGuard implemented; product screens planned |
-| Express API | Validate requests, enforce ownership, save drafts, coordinate publishing | Middleware, health, and auth routes implemented; other feature APIs planned |
+| React client | Forms, dashboard, editing, previews, progress | Login/account, AuthGuard, dashboard, and new-project workflow implemented; editor/publishing screens planned |
+| Express API | Validate requests, enforce ownership, save drafts, coordinate publishing | Middleware, health, auth, project CRUD, and seeded template routes implemented; publishing planned |
 | PostgreSQL / Prisma | Persist account links, content, templates, and deployment records | Schema/migration and connection code implemented |
 | Redis | OAuth state, session revocation, queued background work | Auth state/sessions and connection/ping implemented; queue planned |
 | BullMQ worker | Generate files, call GitHub, and update deployment progress | Planned |

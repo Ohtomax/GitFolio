@@ -21,7 +21,7 @@ export async function projectsFixture(t, browser, options = {}) {
   page.on('pageerror', (error) => errors.push(error.message));
   t.after(async () => { await context.close(); assert.deepEqual(errors, []); });
   const state = { projects: options.projects ?? [], authenticated: true, failProjects: false, failTemplates: false,
-    rejectCreate: false, creates: 0, projectRequests: 0, ...options };
+    rejectCreate: false, creates: 0, projectRequests: 0, templateRequests: 0, templates: templateFixtures, ...options };
   const session = { user: { id: randomUUID(), githubId: '123', login: 'fixture-user', name: 'Fixture Developer',
     email: null, avatarUrl: null }, expiresAt: Date.now() + 3600000 };
   const respond = (route, status, data) => route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(data) });
@@ -30,12 +30,14 @@ export async function projectsFixture(t, browser, options = {}) {
   await page.route('**/api/auth/me', (route) => state.authenticated ? ok(route, session) : fail(route, 'UNAUTHENTICATED', 401));
   await page.route('**/api/auth/logout', (route) => { state.authenticated = false; return ok(route, null); });
   await page.route('**/api/templates**', (route) => {
+    state.templateRequests++;
     if (state.failTemplates) return fail(route, 'TEMPLATES_UNAVAILABLE', 503);
     const url = new URL(route.request().url());
     const id = url.pathname.split('/')[3];
-    if (id) { const template = templateFixtures.find((item) => item.id === id); return template ? ok(route, template) : fail(route, 'TEMPLATE_NOT_FOUND', 404); }
+    if (id && state.failTemplateDetail) return fail(route, 'TEMPLATES_UNAVAILABLE', 503);
+    if (id) { const template = state.templates.find((item) => item.id === id); return template ? ok(route, template) : fail(route, 'TEMPLATE_NOT_FOUND', 404); }
     const category = url.searchParams.get('category');
-    const filtered = templateFixtures.filter((item) => !category || item.category === category);
+    const filtered = state.templates.filter((item) => !category || item.category === category);
     const pageNumber = Number(url.searchParams.get('page') || 1), pageSize = Number(url.searchParams.get('pageSize') || 12);
     return ok(route, { items: filtered.slice((pageNumber - 1) * pageSize, pageNumber * pageSize), total: filtered.length,
       page: pageNumber, pageSize, totalPages: Math.ceil(filtered.length / pageSize) });
@@ -51,7 +53,7 @@ export async function projectsFixture(t, browser, options = {}) {
       state.creates++;
       const input = route.request().postDataJSON();
       if (state.rejectCreate || state.projects.some((item) => item.slug === input.slug)) return fail(route, 'PROJECT_SLUG_TAKEN', 409);
-      const selected = templateFixtures.find((item) => item.id === input.templateId);
+      const selected = state.templates.find((item) => item.id === input.templateId);
       if (!selected) return fail(route, 'TEMPLATE_NOT_FOUND', 404);
       const project = { ...projectFixtureData(input.name), ...input, template: selected, templateId: selected.id,
         repoName: input.repoName ?? null, themeConfig: structuredClone(selected.defaultConfig.theme) };
