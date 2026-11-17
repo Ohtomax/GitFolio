@@ -58,3 +58,30 @@ test('sections can be added edited reordered hidden removed restored and saved',
   await f.page.getByLabel('Section heading', { exact: true }).waitFor();
   assert.equal(await f.page.getByLabel('Section heading', { exact: true }).inputValue(), 'Projects');
 });
+
+test('theme controls update colors fonts and spacing, support undo, and persist across reload', async (t) => {
+  const project = projectFixtureData('Theme');
+  const f = await projectsFixture(t, browser, { projects: [project] });
+  await f.goto(`/projects/${project.id}/edit`);
+  await f.page.getByRole('button', { name: /^theme$/i }).click();
+  await f.page.getByLabel('Background color', { exact: true }).evaluate((input) => {
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(input, '#123456');
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+  await f.page.getByLabel('Font family', { exact: true }).selectOption('serif');
+  await f.page.getByLabel('Section spacing', { exact: true }).selectOption('compact');
+  await f.page.getByRole('button', { name: 'Undo', exact: true }).click();
+  assert.equal(await f.page.getByLabel('Section spacing', { exact: true }).inputValue(), 'spacious');
+  await f.page.getByRole('button', { name: 'Redo', exact: true }).click();
+  const preview = f.page.getByRole('region', { name: 'Theme preview', exact: true });
+  assert.equal(await preview.evaluate((element) => getComputedStyle(element).backgroundColor), 'rgb(18, 52, 86)');
+  await f.page.getByRole('button', { name: 'Save changes', exact: true }).click();
+  await f.page.getByText('All changes saved', { exact: true }).waitFor();
+  await f.page.reload();
+  await f.page.getByRole('button', { name: /^theme$/i }).click();
+  assert.equal(await f.page.getByLabel('Font family', { exact: true }).inputValue(), 'serif');
+  assert.equal(await f.page.getByLabel('Section spacing', { exact: true }).inputValue(), 'compact');
+  assert.equal(await f.page.getByLabel('Background color', { exact: true }).inputValue(), '#123456');
+  await f.page.getByRole('button', { name: 'Use template defaults', exact: true }).click();
+  assert.equal(await f.page.getByLabel('Font family', { exact: true }).inputValue(), 'sans');
+});

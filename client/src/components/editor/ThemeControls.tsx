@@ -1,0 +1,24 @@
+import { ThemeConfigSchema, type Project, type ThemeConfig } from '@gitfolio/shared';
+import { useTemplate } from '../../hooks/useTemplates.ts';
+import { useEditor, useEditorApi } from './EditorProvider.tsx';
+import { ThemeSurface } from './ThemeSurface.tsx';
+
+export function ThemeControls({ project, disabled }: { project: Project; disabled: boolean }) {
+  const store = useEditorApi();
+  const theme = useEditor((state) => state.document.themeConfig);
+  const template = useTemplate(project.templateId);
+  function apply(next: ThemeConfig, group?: string) {
+    if (disabled) return;
+    const parsed = ThemeConfigSchema.safeParse(next);
+    if (!parsed.success) return;
+    const state = store.getState(); state.setDocument({ ...state.document, themeConfig: parsed.data }, group);
+  }
+  return <><h2 className="text-xs font-semibold uppercase tracking-widest text-stone-500">Theme</h2><p className="mb-6 mt-3 text-xs leading-5 text-stone-500">A few choices that make your portfolio feel like you.</p>
+    <fieldset disabled={disabled} className="space-y-5"><legend className="sr-only">Portfolio colors</legend>{([{ key: 'accent', label: 'Accent color' }, { key: 'background', label: 'Background color' }, { key: 'text', label: 'Text color' }] as const).map(({ key, label }) => <label key={key} className="flex items-center justify-between gap-3 text-xs font-medium text-stone-600"><span>{label}<span className="mt-1 block font-mono text-[10px] font-normal text-stone-400">{theme.colors[key]}</span></span><input type="color" aria-label={label} value={theme.colors[key]} className="h-10 w-12 cursor-pointer rounded-lg border border-stone-200 bg-white p-1 disabled:opacity-40" onChange={(event) => apply({ ...theme, colors: { ...theme.colors, [key]: event.target.value } }, `theme:${key}`)} onBlur={() => store.getState().endGroup()} /></label>)}</fieldset>
+    <label className="mt-6 block text-xs font-medium text-stone-600">Font family<select aria-label="Font family" value={theme.font} disabled={disabled} className="mt-2 w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm" onChange={(event) => apply({ ...theme, font: ThemeConfigSchema.shape.font.parse(event.target.value) })}><option value="sans">Modern sans serif</option><option value="serif">Editorial serif</option><option value="mono">Developer monospace</option></select></label>
+    <label className="mt-5 block text-xs font-medium text-stone-600">Section spacing<select aria-label="Section spacing" value={theme.spacing} disabled={disabled} className="mt-2 w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm" onChange={(event) => apply({ ...theme, spacing: ThemeConfigSchema.shape.spacing.parse(event.target.value) })}><option value="compact">Compact</option><option value="comfortable">Comfortable</option><option value="spacious">Spacious</option></select></label>
+    <ThemeSurface theme={theme} label="Theme preview" className="mt-7 overflow-hidden rounded-xl border border-stone-200"><div className="portfolio-section"><p className="portfolio-accent text-[10px] font-semibold uppercase tracking-widest">A little preview</p><h3 className="mt-3 text-xl font-semibold leading-tight">Your work.<br />Your style.</h3><p className="portfolio-muted mt-3 text-xs leading-6">Make room for the things you’re proud of.</p><span className="portfolio-action mt-4">Get in touch</span></div></ThemeSurface>
+    <button type="button" className="mt-6 w-full rounded-lg border border-stone-300 px-3 py-2 text-xs font-medium disabled:opacity-40" disabled={disabled || !template.data} onClick={() => template.data && apply(template.data.defaultConfig.theme)}>Use template defaults</button>
+    {template.isError && <p className="mt-2 text-xs text-amber-800">Template defaults are unavailable. Your custom theme can still be edited.</p>}
+  </>;
+}

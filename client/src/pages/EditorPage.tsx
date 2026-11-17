@@ -11,6 +11,7 @@ import { useAuthStore } from '../stores/auth.store.ts';
 import { SectionNavigation } from '../components/editor/SectionNavigation.tsx';
 import { SectionInspector } from '../components/editor/SectionInspector.tsx';
 import { useEditorPersistence } from '../hooks/useEditorPersistence.ts';
+import { ThemeControls } from '../components/editor/ThemeControls.tsx';
 
 function EditorWorkspace({ project }: { project: Project }) {
   const document = useEditor((state) => state.document);
@@ -25,7 +26,7 @@ function EditorWorkspace({ project }: { project: Project }) {
     toolbar={<><span role="status" className="mr-2 text-xs text-stone-500">{persistence.status.phase === 'saving' ? 'Saving…' : dirty ? 'Unsaved changes' : 'All changes saved'}</span><EditorHistoryToolbar disabled={disabled} /><button type="button" className="rounded-lg border border-stone-300 bg-white px-3 py-2 text-xs disabled:opacity-40" disabled={persistence.status.phase === 'saving' || persistence.reloading} onClick={() => void persistence.reload()}>Reload saved version</button><button type="button" className="primary-button" disabled={disabled || !dirty || persistence.status.phase === 'saving' || persistence.status.phase === 'conflict'} onClick={() => void persistence.save()}>Save changes</button></>}
     notice={persistence.message && <p role="alert" className="mb-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">{persistence.message}</p>}
     navigation={<SectionNavigation disabled={disabled} />}
-    inspector={panel === 'sections' ? <SectionInspector disabled={disabled} /> : <><h2 className="text-sm font-semibold">Theme</h2><dl className="mt-5 space-y-4 text-xs">{Object.entries(document.themeConfig.colors).map(([name, value]) => <div key={name} className="flex justify-between gap-3"><dt className="capitalize text-stone-500">{name}</dt><dd className="font-mono">{value}</dd></div>)}<div className="flex justify-between"><dt>Font</dt><dd>{document.themeConfig.font}</dd></div><div className="flex justify-between"><dt>Spacing</dt><dd>{document.themeConfig.spacing}</dd></div></dl></>}
+    inspector={panel === 'sections' ? <SectionInspector disabled={disabled} /> : <ThemeControls project={project} disabled={disabled} />}
   >
     <div className="flex items-center justify-between border-b border-stone-200 bg-white px-5 py-3 text-xs text-stone-500"><span>Canvas</span><span>{document.sections.filter((section) => section.visible).length} visible sections</span></div>
     {project.status === 'ARCHIVED' && <p role="status" className="m-4 rounded-xl bg-amber-50 p-4 text-sm text-amber-900">This project is archived. Restore it from your projects to make changes.</p>}
