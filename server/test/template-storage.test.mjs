@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 import test from 'node:test';
 import { PrismaClient } from '@prisma/client';
 import { BUILTIN_TEMPLATES, SaveEditorSchema } from '@gitfolio/shared';
-import { seedTemplates, legacyTemplateSeedData } from '../dist/modules/template/template.seed.js';
+import { seedTemplates, legacyTemplateSeedData, templateFallbackId } from '../dist/modules/template/template.seed.js';
 import { createProjectRepository } from '../dist/modules/project/project.repository.js';
 import { createProjectService } from '../dist/modules/project/project.service.js';
 import { createTemplateRepository } from '../dist/modules/template/template.repository.js';
@@ -26,7 +26,7 @@ test('real PostgreSQL upgrades only untouched legacy presets, preserves drafts, 
     const legacy = await service.create(userId, { name: 'Legacy portfolio', slug: 'legacy', templateId: legacyTemplateSeedData[0].id });
     await database.template.update({ where: { id: legacyTemplateSeedData[1].id }, data: { name: 'A custom catalog edit' } });
     const seeded = await seedTemplates(database);
-    assert.equal(seeded.count, 2); assert.equal(seeded.updated, 3);
+    assert.equal(seeded.count, BUILTIN_TEMPLATES.length - legacyTemplateSeedData.length + 1); assert.equal(seeded.updated, 3);
     assert.equal((await seedTemplates(database)).updated, 0);
     const refreshed = await service.get(userId, legacy.id);
     assert.deepEqual(refreshed.themeConfig, legacy.themeConfig);
@@ -51,11 +51,11 @@ test('real PostgreSQL upgrades only untouched legacy presets, preserves drafts, 
       assert.deepEqual(saved.sections.map(({ sortOrder, ...section }) => section), input.sections);
     }
     const listed = await service.list(userId, { page: 1, pageSize: 12, sort: 'updated' });
-    assert.equal(listed.items.length, 6);
+    assert.equal(listed.items.length, BUILTIN_TEMPLATES.length + 1);
     for (const item of listed.items) assert.ok(item.preview);
   } finally {
     await database.user.deleteMany({ where: { id: userId } });
-    if (fixturesCreated && await database.user.count() === 0) await database.template.deleteMany({ where: { id: { in: [...legacyTemplateSeedData.map((row) => row.id), ...BUILTIN_TEMPLATES.flatMap((row) => [row.id, row.id.replace(/^10000000/, '20000000')])] } } });
+    if (fixturesCreated && await database.user.count() === 0) await database.template.deleteMany({ where: { id: { in: [...legacyTemplateSeedData.map((row) => row.id), ...BUILTIN_TEMPLATES.flatMap((row) => [row.id, templateFallbackId(row.id)])] } } });
     await database.$disconnect();
   }
 });

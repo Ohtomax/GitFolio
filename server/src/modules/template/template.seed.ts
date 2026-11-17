@@ -39,6 +39,7 @@ export const templateSeedData = [
   ...BUILTIN_TEMPLATES.filter((preset) => !legacyTemplateSeedData.some((legacy) => legacy.id === preset.id))
     .map(({ preview: _preview, ...preset }) => preset),
 ] satisfies Prisma.TemplateCreateManyInput[];
+export const templateFallbackId = (id: string) => id.startsWith('10000000-') ? id.replace(/^10000000/,'20000000') : id.replace(/^30000000/,'40000000');
 
 export async function seedTemplates(database: Pick<PrismaClient, 'template'>) {
   const created = await database.template.createMany({ data: templateSeedData, skipDuplicates: true });
@@ -55,7 +56,7 @@ export async function seedTemplates(database: Pick<PrismaClient, 'template'>) {
         isReact: replacement.isReact, thumbnailUrl: replacement.thumbnailUrl, defaultConfig: replacement.defaultConfig } });
     updated += result.count;
   }
-  const reservedIds = BUILTIN_TEMPLATES.flatMap((preset) => [preset.id, preset.id.replace(/^10000000/, '20000000')]);
+  const reservedIds = BUILTIN_TEMPLATES.flatMap((preset) => [preset.id, templateFallbackId(preset.id)]);
   const stored = await database.template.findMany({ where: { id: { in: reservedIds } }, select: { id: true, defaultConfig: true } });
   const layouts = new Set(stored.flatMap((row) => {
     const config = TemplateConfigSchema.safeParse(row.defaultConfig);
@@ -65,6 +66,6 @@ export async function seedTemplates(database: Pick<PrismaClient, 'template'>) {
   // An edited legacy row keeps its ID and content. Add the new design under a
   // second reserved ID instead of making that archetype unavailable.
   const additional = missingDesigns.length ? await database.template.createMany({ skipDuplicates: true,
-    data: missingDesigns.map(({ preview: _preview, ...preset }) => ({ ...preset, id: preset.id.replace(/^10000000/, '20000000') })) }) : { count: 0 };
+    data: missingDesigns.map(({ preview: _preview, ...preset }) => ({ ...preset, id: templateFallbackId(preset.id) })) }) : { count: 0 };
   return { count: created.count + additional.count, updated };
 }

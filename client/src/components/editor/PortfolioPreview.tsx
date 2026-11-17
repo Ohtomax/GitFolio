@@ -1,5 +1,6 @@
 import { memo, type ReactNode } from 'react';
-import { PortfolioUrlSchema, type Project } from '@gitfolio/shared';
+import { PortfolioUrlSchema, isRoleLayout, type Project } from '@gitfolio/shared';
+import { RoleTemplatePreview } from '../role-templates/RoleTemplatePreview.tsx';
 import type { EditorDocument } from '../../stores/editor.store.ts';
 import { ThemeSurface } from './ThemeSurface.tsx';
 import { sectionNames } from './SectionNavigation.tsx';
@@ -32,6 +33,7 @@ export function PortfolioPreview({ document, selectedId, onSelect, interactive =
   document: EditorDocument; selectedId?: string | null; onSelect?: (id: string) => void; interactive?: boolean;
 }) {
   const sections = document.sections.filter((section) => section.visible);
+  if (isRoleLayout(document.themeConfig.layout)) return <RoleTemplatePreview document={document} selectedId={selectedId} onSelect={onSelect} interactive={interactive} />;
   if (document.themeConfig.layout && document.themeConfig.layout !== 'classic') return <DesignedPortfolio document={document} selectedId={selectedId} onSelect={onSelect} interactive={interactive} />;
   return <ThemeSurface theme={document.themeConfig} label="Portfolio preview" className="min-h-[400px] shadow-sm">
     {interactive && sections.length > 1 && <nav aria-label="Portfolio sections" className="portfolio-nav flex flex-wrap gap-x-5 gap-y-2 px-6 py-5 text-xs">

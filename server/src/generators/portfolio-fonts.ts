@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import type { ThemeConfig } from '@gitfolio/shared';
+import { isRoleLayout, type ThemeConfig } from '@gitfolio/shared';
 
 const definitions = {
   sans: { file: 'geist', family: 'Geist', weight: '100 900' },
@@ -14,7 +14,7 @@ export function portfolioFontStyles(theme: ThemeConfig): string {
   const headingStyle = theme.headingFont ?? theme.font;
   const heading: keyof typeof definitions = headingStyle === 'sans' && ['bento','quality'].includes(theme.layout ?? '') ? 'bento'
     : headingStyle === 'sans' && theme.layout === 'executive' ? 'executive' : headingStyle;
-  return [...new Set([body, heading])].map((key) => {
+  return [...new Set<keyof typeof definitions>([body, heading, ...(isRoleLayout(theme.layout) ? ['mono' as const] : [])])].map((key) => {
     const definition = definitions[key];
     if (!cache.has(key)) {
       const asset = new URL(`../../../assets/portfolio-fonts/${definition.file}.woff2`, import.meta.url);

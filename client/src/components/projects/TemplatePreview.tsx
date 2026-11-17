@@ -1,4 +1,5 @@
-import { BUILTIN_TEMPLATES, type TemplateCategory, type TemplateSummary, type ThemeConfig } from '@gitfolio/shared';
+import { BUILTIN_TEMPLATES, isRoleLayout, type TemplateCategory, type TemplateSummary, type ThemeConfig } from '@gitfolio/shared';
+import { RoleTemplatePreview } from '../role-templates/RoleTemplatePreview.tsx';
 import { DesignedPortfolio } from '../editor/DesignedPortfolio.tsx';
 
 const palettes: Record<TemplateCategory, { surface: string; text: string; accent: string; card: string; font: string }> = {
@@ -12,7 +13,7 @@ export function TemplatePreview({ template, theme }: { template: TemplateSummary
   const design = preview?.layout && preview.layout !== 'classic' ? BUILTIN_TEMPLATES.find((preset) => preset.defaultConfig.theme.layout === preview.layout) : undefined;
   if (design && preview) {
     const document = { themeConfig: preview, sections: design.defaultConfig.sections.map((section, index) => ({ ...section, id: `preview-${index}` })) };
-    return <div aria-hidden="true" className="pf-thumbnail"><DesignedPortfolio document={document} thumbnail /></div>;
+    return <div aria-hidden="true" className="pf-thumbnail">{isRoleLayout(preview.layout) ? <div className="pf-thumbnail-content"><RoleTemplatePreview document={document} thumbnail /></div> : <DesignedPortfolio document={document} thumbnail />}</div>;
   }
   const palette = palettes[template.category];
   return <div aria-hidden="true" className={`aspect-[16/10] overflow-hidden p-6 sm:p-7 ${palette.surface} ${palette.text} ${palette.font}`}>

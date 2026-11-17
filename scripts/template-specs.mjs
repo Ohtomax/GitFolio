@@ -1,5 +1,6 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
-import { BUILTIN_TEMPLATES, contrastRatio, portfolioVariables } from '../packages/shared/dist/index.js';
+import { BUILTIN_TEMPLATES as ALL_TEMPLATES, isRoleLayout, contrastRatio, portfolioVariables } from '../packages/shared/dist/index.js';
+const BUILTIN_TEMPLATES = ALL_TEMPLATES.filter((template) => !isRoleLayout(template.defaultConfig.theme.layout));
 
 const root = new URL('../docs/templates/', import.meta.url);
 mkdirSync(root, { recursive: true });
@@ -38,7 +39,7 @@ for (const template of BUILTIN_TEMPLATES) {
   });
   writeFileSync(new URL(`${theme.layout}.md`, root), lines.join('\n').trimEnd()+'\n');
 }
-writeFileSync(new URL('../docs/portfolio-templates.json', import.meta.url), JSON.stringify(BUILTIN_TEMPLATES, null, 2)+'\n');
+writeFileSync(new URL('../docs/portfolio-templates.json', import.meta.url), JSON.stringify(ALL_TEMPLATES, null, 2)+'\n');
 const index = `# GitFolio portfolio templates
 
 Five original design families for different kinds of technical work. Choose one in **New project**; the picker, editor, static output, and React output share a semantic renderer and styles. Each preset has a distinct composition, type pairing, content order, density, and contact treatment.

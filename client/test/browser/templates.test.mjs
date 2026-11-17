@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { before, after, test } from 'node:test';
-import { BUILTIN_TEMPLATES } from '../../../packages/shared/dist/index.js';
+import { BUILTIN_TEMPLATES as ALL_TEMPLATES, isRoleLayout } from '../../../packages/shared/dist/index.js';
+const BUILTIN_TEMPLATES = ALL_TEMPLATES.filter((item) => !isRoleLayout(item.defaultConfig.theme.layout));
 import { mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { generateStaticSite } from '../../../server/dist/generators/static.generator.js';

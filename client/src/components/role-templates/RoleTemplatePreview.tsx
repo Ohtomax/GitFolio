@@ -1,4 +1,8 @@
 import type { RolePortfolioProps } from './shared/contracts.ts';
 import '../editor/portfolio-fonts.css';
+import { BackendPortfolio } from './backend/BackendPortfolio.tsx';
 
-export function RoleTemplatePreview(_props: RolePortfolioProps) { return <div />; }
+export function RoleTemplatePreview(props: RolePortfolioProps) {
+  if(props.document.themeConfig.layout==='backend')return <BackendPortfolio {...props} />;
+  return null;
+}

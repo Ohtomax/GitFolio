@@ -1,12 +1,12 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { BUILTIN_TEMPLATES, ThemeConfigSchema, SectionContentSchema, buildPortfolioTree, serializePortfolioTree, contrastRatio } from '@gitfolio/shared';
+import { BUILTIN_TEMPLATES, isRoleLayout, ThemeConfigSchema, SectionContentSchema, buildPortfolioTree, serializePortfolioTree, contrastRatio } from '@gitfolio/shared';
 import { randomUUID } from 'node:crypto';
 import { generateStaticSite } from '../dist/generators/static.generator.js';
 import { generateReactProject } from '../dist/generators/react.generator.js';
 import { generatorProject } from './helpers/portfolio.mjs';
 
-for (const template of BUILTIN_TEMPLATES) test(`${template.name}: accessible preset, complete editable content, and identical export composition`, () => {
+for (const template of BUILTIN_TEMPLATES.filter((item) => !isRoleLayout(item.defaultConfig.theme.layout))) test(`${template.name}: accessible preset, complete editable content, and identical export composition`, () => {
   const project = { ...generatorProject(), templateId: template.id, template, themeConfig: template.defaultConfig.theme,
     sections: template.defaultConfig.sections.map((section, sortOrder) => ({ ...structuredClone(section), sortOrder, id: randomUUID() })) };
   for (const type of ['hero','about','projects','experience','skills','contact']) assert.ok(project.sections.some((s) => s.type === type));

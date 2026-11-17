@@ -858,5 +858,228 @@
         }
       ]
     }
+  },
+  {
+    "id": "30000000-0000-4000-8000-000000000001",
+    "name": "Backend Engineer / System Architecture",
+    "description": "A blueprint-led systems portfolio pairing throughput evidence with an interactive API contract inspector.",
+    "category": "developer",
+    "thumbnailUrl": null,
+    "isReact": true,
+    "defaultConfig": {
+      "theme": {
+        "colors": {
+          "accent": "#7AB8FF",
+          "background": "#0B1220",
+          "text": "#E8F0FB",
+          "muted": "#A2B3CB",
+          "surface": "#121F33",
+          "border": "#2B3F5D",
+          "primary": "#8FD8FF",
+          "success": "#86EFAC",
+          "warning": "#FCD34D",
+          "danger": "#FCA5A5"
+        },
+        "font": "sans",
+        "spacing": "comfortable",
+        "layout": "backend",
+        "headingFont": "sans",
+        "demo": true
+      },
+      "sections": [
+        {
+          "type": "hero",
+          "content": {
+            "heading": "Invisible work. Measurable difference.",
+            "description": "I design APIs and data systems that remain understandable under load. Make failure explicit, state durable, and the next incident easier to diagnose.",
+            "eyebrow": "Samir Patel / Backend & platform engineer",
+            "subtitle": "Go · PostgreSQL · Kafka · Kubernetes",
+            "buttonLabel": "Talk systems with me ↗",
+            "buttonUrl": "mailto:samir@example.com",
+            "tags": [
+              "Idempotent by default",
+              "Observable at the boundary",
+              "Reversible deployments"
+            ],
+            "metrics": [
+              {
+                "value": "18.4k",
+                "label": "Example events / second"
+              },
+              {
+                "value": "24 ms",
+                "label": "p99 ingest latency"
+              },
+              {
+                "value": "99.95%",
+                "label": "Service SLO target"
+              }
+            ]
+          },
+          "visible": true
+        },
+        {
+          "type": "interactive",
+          "content": {
+            "heading": "Read the contract. Inspect the tradeoffs.",
+            "description": "Explore the request, response, and benchmark context for three example endpoints. This is a local API simulation.",
+            "widget": {
+              "kind": "api",
+              "endpoints": [
+                {
+                  "id": "ingest",
+                  "label": "Batch ingestion",
+                  "method": "POST",
+                  "path": "/v1/ingest",
+                  "request": "{\"source\":\"web\",\"idempotency_key\":\"demo-batch-42\",\"events\":[{\"type\":\"page_view\",\"timestamp\":\"2026-11-01T10:00:00Z\"}]}",
+                  "response": "{\"batch_id\":\"batch_demo_42\",\"accepted\":1,\"status\":\"queued\",\"deduplicated\":false}",
+                  "p99": "24 ms",
+                  "throughput": "18.4k events/s",
+                  "status": 202
+                },
+                {
+                  "id": "jobs",
+                  "label": "Job visibility",
+                  "method": "GET",
+                  "path": "/v1/jobs/{id}",
+                  "request": "{\"path\":{\"id\":\"job_demo_42\"},\"include\":\"attempts\"}",
+                  "response": "{\"id\":\"job_demo_42\",\"state\":\"completed\",\"attempts\":1,\"duration_ms\":87,\"retryable\":false}",
+                  "p99": "12 ms",
+                  "throughput": "9.2k reads/s",
+                  "status": 200
+                },
+                {
+                  "id": "ledger",
+                  "label": "Idempotent writes",
+                  "method": "POST",
+                  "path": "/v1/ledger/entries",
+                  "request": "{\"idempotency_key\":\"demo-entry-7\",\"account_id\":\"acct_demo\",\"amount_minor\":1250,\"currency\":\"USD\"}",
+                  "response": "{\"code\":\"IDEMPOTENCY_CONFLICT\",\"message\":\"This key was already used with a different payload.\",\"retryable\":false}",
+                  "p99": "31 ms",
+                  "throughput": "4.8k writes/s",
+                  "status": 409
+                }
+              ]
+            }
+          },
+          "visible": true
+        },
+        {
+          "type": "projects",
+          "content": {
+            "heading": "Systems built for the unglamorous moments.",
+            "description": "Ownership, constraints, and operational results behind the architecture.",
+            "items": [
+              {
+                "title": "Streamline / Event ingestion platform",
+                "subtitle": "Lead backend engineer · 2025–2026",
+                "description": "Designed a partitioned ingestion path with Kafka, bounded retries, and dead-letter recovery. Made replay safety and per-tenant backpressure explicit in the API.",
+                "url": "https://example.com/samir/streamline",
+                "tags": [
+                  "Go",
+                  "Kafka",
+                  "PostgreSQL"
+                ],
+                "metrics": [
+                  {
+                    "value": "18.4k/s",
+                    "label": "Example sustained throughput"
+                  },
+                  {
+                    "value": "24 ms",
+                    "label": "p99 API latency"
+                  }
+                ]
+              },
+              {
+                "title": "Ledger Core / Consistent writes at the edge",
+                "subtitle": "API architecture · 2024–2025",
+                "description": "Built an append-only ledger with transaction boundaries, idempotency keys, and reconciliation jobs. Documented failure modes before scaling the happy path.",
+                "url": "https://example.com/samir/ledger",
+                "tags": [
+                  "Rust",
+                  "PostgreSQL",
+                  "Redis"
+                ],
+                "metrics": [
+                  {
+                    "value": "0",
+                    "label": "Duplicate writes in test fixtures"
+                  },
+                  {
+                    "value": "8 min",
+                    "label": "Recovery drill target"
+                  }
+                ]
+              }
+            ]
+          },
+          "visible": true
+        },
+        {
+          "type": "skills",
+          "content": {
+            "heading": "An intentionally boring foundation.",
+            "description": "Choose the smallest system that meets the operational requirement.",
+            "items": [
+              {
+                "title": "Runtime & compute",
+                "subtitle": "Go / Rust / Node.js",
+                "description": "Typed contracts, bounded concurrency, profiling, and graceful shutdown."
+              },
+              {
+                "title": "State & messaging",
+                "subtitle": "PostgreSQL / Redis / Kafka",
+                "description": "Query plans, transaction boundaries, partitioning, and replay-safe consumers."
+              },
+              {
+                "title": "Delivery & operations",
+                "subtitle": "Docker / Kubernetes / OpenTelemetry",
+                "description": "Repeatable environments, SLOs, traces, runbooks, and safe rollbacks."
+              }
+            ]
+          },
+          "visible": true
+        },
+        {
+          "type": "experience",
+          "content": {
+            "heading": "Operating experience.",
+            "description": "",
+            "items": [
+              {
+                "title": "Senior Backend Engineer · Northline Data",
+                "subtitle": "2023 — Present",
+                "description": "Own ingestion and service reliability, lead incident reviews, and turn recurring operational pain into platform improvements."
+              },
+              {
+                "title": "Software Engineer · Common Systems",
+                "subtitle": "2020 — 2023",
+                "description": "Built relational APIs, background workers, and migrations with explicit data-integrity checks."
+              }
+            ]
+          },
+          "visible": true
+        },
+        {
+          "type": "about",
+          "content": {
+            "heading": "A useful system can explain itself.",
+            "description": "I’m Samir. I enjoy the part of engineering where a vague reliability concern becomes a concrete model, a useful trace, and a smaller failure domain. My best work leaves teammates with a clear contract and a runbook they can trust."
+          },
+          "visible": true
+        },
+        {
+          "type": "contact",
+          "content": {
+            "heading": "Have a bottleneck worth understanding?",
+            "description": "I’m interested in backend and platform teams building products with real operational constraints. Tell me about the system, the traffic, and the decision ahead.",
+            "buttonLabel": "samir@example.com ↗",
+            "buttonUrl": "mailto:samir@example.com"
+          },
+          "visible": true
+        }
+      ]
+    }
   }
 ]
