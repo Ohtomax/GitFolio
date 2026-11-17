@@ -13,8 +13,9 @@ import { backendTemplate } from './roles/backend.js';
 import { securityTemplate } from './roles/security.js';
 import { qualityTemplate } from './roles/quality.js';
 import { frontendTemplate } from './roles/frontend.js';
+import { fullstackTemplate } from './roles/fullstack.js';
 
-export const BUILTIN_TEMPLATES: Template[] = [minimalTemplate, terminalTemplate, editorialTemplate, bentoTemplate, executiveTemplate, backendTemplate, securityTemplate, qualityTemplate, frontendTemplate];
+export const BUILTIN_TEMPLATES: Template[] = [minimalTemplate, terminalTemplate, editorialTemplate, bentoTemplate, executiveTemplate, backendTemplate, securityTemplate, qualityTemplate, frontendTemplate, fullstackTemplate];
 export const PORTFOLIO_CSS = PORTFOLIO_BASE_CSS + MINIMAL_CSS + TERMINAL_CSS + EDITORIAL_CSS + BENTO_CSS + EXECUTIVE_CSS;
 export function buildPortfolioTree(document: PortfolioDocument): PortfolioElement {
   if (document.themeConfig.layout === 'minimal') return renderMinimal(document);
