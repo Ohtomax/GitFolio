@@ -1,0 +1,41 @@
+import { useEffect, useState, type FormEvent } from 'react';
+import { ArrowRight, FolderOpen, Plus, Search, Settings2 } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
+import type { ProjectQuery, ProjectSummary } from '@gitfolio/shared';
+import { WorkspaceShell } from '../components/common/WorkspaceShell.tsx';
+import { TemplatePreview } from '../components/projects/TemplatePreview.tsx';
+import { ManageProjectDialog } from '../components/projects/ManageProjectDialog.tsx';
+import { useProjects } from '../hooks/useProjects.ts';
+import { errorMessage } from '../utils/errorParser.ts';
+
+const statusLabels: Record<ProjectSummary['status'], string> = { DRAFT: 'Draft', PUBLISHED: 'Published', ARCHIVED: 'Archived' };
+export default function DashboardPage() {
+  const [page, setPage] = useState(1);
+  const [status, setStatus] = useState<ProjectQuery['status']>();
+  const [sort, setSort] = useState<ProjectQuery['sort']>('updated');
+  const [search, setSearch] = useState('');
+  const [searchInput, setSearchInput] = useState('');
+  const [managedId, setManagedId] = useState<string | null>(null);
+  const location = useLocation();
+  const created = typeof location.state === 'object' && location.state !== null && 'createdProjectId' in location.state;
+  const projects = useProjects({ page, pageSize: 6, status, sort, search });
+  const data = projects.data;
+  useEffect(() => { if (data && !projects.isPlaceholderData && page > Math.max(data.totalPages, 1)) setPage(Math.max(data.totalPages, 1)); }, [data, page, projects.isPlaceholderData]);
+  function submitSearch(event: FormEvent<HTMLFormElement>) { event.preventDefault(); setSearch(searchInput.trim()); setPage(1); }
+  function clearFilters() { setSearch(''); setSearchInput(''); setStatus(undefined); setPage(1); }
+  return <WorkspaceShell><main className="mx-auto max-w-7xl px-5 pb-16 pt-10 sm:px-10 sm:pt-14">
+    <div className="flex flex-wrap items-end justify-between gap-6"><div><p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-lime-700">Your workspace</p><h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">Your projects<span className="text-lime-600">.</span></h1><p className="mt-4 text-sm leading-6 text-stone-500">A home for every idea you’re ready to share.</p></div><Link to="/projects/new" className="primary-button inline-flex items-center gap-2"><Plus size={17} aria-hidden="true" />New project</Link></div>
+    {created && <p role="status" className="mt-6 rounded-xl border border-lime-200 bg-lime-50 p-4 text-sm text-lime-950">Your project is ready. Find it below and make it yours.</p>}
+    <div className="mb-8 mt-10 flex flex-col justify-between gap-5 border-b border-stone-200 pb-5 lg:flex-row lg:items-center">
+      <div className="flex max-w-full gap-1 overflow-x-auto" aria-label="Filter projects by status">{([{ label: 'All projects', value: undefined }, { label: 'Drafts', value: 'DRAFT' }, { label: 'Published', value: 'PUBLISHED' }, { label: 'Archived', value: 'ARCHIVED' }] as const).map((tab) => <button key={tab.label} type="button" aria-pressed={status === tab.value} className={`whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium ${status === tab.value ? 'bg-stone-900 text-white' : 'text-stone-500 hover:bg-white'}`} onClick={() => { setStatus(tab.value); setPage(1); }}>{tab.label}</button>)}</div>
+      <div className="flex flex-wrap gap-3"><form onSubmit={submitSearch} className="flex min-w-0 flex-1 items-center rounded-xl border border-stone-200 bg-white"><label htmlFor="project-search" className="sr-only">Search projects</label><input id="project-search" type="search" value={searchInput} maxLength={80} placeholder="Search projects…" onChange={(event) => setSearchInput(event.target.value)} className="min-w-0 flex-1 rounded-xl bg-transparent px-3 py-2 text-sm outline-none" /><button type="submit" className="rounded-r-xl p-2.5 text-stone-500 hover:text-stone-950" aria-label="Search projects"><Search size={16} /></button></form><label className="sr-only" htmlFor="project-sort">Sort projects</label><select id="project-sort" value={sort} onChange={(event) => { setSort(event.target.value === 'name' ? 'name' : 'updated'); setPage(1); }} className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm"><option value="updated">Recently updated</option><option value="name">Name A–Z</option></select></div>
+    </div>
+    {projects.isPending ? <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3" role="status" aria-label="Loading projects">{[0, 1, 2].map((item) => <div key={item} className="h-80 animate-pulse rounded-2xl bg-stone-200/70" />)}</div>
+      : projects.isError ? <div role="alert" className="rounded-2xl border border-amber-200 bg-amber-50 p-8"><h2 className="text-lg font-semibold">Your projects couldn’t load.</h2><p className="mt-3 text-sm text-stone-600">{errorMessage(projects.error)}</p><button className="primary-button mt-5" onClick={() => void projects.refetch()}>Try again</button></div>
+      : data?.items.length ? <><div className="mb-4 flex items-center justify-between text-xs text-stone-500"><span>{data.total} {data.total === 1 ? 'project' : 'projects'}{search ? ' matching your search' : ''}</span><span aria-live="polite">{projects.isFetching ? 'Updating…' : ''}</span></div><div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3" aria-busy={projects.isFetching}>{data.items.map((project) => <article key={project.id} className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm">
+        <TemplatePreview template={project.template} /><div className="border-t border-stone-200 p-5"><div className="flex items-start justify-between gap-3"><h2 className="break-words text-lg font-semibold tracking-tight">{project.name}</h2><span className={`shrink-0 rounded-full px-2 py-1 text-[10px] font-semibold ${project.status === 'PUBLISHED' ? 'bg-lime-100 text-lime-900' : 'bg-stone-100 text-stone-500'}`}>{statusLabels[project.status]}</span></div><p className="mt-2 truncate font-mono text-xs text-stone-500">/{project.slug}</p><div className="mt-5 flex items-center justify-between gap-3 border-t border-stone-100 pt-4"><span className="text-xs text-stone-400">{project.template.name} · {project.sectionCount} sections</span><button type="button" className="inline-flex items-center gap-1.5 text-xs font-semibold text-stone-700 hover:text-lime-700" aria-label={`Manage ${project.name}`} onClick={() => setManagedId(project.id)}>Manage<Settings2 size={13} aria-hidden="true" /></button></div></div>
+      </article>)}</div><div className="mt-8 flex items-center justify-between text-sm"><span className="text-stone-500">Page {page} of {Math.max(data.totalPages, 1)}</span><div className="flex gap-2"><button type="button" className="rounded-lg border border-stone-300 px-4 py-2 disabled:opacity-40" disabled={page <= 1 || projects.isFetching} onClick={() => setPage((value) => value - 1)}>Previous</button><button type="button" className="rounded-lg border border-stone-300 px-4 py-2 disabled:opacity-40" disabled={page >= data.totalPages || projects.isFetching} onClick={() => setPage((value) => value + 1)}>Next</button></div></div></>
+      : <section className="rounded-3xl border border-dashed border-stone-300 bg-white/60 px-6 py-16 text-center"><span className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-lime-100 text-lime-800"><FolderOpen size={26} aria-hidden="true" /></span><h2 className="text-2xl font-semibold tracking-tight">{search || status ? 'No projects found.' : 'Your next idea starts here.'}</h2><p className="mx-auto mt-4 max-w-sm text-sm leading-6 text-stone-500">{search || status ? 'Try a different search or filter to find your project.' : 'Choose a starting point and give your work a space of its own.'}</p>{search || status ? <button className="primary-button mt-6" onClick={clearFilters}>Clear filters</button> : <Link to="/projects/new" className="primary-button mt-6 inline-flex items-center gap-2">Create your first project<ArrowRight size={15} aria-hidden="true" /></Link>}</section>}
+    {managedId && <ManageProjectDialog id={managedId} onClose={() => setManagedId(null)} />}
+  </main></WorkspaceShell>;
+}

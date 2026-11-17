@@ -17,7 +17,7 @@ export default function OAuthCallbackPage() {
     if (!callback.input || started.current) return;
     started.current = true;
     mutate(callback.input, { onSuccess: () => {
-      let returnTo = '/account';
+      let returnTo = '/dashboard';
       try { returnTo = safeReturnTo(window.sessionStorage.getItem(RETURN_TO_KEY)); window.sessionStorage.removeItem(RETURN_TO_KEY); } catch { /* Use the default destination. */ }
       navigate(returnTo, { replace: true });
     } });

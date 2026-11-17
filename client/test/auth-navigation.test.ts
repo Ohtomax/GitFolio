@@ -17,6 +17,6 @@ test('post-login navigation accepts only internal protected routes', () => {
   assert.equal(safeReturnTo('/account'), '/account');
   assert.equal(safeReturnTo('/projects/fixture/edit?tab=theme'), '/projects/fixture/edit?tab=theme');
   for (const value of [null, {}, 'https://evil.example', '//evil.example', '/\\evil.example', '/auth/callback?code=x', '/login', '/projects/../../login', '/account\n']) {
-    assert.equal(safeReturnTo(value), '/account');
+    assert.equal(safeReturnTo(value), '/dashboard');
   }
 });

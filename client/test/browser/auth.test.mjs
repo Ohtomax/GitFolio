@@ -18,6 +18,7 @@ async function fixture(t, options = {}) {
     email: 'fixture@example.test', avatarUrl: null }, expiresAt: Date.now() + (options.lifetime ?? 3600000) };
   const state = { authenticated: options.authenticated ?? false, unavailable: false, callbacks: 0, ...options };
   const respond = (route, status, data) => route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(data) });
+  await page.route('**/api/projects?**', (route) => respond(route, 200, { success: true, data: { items: [], page: 1, pageSize: 6, total: 0, totalPages: 0 } }));
   await page.route('**/api/auth/me', async (route) => {
     if (state.waitForSession) await state.waitForSession;
     if (state.unavailable) return respond(route, 503, { success: false, error: { code: 'SERVICE_UNAVAILABLE', message: 'Unavailable.' } });
@@ -57,14 +58,14 @@ test('AuthGuard waits for verification and redirects anonymous users without exp
 test('OAuth completion runs once in StrictMode; session reload and logout update guarded routes', async (t) => {
   const f = await fixture(t);
   await f.goto(`/auth/callback?code=fixture-code&state=${'b'.repeat(43)}`);
-  await f.page.waitForURL('**/account');
-  await f.page.getByRole('heading', { name: 'Welcome, Fixture Developer.' }).waitFor();
+  await f.page.waitForURL('**/dashboard');
+  await f.page.getByRole('heading', { name: 'Your projects.' }).waitFor();
   assert.equal(f.state.callbacks, 1);
   assert.equal(new URL(f.page.url()).search, '');
   const storage = await f.page.evaluate(() => ({ local: { ...localStorage }, session: { ...sessionStorage } }));
   assert.ok(!JSON.stringify(storage).match(/token|fixture-code|Fixture Developer|fixture@example/));
   await f.page.reload();
-  await f.page.getByRole('heading', { name: 'Welcome, Fixture Developer.' }).waitFor();
+  await f.page.getByRole('heading', { name: 'Your projects.' }).waitFor();
   await f.page.getByRole('button', { name: 'Sign out', exact: true }).click();
   await f.page.waitForURL('**/login');
   assert.equal(await f.page.getByRole('heading', { name: /Welcome,/ }).count(), 0);

@@ -29,3 +29,7 @@ Lists use the same pagination envelope as templates, with a maximum page size of
 ## Client data layer
 
 `useProjects`, `useProject`, `useCreateProject`, `useUpdateProject`, and `useDeleteProject` use the validated project service and same-origin `apiFetch`. `useTemplates` and `useTemplate` load the catalog and selected defaults. Queries use five-minute freshness and forward cancellation signals. Project query keys include the signed-in user's ID; pagination placeholders are reused only within the same owner. Successful mutations invalidate list queries and update/remove relevant details. A mutation completing after sign-out cannot repopulate user caches. The auth flow continues to clear all query data on sign-in/sign-out.
+
+## Dashboard
+
+Successful sign-in now defaults to `/dashboard`; explicit protected return destinations are preserved. The dashboard lists six projects per page, searches by name, filters by status, and sorts by update time/name using the API. Empty, loading, error/retry, and mobile states are provided. Manage opens project metadata settings; archive/restore retain content, while delete requires confirmation. `/account` remains available from workspace navigation. The portfolio editor and publishing actions remain separate later phases.

@@ -7,13 +7,14 @@ import { AuthGuard } from './components/auth/AuthGuard.tsx';
 const LoginPage = lazy(() => import('./pages/LoginPage.tsx'));
 const OAuthCallbackPage = lazy(() => import('./pages/OAuthCallbackPage.tsx'));
 const AccountPage = lazy(() => import('./pages/AccountPage.tsx'));
+const DashboardPage = lazy(() => import('./pages/DashboardPage.tsx'));
 
 export default function App() {
   return <ChunkErrorBoundary><Suspense fallback={<PageSkeleton label="Loading GitFolio" />}><Routes>
     <Route path="/" element={<LoginPage />} />
     <Route path="/login" element={<LoginPage />} />
     <Route path="/auth/callback" element={<OAuthCallbackPage />} />
-    <Route element={<AuthGuard />}><Route path="/account" element={<AccountPage />} /></Route>
+    <Route element={<AuthGuard />}><Route path="/account" element={<AccountPage />} /><Route path="/dashboard" element={<DashboardPage />} /></Route>
     <Route path="*" element={<main className="mx-auto max-w-xl px-6 py-24"><h1 className="text-3xl font-semibold">Page not found.</h1><Link className="mt-6 inline-block underline" to="/">Back to GitFolio</Link></main>} />
   </Routes></Suspense></ChunkErrorBoundary>;
 }

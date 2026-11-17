@@ -931,7 +931,7 @@ Phase 1 implementation and local setup commands are documented in [README.md](RE
 
 - [x] Project module CRUD (controller → service → repository)
 - [x] Template module (seeded templates)
-- [ ] Dashboard page (project list, create button)
+- [x] Dashboard page (project list, create button)
 - [ ] New Project page (template picker, setup form)
 - [x] TanStack Query hooks for projects & templates
 
