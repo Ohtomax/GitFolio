@@ -1,4 +1,4 @@
-import { CreateProjectSchema, IdParamsSchema, ProjectQuerySchema, UpdateProjectSchema } from '@gitfolio/shared';
+import { CreateProjectSchema, IdParamsSchema, ProjectQuerySchema, SaveEditorSchema, UpdateProjectSchema } from '@gitfolio/shared';
 import type { Request, RequestHandler } from 'express';
 import { ServiceError } from '../../utils/service-error.js';
 import type { ProjectService } from './project.service.js';
@@ -44,5 +44,13 @@ export function createProjectController(service: ProjectService) {
       service.delete(userId, id).then(() => response.json({ success: true, data: null })).catch(next);
     } catch (error) { next(error); }
   };
-  return { list, get, create, update, remove };
+  const saveEditor: RequestHandler = (request, response, next) => {
+    try {
+      const userId = owner(request);
+      const { id } = IdParamsSchema.parse(request.params);
+      const input = SaveEditorSchema.parse(request.body);
+      service.saveEditor(userId, id, input).then((data) => response.json({ success: true, data })).catch(next);
+    } catch (error) { next(error); }
+  };
+  return { list, get, create, update, remove, saveEditor };
 }

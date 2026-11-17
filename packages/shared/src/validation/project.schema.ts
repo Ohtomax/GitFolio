@@ -1,5 +1,6 @@
 import { z } from 'zod';
-import { PageMetaSchema, PaginationQuerySchema, SectionTypeSchema, TemplateSummarySchema, ThemeConfigSchema } from './template.schema.js';
+import { PageMetaSchema, PaginationQuerySchema, TemplateSummarySchema, ThemeConfigSchema } from './template.schema.js';
+import { EditorSectionSchema } from './editor.schema.js';
 
 export const ProjectNameSchema = z.string().trim().min(1, 'Enter a project name.').max(100, 'Use 100 characters or fewer.')
   .refine((value) => !/[<>\u0000-\u001f\u007f]/.test(value), 'Use plain text for the project name.');
@@ -27,9 +28,9 @@ export const ProjectSummarySchema = z.object({
   createdAt: z.string().datetime(), updatedAt: z.string().datetime(),
   sectionCount: z.number().int().nonnegative(), template: TemplateSummarySchema,
 });
-export const ProjectSectionSchema = z.object({ id: z.string().uuid(), type: SectionTypeSchema,
-  sortOrder: z.number().int().nonnegative(), content: z.record(z.unknown()), visible: z.boolean() });
+export const ProjectSectionSchema = EditorSectionSchema.extend({ sortOrder: z.number().int().nonnegative() });
 export const ProjectSchema = ProjectSummarySchema.extend({
+  editorRevision: z.number().int().nonnegative().default(0),
   themeConfig: ThemeConfigSchema, sections: z.array(ProjectSectionSchema).max(50),
 });
 export const ProjectPageSchema = PageMetaSchema.extend({ items: z.array(ProjectSummarySchema).max(50) });

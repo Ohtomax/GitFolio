@@ -1,12 +1,13 @@
 import type { Prisma, PrismaClient } from '@prisma/client';
-import type { CreateProjectInput, ProjectQuery, TemplateConfig, UpdateProjectInput } from '@gitfolio/shared';
+import type { CreateProjectInput, ProjectQuery, SaveEditorInput, TemplateConfig, UpdateProjectInput } from '@gitfolio/shared';
 import { templateSummarySelect } from '../template/template.repository.js';
+import { saveProjectEditor } from './project-editor.repository.js';
 
 const projectSummarySelect = {
   id: true, templateId: true, name: true, slug: true, repoName: true, status: true, createdAt: true, updatedAt: true,
   template: { select: templateSummarySelect }, _count: { select: { sections: true } },
 } satisfies Prisma.ProjectSelect;
-const projectSelect = { ...projectSummarySelect, themeConfig: true,
+export const projectSelect = { ...projectSummarySelect, themeConfig: true, editorRevision: true,
   sections: { select: { id: true, type: true, sortOrder: true, content: true, visible: true },
     orderBy: [{ sortOrder: 'asc' }, { id: 'asc' }], take: 50 },
 } satisfies Prisma.ProjectSelect;
@@ -18,6 +19,7 @@ export interface ProjectRepository {
   create(userId: string, input: CreateProjectInput, defaults: TemplateConfig): Promise<StoredProject>;
   update(userId: string, id: string, input: UpdateProjectInput): Promise<StoredProject>;
   delete(userId: string, id: string): Promise<void>;
+  saveEditor(userId: string, id: string, input: SaveEditorInput): Promise<StoredProject>;
 }
 
 export function createProjectRepository(database: PrismaClient): ProjectRepository {
@@ -46,5 +48,6 @@ export function createProjectRepository(database: PrismaClient): ProjectReposito
     async delete(userId, id) {
       await database.project.delete({ where: { id_userId: { id, userId } }, select: { id: true } });
     },
+    saveEditor: (userId, id, input) => saveProjectEditor(database, userId, id, input),
   };
 }

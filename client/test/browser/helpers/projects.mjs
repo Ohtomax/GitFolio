@@ -10,7 +10,7 @@ export const templateFixtures = ['Canvas', 'Terminal', 'Editorial', 'Studio'].ma
 export function projectFixtureData(name = 'Alpha', index = 0) {
   const template = templateFixtures[index % templateFixtures.length];
   return { id: randomUUID(), templateId: template.id, template, name, slug: name.toLowerCase().replaceAll(' ', '-'),
-    repoName: null, status: 'DRAFT', sectionCount: 1, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
+    repoName: null, status: 'DRAFT', editorRevision: 0, sectionCount: 1, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
     themeConfig: structuredClone(template.defaultConfig.theme),
     sections: [{ id: randomUUID(), type: 'hero', sortOrder: 0, content: { heading: 'Your name', description: '' }, visible: true }] };
 }
@@ -21,7 +21,7 @@ export async function projectsFixture(t, browser, options = {}) {
   page.on('pageerror', (error) => errors.push(error.message));
   t.after(async () => { await context.close(); assert.deepEqual(errors, []); });
   const state = { projects: options.projects ?? [], authenticated: true, failProjects: false, failTemplates: false,
-    rejectCreate: false, creates: 0, projectRequests: 0, templateRequests: 0, templates: templateFixtures, ...options };
+    rejectCreate: false, creates: 0, editorSaves: 0, projectRequests: 0, templateRequests: 0, templates: templateFixtures, ...options };
   const session = { user: { id: randomUUID(), githubId: '123', login: 'fixture-user', name: 'Fixture Developer',
     email: null, avatarUrl: null }, expiresAt: Date.now() + 3600000 };
   const respond = (route, status, data) => route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(data) });
@@ -62,6 +62,18 @@ export async function projectsFixture(t, browser, options = {}) {
     if (id) {
       const index = state.projects.findIndex((item) => item.id === id);
       if (index < 0) return fail(route, 'PROJECT_NOT_FOUND', 404);
+      if (url.pathname.endsWith('/editor') && method === 'PATCH') {
+        state.editorSaves++;
+        const input = route.request().postDataJSON();
+        if (state.failEditor) return fail(route, 'SERVICE_UNAVAILABLE', 503);
+        if (state.projects[index].status === 'ARCHIVED') return fail(route, 'PROJECT_ARCHIVED', 409);
+        if (input.baseRevision !== state.projects[index].editorRevision) return fail(route, 'EDITOR_CONFLICT', 409);
+        if (state.waitForEditor) await state.waitForEditor;
+        Object.assign(state.projects[index], { themeConfig: input.themeConfig,
+          sections: input.sections.map((section, sortOrder) => ({ ...section, sortOrder })),
+          sectionCount: input.sections.length, editorRevision: input.baseRevision + 1, updatedAt: new Date().toISOString() });
+        return ok(route, state.projects[index]);
+      }
       if (method === 'DELETE') { state.projects.splice(index, 1); return ok(route, null); }
       if (method === 'PATCH') Object.assign(state.projects[index], route.request().postDataJSON(), { updatedAt: new Date().toISOString() });
       return ok(route, state.projects[index]);

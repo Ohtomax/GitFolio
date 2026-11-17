@@ -30,3 +30,31 @@ test('editor routes reject invalid links and remain behind authentication', asyn
   await f.page.getByRole('heading', { name: 'This project link is invalid.' }).waitFor();
   assert.equal(f.state.projectRequests, 0);
 });
+
+test('sections can be added edited reordered hidden removed restored and saved', async (t) => {
+  const project = projectFixtureData('Sections');
+  const f = await projectsFixture(t, browser, { projects: [project] });
+  await f.goto(`/projects/${project.id}/edit`);
+  await f.page.getByLabel('Section heading', { exact: true }).fill('A better introduction');
+  await f.page.getByRole('button', { name: 'Undo', exact: true }).click();
+  assert.equal(await f.page.getByLabel('Section heading', { exact: true }).inputValue(), 'Your name');
+  await f.page.getByRole('button', { name: 'Redo', exact: true }).click();
+  await f.page.getByLabel('Add a section', { exact: true }).selectOption('projects');
+  await f.page.getByRole('button', { name: 'Add section', exact: true }).click();
+  await f.page.getByRole('button', { name: 'Add entry', exact: true }).click();
+  await f.page.getByLabel('Entry 1 title', { exact: true }).fill('My first project');
+  await f.page.getByLabel('Entry 1 link', { exact: true }).fill('https://example.com/project');
+  await f.page.getByRole('button', { name: 'Move section 2 up', exact: true }).click();
+  await f.page.getByLabel('Visible in portfolio', { exact: true }).uncheck();
+  await f.page.getByRole('button', { name: 'Remove section', exact: true }).click();
+  await f.page.getByRole('button', { name: 'Undo', exact: true }).click();
+  await f.page.getByRole('button', { name: 'Save changes', exact: true }).click();
+  await f.page.getByText('All changes saved', { exact: true }).waitFor();
+  assert.equal(f.state.projects[0].sections.length, 2);
+  assert.equal(f.state.projects[0].sections[0].type, 'projects');
+  assert.equal(f.state.projects[0].sections[0].visible, false);
+  assert.equal(f.state.projects[0].sections[0].content.items[0].title, 'My first project');
+  await f.page.reload();
+  await f.page.getByLabel('Section heading', { exact: true }).waitFor();
+  assert.equal(await f.page.getByLabel('Section heading', { exact: true }).inputValue(), 'Projects');
+});

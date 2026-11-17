@@ -942,7 +942,7 @@ Phase 1 implementation and local setup commands are documented in [README.md](RE
 ### Phase 4 — Portfolio Editor
 
 - [x] Editor page layout (canvas + sidebar panels)
-- [ ] Section management (add, reorder, remove, edit)
+- [x] Section management (add, reorder, remove, edit)
 - [ ] Theme customization (colors, fonts, spacing)
 - [ ] Live preview pane
 - [ ] Auto-save with debounced mutations

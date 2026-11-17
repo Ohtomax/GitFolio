@@ -8,18 +8,24 @@ import { errorMessage } from '../utils/errorParser.ts';
 import { EditorProvider, useEditor } from '../components/editor/EditorProvider.tsx';
 import { EditorHistoryToolbar } from '../components/editor/EditorHistoryToolbar.tsx';
 import { useAuthStore } from '../stores/auth.store.ts';
+import { SectionNavigation } from '../components/editor/SectionNavigation.tsx';
+import { SectionInspector } from '../components/editor/SectionInspector.tsx';
+import { useEditorPersistence } from '../hooks/useEditorPersistence.ts';
 
 function EditorWorkspace({ project }: { project: Project }) {
   const document = useEditor((state) => state.document);
   const selectedId = useEditor((state) => state.selectedId);
   const setSelectedId = useEditor((state) => state.selectSection);
   const dirty = useEditor((state) => state.dirty);
-  const selected = document.sections.find((section) => section.id === selectedId);
-  const heading = selected && typeof selected.content.heading === 'string' ? selected.content.heading : selected?.type;
+  const panel = useEditor((state) => state.panel);
+  const persistence = useEditorPersistence(project);
+  const readOnly = project.status === 'ARCHIVED';
+  const disabled = readOnly || persistence.reloading;
   return <EditorFrame name={project.name}
-    toolbar={<><span role="status" className="mr-2 text-xs text-stone-500">{dirty ? 'Unsaved changes' : 'Saved document'}</span><EditorHistoryToolbar disabled={project.status === 'ARCHIVED'} /><span className="rounded-full bg-lime-100 px-3 py-1.5 text-xs font-medium text-lime-950">{project.template.name}</span></>}
-    navigation={<><h2 className="mb-4 text-xs font-semibold uppercase tracking-widest text-stone-500">Sections · {document.sections.length}</h2><div className="max-h-96 space-y-2 overflow-y-auto">{document.sections.map((section) => <button key={section.id} type="button" aria-pressed={section.id === selectedId} className={`w-full rounded-xl border px-3 py-3 text-left text-sm capitalize ${section.id === selectedId ? 'border-lime-600 bg-lime-50' : 'border-stone-200 hover:bg-stone-50'}`} onClick={() => setSelectedId(section.id)}>{section.type}<span className="mt-1 block text-[10px] normal-case text-stone-400">{section.visible ? 'Visible' : 'Hidden'}</span></button>)}</div></>}
-    inspector={<><h2 className="mb-5 text-xs font-semibold uppercase tracking-widest text-stone-500">Section details</h2>{selected ? <><p className="text-xs capitalize text-lime-700">{selected.type}</p><h3 className="mt-3 break-words text-lg font-semibold">{heading || 'Untitled section'}</h3><p className="mt-3 whitespace-pre-wrap break-words text-sm leading-6 text-stone-500">{typeof selected.content.description === 'string' ? selected.content.description : ''}</p></> : <p className="text-sm text-stone-500">This project has no sections yet.</p>}</>}
+    toolbar={<><span role="status" className="mr-2 text-xs text-stone-500">{persistence.status.phase === 'saving' ? 'Saving…' : dirty ? 'Unsaved changes' : 'All changes saved'}</span><EditorHistoryToolbar disabled={disabled} /><button type="button" className="rounded-lg border border-stone-300 bg-white px-3 py-2 text-xs disabled:opacity-40" disabled={persistence.status.phase === 'saving' || persistence.reloading} onClick={() => void persistence.reload()}>Reload saved version</button><button type="button" className="primary-button" disabled={disabled || !dirty || persistence.status.phase === 'saving' || persistence.status.phase === 'conflict'} onClick={() => void persistence.save()}>Save changes</button></>}
+    notice={persistence.message && <p role="alert" className="mb-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">{persistence.message}</p>}
+    navigation={<SectionNavigation disabled={disabled} />}
+    inspector={panel === 'sections' ? <SectionInspector disabled={disabled} /> : <><h2 className="text-sm font-semibold">Theme</h2><dl className="mt-5 space-y-4 text-xs">{Object.entries(document.themeConfig.colors).map(([name, value]) => <div key={name} className="flex justify-between gap-3"><dt className="capitalize text-stone-500">{name}</dt><dd className="font-mono">{value}</dd></div>)}<div className="flex justify-between"><dt>Font</dt><dd>{document.themeConfig.font}</dd></div><div className="flex justify-between"><dt>Spacing</dt><dd>{document.themeConfig.spacing}</dd></div></dl></>}
   >
     <div className="flex items-center justify-between border-b border-stone-200 bg-white px-5 py-3 text-xs text-stone-500"><span>Canvas</span><span>{document.sections.filter((section) => section.visible).length} visible sections</span></div>
     {project.status === 'ARCHIVED' && <p role="status" className="m-4 rounded-xl bg-amber-50 p-4 text-sm text-amber-900">This project is archived. Restore it from your projects to make changes.</p>}

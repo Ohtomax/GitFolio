@@ -12,6 +12,7 @@ export function createProjectRouter(service: ProjectService, guard: RequestHandl
   router.post('/', controller.create);
   router.get('/:id', controller.get);
   router.patch('/:id', controller.update);
+  router.patch('/:id/editor', controller.saveEditor);
   router.delete('/:id', controller.remove);
   router.use(ProjectErrorHandler);
   return router;

@@ -1,5 +1,5 @@
 import { ProjectSchema, ProjectSummarySchema, TemplateConfigSchema,
-  type CreateProjectInput, type Project, type ProjectPage, type ProjectQuery, type ProjectSummary, type UpdateProjectInput } from '@gitfolio/shared';
+  type CreateProjectInput, type Project, type ProjectPage, type ProjectQuery, type ProjectSummary, type SaveEditorInput, type UpdateProjectInput } from '@gitfolio/shared';
 import { ServiceError } from '../../utils/service-error.js';
 import type { TemplateRepository } from '../template/template.repository.js';
 import type { ProjectRepository, StoredProject, StoredProjectSummary } from './project.repository.js';
@@ -12,7 +12,7 @@ function summary(stored: StoredProjectSummary): ProjectSummary {
   return parsed.data;
 }
 function detail(stored: StoredProject): Project {
-  const parsed = ProjectSchema.safeParse({ ...summary(stored), themeConfig: stored.themeConfig, sections: stored.sections });
+  const parsed = ProjectSchema.safeParse({ ...summary(stored), editorRevision: stored.editorRevision, themeConfig: stored.themeConfig, sections: stored.sections });
   if (!parsed.success) throw new ServiceError(503, 'PROJECT_UNAVAILABLE', 'This project is temporarily unavailable.');
   return parsed.data;
 }
@@ -40,6 +40,9 @@ export function createProjectService(repository: ProjectRepository, templates: T
       return detail(await repository.update(userId, id, input));
     },
     delete: (userId: string, id: string) => repository.delete(userId, id),
+    async saveEditor(userId: string, id: string, input: SaveEditorInput): Promise<Project> {
+      return detail(await repository.saveEditor(userId, id, input));
+    },
   };
 }
 export type ProjectService = ReturnType<typeof createProjectService>;

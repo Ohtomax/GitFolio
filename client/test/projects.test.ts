@@ -14,6 +14,7 @@ const otherId = randomUUID();
 const template = { id: randomUUID(), name: 'Canvas', description: 'Fixture template', category: 'minimal' as const,
   thumbnailUrl: null, isReact: false };
 const project: Project = { id: randomUUID(), templateId: template.id, template,
+  editorRevision: 0,
   name: 'My portfolio', slug: 'my-portfolio', repoName: null, status: 'DRAFT',
   createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), sectionCount: 1,
   themeConfig: { colors: { accent: '#65a30d', background: '#fafaf9', text: '#1c1917' }, font: 'sans', spacing: 'spacious' },

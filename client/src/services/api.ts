@@ -25,6 +25,10 @@ const messages: Record<string, string> = {
   INVALID_PROJECT_REQUEST: 'Check the project fields and try again.',
   INVALID_TEMPLATE_REQUEST: 'Check the template selection and filters.',
   PROJECT_CONFLICT: 'The project changed while saving. Refresh and try again.',
+  EDITOR_CONFLICT: 'A newer version was saved elsewhere. Reload the saved version before saving again.',
+  PROJECT_ARCHIVED: 'Restore this project before editing it.',
+  INVALID_EDITOR_CONTENT: 'The section data could not be saved. Reload the project and try again.',
+  PAYLOAD_TOO_LARGE: 'This portfolio is too large to save. Remove some content and try again.',
 };
 export function isBackendUrl(path: string): boolean {
   if (!path.startsWith('/api/') || path.includes('\\') || path.includes('#')) return false;
@@ -32,7 +36,7 @@ export function isBackendUrl(path: string): boolean {
   return url.origin === 'https://gitfolio.invalid' && url.pathname.startsWith('/api/');
 }
 
-export async function apiFetch<T>(path: string, schema: z.ZodType<T>, init: RequestInit = {}): Promise<T> {
+export async function apiFetch<T>(path: string, schema: z.ZodType<T, z.ZodTypeDef, unknown>, init: RequestInit = {}): Promise<T> {
   if (!isBackendUrl(path)) throw new ApiError(0, 'INVALID_API_URL', 'The API address is invalid.');
   let response: Response;
   try {
