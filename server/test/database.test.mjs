@@ -45,7 +45,11 @@ test('migration enforces relationships, ownership, uniqueness, and cascade clean
     } }), { code: 'P2003' });
 
     for (const status of DEPLOY_STATUSES) {
-      await database.deployment.create({ data: { projectId, userId: ownerId, status } });
+      const record = await database.deployment.create({ data: { projectId, userId: ownerId, status } });
+      if (!['LIVE', 'FAILED'].includes(status)) {
+        await assert.rejects(database.deployment.create({ data: { projectId, userId: ownerId } }), { code: 'P2002' });
+        await database.deployment.update({ where: { id: record.id }, data: { status: 'FAILED' } });
+      }
     }
     await assert.rejects(database.template.delete({ where: { id: templateId } }));
     assert.equal(await database.template.count({ where: { id: templateId } }), 1);

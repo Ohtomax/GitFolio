@@ -96,16 +96,28 @@ model Deployment {
   id          String           @id @default(uuid()) @db.Uuid
   projectId   String           @db.Uuid
   userId      String           @db.Uuid
+  requestKey  String           @default(uuid()) @db.Uuid
+  editorRevision Int           @default(0)
+  repositoryName String?
+  format      String?          @db.VarChar(10)
+  snapshot    Json?            @db.JsonB
+  source      Json?            @db.JsonB
+  errorCode   String?          @db.VarChar(64)
+  buildUrl    String?
+  leaseToken  String?          @db.Uuid
+  leaseExpiresAt DateTime?     @db.Timestamptz(3)
   status      DeploymentStatus @default(PENDING)
   commitSha   String?
   pagesUrl    String?
   logs        Json             @default("[]") @db.JsonB
   startedAt   DateTime         @default(now()) @db.Timestamptz(3)
   completedAt DateTime?        @db.Timestamptz(3)
+  updatedAt   DateTime         @default(now()) @updatedAt @db.Timestamptz(3)
   project     Project          @relation(fields: [projectId, userId], references: [id, userId], onDelete: Cascade)
   user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([projectId, startedAt])
   @@index([userId, startedAt])
   @@index([status, startedAt])
+  @@unique([userId, requestKey])
 }

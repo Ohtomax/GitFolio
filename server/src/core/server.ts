@@ -12,14 +12,19 @@ import { seedTemplates } from '../modules/template/template.seed.js';
 import { createProjectRepository } from '../modules/project/project.repository.js';
 import { createProjectService } from '../modules/project/project.service.js';
 import { createProjectRouter } from '../modules/project/project.route.js';
+import { createDeploymentQueue, type DeploymentQueue } from '../queues/deployment.queue.js';
+import { createDeploymentRepository } from '../modules/deployment/deployment.repository.js';
+import { createDeploymentService } from '../modules/deployment/deployment.service.js';
+import { createDeploymentRouter } from '../modules/deployment/deployment.route.js';
 
 export async function startServer(environment: Environment, logger: Logger) {
   const database = createDatabase(environment);
   const redis = createRedis(environment, logger);
+  let deployments: DeploymentQueue | undefined;
 
   const disconnect = async () => {
-    redis.disconnect();
-    await database.$disconnect();
+    try { await deployments?.close(); }
+    finally { redis.disconnect(); await database.$disconnect(); }
   };
 
   try {
@@ -30,11 +35,13 @@ export async function startServer(environment: Environment, logger: Logger) {
 
     await seedTemplates(database);
     const guard = createFeatureGuard(environment, redis);
+    deployments = createDeploymentQueue(environment.REDIS_URL, logger);
     const app = createApp(environment, {
       logger,
       authRouter: createAuthModule(environment, database, redis),
       templateRouter: createTemplateRouter(createTemplateService(createTemplateRepository(database)), guard),
       projectRouter: createProjectRouter(createProjectService(createProjectRepository(database), createTemplateRepository(database)), guard),
+      deploymentRouter: createDeploymentRouter(createDeploymentService(createDeploymentRepository(database), deployments), guard),
       checkReadiness: async () => {
         await Promise.all([database.$queryRaw`SELECT 1`, redis.ping()]);
       },

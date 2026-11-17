@@ -5,10 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "nodemon",
+    "dev:worker": "nodemon --config nodemon.worker.json",
     "build": "tsc",
     "typecheck": "tsc --noEmit",
     "test": "npm run db:generate && npm run build && node --test test/*.test.mjs",
     "start": "node dist/index.js",
+    "start:worker": "node dist/worker.js",
     "oauth:check": "npm run build && node scripts/check-github-oauth.mjs",
     "db:generate": "node scripts/prisma.mjs generate",
     "db:validate": "node scripts/prisma.mjs validate",

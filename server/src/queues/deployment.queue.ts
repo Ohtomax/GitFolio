@@ -14,18 +14,26 @@ export function deploymentConnection(address: string, worker: boolean): Connecti
     password: url.password ? decodeURIComponent(url.password) : undefined,
     db: database, ...(url.protocol === 'rediss:' ? { tls: {} } : {}),
     connectTimeout: 5000, maxRetriesPerRequest: worker ? null : 1,
-    enableOfflineQueue: worker, retryStrategy: worker ? (attempt) => Math.min(attempt * 250, 3000) : () => null };
+    enableOfflineQueue: worker, retryStrategy: (attempt) => Math.min(attempt * 250, 3000) };
 }
 export function createDeploymentQueue(address: string, logger: Logger, prefix = 'gitfolio') {
   const queue = new Queue<{ deploymentId: string }>(DEPLOYMENT_QUEUE, {
     connection: deploymentConnection(address, false), prefix,
     defaultJobOptions: { attempts: 1, removeOnComplete: { age: 86400, count: 1000 }, removeOnFail: { age: 604800, count: 1000 } },
   });
+  let ready = false;
+  let closing = false;
+  void queue.waitUntilReady().then((client) => {
+    const connected = () => { ready = !closing && client.status === 'ready'; };
+    connected(); client.on('ready', connected); client.on('close', () => { ready = false; });
+    client.on('end', () => { ready = false; });
+  }).catch(() => { ready = false; });
   queue.on('error', () => logger.warn('Deployment queue connection is unavailable'));
   return {
     queue,
     async enqueue(deploymentId: string) {
       const data = DeploymentJobSchema.parse({ deploymentId });
+      if (!ready || closing) throw new Error('Deployment queue is unavailable');
       const existing = await queue.getJob(deploymentId);
       if (existing) {
         const state = await existing.getState();
@@ -35,7 +43,7 @@ export function createDeploymentQueue(address: string, logger: Logger, prefix = 
       }
       await queue.add('publish', data, { jobId: deploymentId });
     },
-    close: () => queue.close(),
+    close: () => { closing = true; ready = false; return queue.close(); },
   };
 }
 export type DeploymentQueue = ReturnType<typeof createDeploymentQueue>;
@@ -44,7 +52,9 @@ export function registerDeploymentWorker(address: string, logger: Logger, proces
   const worker = new Worker(DEPLOYMENT_QUEUE, async (job, token) => {
     const parsed = DeploymentJobSchema.safeParse(job.data);
     if (job.name !== 'publish' || !parsed.success || job.id !== parsed.data.deploymentId) throw new UnrecoverableError('Invalid deployment job');
-    const result = await processor(parsed.data.deploymentId);
+    let result: Awaited<ReturnType<DeploymentProcessor>>;
+    try { result = await processor(parsed.data.deploymentId); }
+    catch { throw new UnrecoverableError('Deployment job failed'); }
     if (result) {
       if (!Number.isFinite(result.retryAfterMs) || result.retryAfterMs < 1000 || result.retryAfterMs > 60000) throw new UnrecoverableError('Invalid deployment delay');
       await job.moveToDelayed(Date.now() + result.retryAfterMs, token);
@@ -53,6 +63,9 @@ export function registerDeploymentWorker(address: string, logger: Logger, proces
   }, { connection: deploymentConnection(address, true), prefix, concurrency: 2, lockDuration: 60000,
     maxStalledCount: 2, autorun: true });
   worker.on('error', () => logger.warn('Deployment worker connection is unavailable'));
-  worker.on('failed', (job) => logger.warn({ deploymentId: job?.id }, 'Deployment job failed'));
+  worker.on('failed', (job) => {
+    const id = z.string().uuid().safeParse(job?.id);
+    logger.warn({ deploymentId: id.success ? id.data : undefined }, 'Deployment job failed');
+  });
   return worker;
 }

@@ -8,6 +8,7 @@ test('queue connections separate producer failures from worker retries and restr
   const producer = deploymentConnection('rediss://fixture:password@localhost:6380/2', false);
   assert.equal(producer.maxRetriesPerRequest, 1); assert.equal(producer.enableOfflineQueue, false);
   assert.equal(producer.db, 2); assert.ok(producer.tls);
+  assert.ok(producer.retryStrategy(2) > 0);
   assert.equal(deploymentConnection('redis://localhost', true).maxRetriesPerRequest, null);
   assert.throws(() => deploymentConnection('https://localhost', false));
   assert.throws(() => deploymentConnection('redis://localhost/invalid', false));
@@ -24,7 +25,7 @@ test('real BullMQ worker consumes an ID, delays verification, deduplicates jobs,
     assert.equal(deploymentId, id); calls++; return calls === 1 ? { retryAfterMs: 1000 } : undefined;
   }, prefix);
   try {
-    await worker.waitUntilReady();
+    await Promise.all([worker.waitUntilReady(), producer.queue.waitUntilReady()]);
     await Promise.all([producer.enqueue(id), producer.enqueue(id)]);
     const deadline = Date.now() + 10000;
     while (Date.now() < deadline) {

@@ -957,7 +957,7 @@ Phase 1 implementation and local setup commands are documented in [README.md](RE
 - [x] Static site generation (Mustache templates → HTML/CSS/JS)
 - [x] React project generation (with GitHub Actions workflow)
 - [x] GitHub provider: repo creation, tree commit, Pages enablement
-- [ ] Deploy status API + client polling
+- [x] Deploy status API + client polling
 - [ ] Deploy history & logs UI
 
 ### Phase 6 — Polish & Launch

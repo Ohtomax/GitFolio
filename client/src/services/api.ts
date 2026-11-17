@@ -29,6 +29,13 @@ const messages: Record<string, string> = {
   PROJECT_ARCHIVED: 'Restore this project before editing it.',
   INVALID_EDITOR_CONTENT: 'The section data could not be saved. Reload the project and try again.',
   PAYLOAD_TOO_LARGE: 'This portfolio is too large to save. Remove some content and try again.',
+  GITHUB_PERMISSION_REQUIRED: 'Authorize GitHub publishing access before publishing.',
+  GITHUB_ACCOUNT_MISMATCH: 'Use the same GitHub account when authorizing publishing.',
+  GITHUB_RATE_LIMITED: 'GitHub is limiting publishing requests. Wait before trying again.',
+  DEPLOYMENT_ACTIVE: 'A deployment is already active for this project or repository. Open its history to follow it.',
+  DEPLOYMENT_REQUEST_CONFLICT: 'The saved version or publishing target changed. Refresh before publishing.',
+  DEPLOYMENT_NOT_FOUND: 'This deployment could not be found.',
+  INVALID_DEPLOYMENT_REQUEST: 'Check the publishing request and try again.',
 };
 export function isBackendUrl(path: string): boolean {
   if (!path.startsWith('/api/') || path.includes('\\') || path.includes('#')) return false;

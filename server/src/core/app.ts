@@ -15,6 +15,7 @@ export interface AppDependencies {
   authRouter?: Router;
   templateRouter?: Router;
   projectRouter?: Router;
+  deploymentRouter?: Router;
 }
 
 export function createApp(environment: Environment, dependencies: AppDependencies) {
@@ -59,6 +60,7 @@ export function createApp(environment: Environment, dependencies: AppDependencie
   }, dependencies.authRouter ?? ((_request, _response, next) => {
     next(new ServiceError(503, 'AUTH_NOT_CONFIGURED', 'Sign-in is not configured.'));
   }));
+  if (dependencies.deploymentRouter) app.use('/api', dependencies.deploymentRouter);
   if (dependencies.templateRouter) app.use('/api/templates', dependencies.templateRouter);
   if (dependencies.projectRouter) app.use('/api/projects', dependencies.projectRouter);
   app.use(notFound);
