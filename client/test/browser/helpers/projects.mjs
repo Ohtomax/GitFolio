@@ -21,13 +21,14 @@ export async function projectsFixture(t, browser, options = {}) {
   page.on('pageerror', (error) => errors.push(error.message));
   t.after(async () => { await context.close(); assert.deepEqual(errors, []); });
   const state = { projects: options.projects ?? [], authenticated: true, failProjects: false, failTemplates: false,
-    rejectCreate: false, creates: 0, editorSaves: 0, projectRequests: 0, templateRequests: 0, templates: templateFixtures, ...options };
+    rejectCreate: false, creates: 0, editorSaves: 0, editorBodies: [], projectRequests: 0, templateRequests: 0, templates: templateFixtures, ...options };
   const session = { user: { id: randomUUID(), githubId: '123', login: 'fixture-user', name: 'Fixture Developer',
     email: null, avatarUrl: null }, expiresAt: Date.now() + 3600000 };
   const respond = (route, status, data) => route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(data) });
   const ok = (route, data, status = 200) => respond(route, status, { success: true, data });
   const fail = (route, code, status) => respond(route, status, { success: false, error: { code, message: 'Fixture request failed.' } });
-  await page.route('**/api/auth/me', (route) => state.authenticated ? ok(route, session) : fail(route, 'UNAUTHENTICATED', 401));
+  await page.route('**/api/auth/me', (route) => state.unavailable ? fail(route, 'SERVICE_UNAVAILABLE', 503)
+    : state.authenticated ? ok(route, session) : fail(route, 'UNAUTHENTICATED', 401));
   await page.route('**/api/auth/logout', (route) => { state.authenticated = false; return ok(route, null); });
   await page.route('**/api/templates**', (route) => {
     state.templateRequests++;
@@ -65,6 +66,7 @@ export async function projectsFixture(t, browser, options = {}) {
       if (url.pathname.endsWith('/editor') && method === 'PATCH') {
         state.editorSaves++;
         const input = route.request().postDataJSON();
+        state.editorBodies.push(input);
         if (state.failEditor) return fail(route, 'SERVICE_UNAVAILABLE', 503);
         if (state.projects[index].status === 'ARCHIVED') return fail(route, 'PROJECT_ARCHIVED', 409);
         if (input.baseRevision !== state.projects[index].editorRevision) return fail(route, 'EDITOR_CONFLICT', 409);
@@ -72,6 +74,7 @@ export async function projectsFixture(t, browser, options = {}) {
         Object.assign(state.projects[index], { themeConfig: input.themeConfig,
           sections: input.sections.map((section, sortOrder) => ({ ...section, sortOrder })),
           sectionCount: input.sections.length, editorRevision: input.baseRevision + 1, updatedAt: new Date().toISOString() });
+        if (state.loseEditorResponseOnce) { state.loseEditorResponseOnce = false; return route.abort('failed'); }
         return ok(route, state.projects[index]);
       }
       if (method === 'DELETE') { state.projects.splice(index, 1); return ok(route, null); }

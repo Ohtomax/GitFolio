@@ -2,7 +2,7 @@
 
 > A planned full-stack SaaS for designing static or React portfolios and publishing them to GitHub Pages through a browser-based workflow.
 
-**Status reviewed: November 17, 2026 (Asia/Manila).** Phases 1–3 are implemented in source, including authentication and project management. Live GitHub consent and service-backed integration verification remain separate checks. The diagrams and feature contracts below describe the target architecture unless explicitly marked as implemented.
+**Status reviewed: November 18, 2026 (Asia/Manila).** Phases 1–4 are implemented in source, including authentication, project management, and the portfolio editor. Live GitHub consent and production verification remain separate checks. The diagrams and feature contracts below describe the target architecture unless explicitly marked as implemented.
 
 For the product objective, user workflow, benefits, and limitations, read [System Overview](SYSTEM_OVERVIEW.md). For installation commands, read [README.md](README.md).
 
@@ -45,7 +45,8 @@ These statuses are based on the checked-in source, rather than the presence of a
 | GitHub OAuth configuration | Local preparation implemented | [Server-only OAuth configuration](server/src/config/github-oauth.ts), callback validation, secret redaction, [configuration checker](server/scripts/check-github-oauth.mjs), and [registration guide](docs/GITHUB_OAUTH_SETUP.md) |
 | GitHub authentication | Code implemented; registration/live consent pending | [Auth module](server/src/modules/auth/auth.module.ts), one-time state/PKCE, JWT verification/revocation, AES-256-GCM, and token refresh; [details](docs/AUTHENTICATION.md) |
 | Project management | Implemented | [Project module](server/src/modules/project/project.route.ts), [seeded catalog](server/src/modules/template/template.seed.ts), dashboard, template picker/setup form, and query hooks; [guide](docs/PROJECT_MANAGEMENT.md) |
-| Editor and publishing | Planned | No section/theme editor, GitHub repository/Pages provider, site generator, BullMQ queue, or deployment worker is implemented |
+| Portfolio editor | Implemented | [Editor workspace](client/src/pages/EditorPage.tsx), sections, theme controls, live preview, undo/redo, and debounced revision-checked saves; [guide](docs/PORTFOLIO_EDITOR.md) |
+| Publishing | Planned | No GitHub repository/Pages provider, site generator, BullMQ queue, or deployment worker is implemented |
 | Production operation | Planned | No production deployment or end-to-end GitHub Pages publishing has been verified |
 
 ### Current executable behavior
@@ -53,8 +54,9 @@ These statuses are based on the checked-in source, rather than the presence of a
 - `npm run dev` builds the shared package, generates Prisma Client, and starts the shared, server, and client watchers.
 - The API connects to both PostgreSQL and Redis before listening. Redis is already a startup dependency; queue processing itself is still planned.
 - `GET /api/health` checks the HTTP process. `GET /api/health/ready` queries PostgreSQL and pings Redis, returning HTTP 503 if a dependency check fails. Both routes are under the API rate limiter.
-- The frontend processes OAuth callbacks and protects `/account`, `/dashboard`, and `/projects/new` with AuthGuard. Successful sign-in defaults to the dashboard. Vite proxies `/api` to Express for same-origin cookies.
+- The frontend processes OAuth callbacks and protects `/account`, `/dashboard`, `/projects/new`, and `/projects/:id/edit` with AuthGuard. Successful sign-in defaults to the dashboard. Vite proxies `/api` to Express for same-origin cookies.
 - `/api/projects` implements owner-scoped CRUD and paginated search/filtering. `/api/templates` supplies an authenticated catalog with validated defaults. Four missing templates are seeded at startup; `npm run db:seed` is also available.
+- `PATCH /api/projects/:id/editor` atomically saves ordered sections/theme against a base revision. The editor uses an isolated Zustand history, responsive live preview, and 800 ms debounced TanStack Query mutations. Apply the editor-revision migration before using saves.
 - `/api/auth/github`, `/api/auth/github/callback`, `/api/auth/me`, and `/api/auth/logout` implement authentication. Missing OAuth credentials or application secrets disable auth safely with HTTP 503.
 - `npm run oauth:check` validates local configuration without connecting to PostgreSQL or Redis. It does not verify GitHub-issued credentials or perform sign-in.
 
@@ -62,7 +64,7 @@ These statuses are based on the checked-in source, rather than the presence of a
 
 Automated tests exist for HTTP behavior, configuration, OAuth callback rules, credential redaction, database relationships, and server lifecycle. Database and full server integration tests require explicitly supplied disposable service URLs and may be skipped during a normal test run. A committed migration, a passing configuration check, and a working live deployment are separate pieces of evidence.
 
-Unit/HTTP tests and browser tests with synthetic API responses validate authentication and project management. Real database/Redis integrations require explicitly supplied disposable service URLs and are skipped when unavailable. GitHub consent and production deployment remain separate verification steps.
+Unit/HTTP tests and browser tests with synthetic API responses validate authentication, project management, and editor behavior. Real database/Redis integrations require explicitly supplied disposable service URLs and are skipped when unavailable. The editor-storage suite verifies concurrent saves and rollback with real Prisma transactions. GitHub consent and production deployment remain separate verification steps.
 
 ---
 
@@ -88,7 +90,7 @@ GitHub Pages serves static websites and has plan, usage, and content restriction
 
 ## 2. High-Level Architecture
 
-**Planned product architecture.** The foundation, authentication, templates, and project management are implemented. The editor and deployment pipeline shown here remain future work.
+**Planned product architecture.** The foundation, authentication, templates, project management, and portfolio editor are implemented. The deployment pipeline shown here remains future work.
 
 ```
 ┌───────────────────────────────────────────────────────────────────┐
@@ -419,7 +421,7 @@ Auth, project, and template schemas and pagination contracts are implemented. De
 
 ## 8. Database Schema
 
-**Implemented schema:** [schema.prisma](server/prisma/schema.prisma), [initial migration](server/prisma/migrations/20261116000000_init/migration.sql), and [token lifecycle migration](server/prisma/migrations/20261117000000_github_token_lifecycle/migration.sql). Auth encrypts private account fields before writing; schema files alone do not prove that a live database has been migrated. Phase 3 implements CRUD and template seeds using the existing tables, with no new schema migration.
+**Implemented schema:** [schema.prisma](server/prisma/schema.prisma), [initial migration](server/prisma/migrations/20261116000000_init/migration.sql), [token lifecycle migration](server/prisma/migrations/20261117000000_github_token_lifecycle/migration.sql), and [editor revision migration](server/prisma/migrations/20261118000000_editor_revision/migration.sql). Auth encrypts private account fields before writing; schema files alone do not prove that a live database has been migrated. Phase 3 uses existing tables; Phase 4 adds the project's optimistic-concurrency counter, not a persistent version-history table.
 
 ### Entity Relationship Diagram
 
@@ -718,6 +720,7 @@ Auth, project, and template endpoints below are implemented. Deployment and user
 | GET    | `/projects/:id`                  | Yes  | Get project detail        |
 | POST   | `/projects`                      | Yes  | Create new project        |
 | PATCH  | `/projects/:id`                  | Yes  | Update project            |
+| PATCH  | `/projects/:id/editor`           | Yes  | Save sections/theme with revision check |
 | DELETE | `/projects/:id`                  | Yes  | Delete project            |
 
 #### Templates
@@ -939,13 +942,13 @@ Phase 1 implementation and local setup commands are documented in [README.md](RE
 - [x] New Project page (template picker, setup form)
 - [x] TanStack Query hooks for projects & templates
 
-### Phase 4 — Portfolio Editor
+### Phase 4 — Portfolio Editor *(Implemented)*
 
 - [x] Editor page layout (canvas + sidebar panels)
 - [x] Section management (add, reorder, remove, edit)
 - [x] Theme customization (colors, fonts, spacing)
 - [x] Live preview pane
-- [ ] Auto-save with debounced mutations
+- [x] Auto-save with debounced mutations
 - [x] Editor Zustand store for undo/redo
 
 ### Phase 5 — Deployment Engine

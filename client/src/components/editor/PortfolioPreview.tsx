@@ -37,7 +37,7 @@ export function PortfolioPreview({ document, selectedId, onSelect, interactive =
     </nav>}
     {sections.map((section) => <section key={section.id} id={`portfolio-${section.id}`} aria-label={`${sectionNames[section.type]} portfolio section`}
       className={`relative scroll-mt-5 ${onSelect && selectedId === section.id ? 'ring-2 ring-inset ring-lime-600' : ''}`}>
-      {onSelect && <button type="button" className="portfolio-accent absolute right-3 top-2 rounded bg-white px-2 py-1 font-sans text-[10px] font-semibold text-stone-700 shadow-sm focus-visible:outline-2 focus-visible:outline-lime-700"
+      {onSelect && <button type="button" className="absolute right-3 top-2 rounded bg-white px-2 py-1 font-sans text-[10px] font-semibold text-stone-700 shadow-sm focus-visible:outline-2 focus-visible:outline-lime-700"
         aria-label={`Select ${section.type} section`} aria-pressed={selectedId === section.id} onClick={() => onSelect(section.id)}>Edit {sectionNames[section.type]}</button>}
       <PortfolioSection section={section} interactive={interactive} />
     </section>)}

@@ -1,6 +1,6 @@
 # GitFolio: Objective, Workflow, and Benefits
 
-Reviewed on November 17, 2026 (Asia/Manila).
+Reviewed on November 18, 2026 (Asia/Manila).
 
 This document explains the intended product in plain language and assesses its potential value. It distinguishes implemented code from planned behavior. Technical details and the development checklist live in [ARCHITECTURE.md](ARCHITECTURE.md); installation steps live in [README.md](README.md).
 
@@ -39,7 +39,7 @@ This audience assessment is a product judgment based on the proposed workflow. N
 
 ## 3. Current implementation
 
-The repository contains the technical foundation, authentication, and project-management implementation:
+The repository contains the technical foundation, authentication, project management, and portfolio editor:
 
 - An npm workspace monorepo with React/Vite, Express/TypeScript, and a shared types/validation package.
 - A Prisma schema and initial migration for users, templates, projects, sections, and deployments.
@@ -48,9 +48,9 @@ The repository contains the technical foundation, authentication, and project-ma
 - Docker Compose configuration for local PostgreSQL and Redis, plus setup instructions and development/check commands.
 - Server-side OAuth settings, callback validation, initial sign-in scopes, secret redaction, and a configuration checker.
 
-The frontend has GitHub login/callback pages, a connected-account page, AuthGuard, a project dashboard, and a template picker/setup form. The backend implements one-time state, PKCE, encrypted token storage/refresh, revocable JWT sessions, owner-scoped project CRUD, and four seeded templates. Real GitHub consent remains a separate verification step. The editor, generated portfolio files, GitHub publishing, and deployment progress screens remain planned.
+The frontend has GitHub login/callback pages, a connected-account page, AuthGuard, a project dashboard, a template picker/setup form, and a portfolio editor. The backend implements one-time state, PKCE, encrypted token storage/refresh, revocable JWT sessions, owner-scoped project CRUD, four seeded templates, and atomic revision-checked editor saves. Real GitHub consent remains a separate verification step. Generated portfolio files, GitHub publishing, and deployment progress screens remain planned.
 
-Users can create and manage portfolio drafts with copied template themes and sections. Editing those sections and publishing a live portfolio remain later phases.
+Users can create and manage portfolio drafts with copied template themes and sections, edit content/order/visibility and styling, preview changes, undo/redo, and autosave drafts. Publishing a live portfolio remains Phase 5.
 
 ## 4. Planned user workflow
 
@@ -80,9 +80,9 @@ The user selects a template and enters a project name. GitFolio will create an o
 
 ### Step 3: Edit and preview
 
-The planned editor will support changing section content and order, visibility, colors, fonts, and other supported settings. A preview should reflect those changes. Saving a draft updates GitFolio's database; it does not publish every edit immediately.
+The implemented editor supports section content and order, visibility, colors, fonts, and spacing. Its live preview reflects the current draft at different pane widths. Saving a draft updates GitFolio's database; it does not publish edits.
 
-Input validation, safe HTML generation, loading feedback, and protection against losing unsaved work are required parts of this experience. Undo/redo and project revision rollback are later features; the current schema has no revision-history model.
+Strict validation, React text escaping, safe preview links, loading/error feedback, and unsaved-navigation protection are implemented. Undo/redo keeps bounded history in the page session. The database revision counter prevents competing saves from overwriting each other; persistent project-version history and rollback remain future work. [Editor behavior and recovery limits](docs/PORTFOLIO_EDITOR.md).
 
 ### Step 4: Request publishing
 
@@ -122,7 +122,7 @@ flowchart TD
 
 | Component | Responsibility | Current state |
 | --- | --- | --- |
-| React client | Forms, dashboard, editing, previews, progress | Login/account, AuthGuard, dashboard, and new-project workflow implemented; editor/publishing screens planned |
+| React client | Forms, dashboard, editing, previews, progress | Login/account, AuthGuard, dashboard, new-project workflow, and portfolio editor implemented; publishing screens planned |
 | Express API | Validate requests, enforce ownership, save drafts, coordinate publishing | Middleware, health, auth, project CRUD, and seeded template routes implemented; publishing planned |
 | PostgreSQL / Prisma | Persist account links, content, templates, and deployment records | Schema/migration and connection code implemented |
 | Redis | OAuth state, session revocation, queued background work | Auth state/sessions and connection/ping implemented; queue planned |
@@ -198,7 +198,7 @@ Set release targets after the baseline is observed. Phase 1 tests validate found
 
 1. Finish OAuth registration and the full sign-in/session flow, including required token protections.
 2. Implement owner-scoped project CRUD and one well-tested static template.
-3. Build a focused form-based editor with clear draft saving and an accurate preview.
+3. Validate the implemented form-based editor with real users, then build the publishing pipeline.
 4. Deliver and verify a complete publish/update/retry workflow to a public repository.
 5. Test the result with portfolio creators, collect the measures above, and improve the points where they need help.
 6. Expand to React templates and additional customization after the simpler publishing path is reliable.

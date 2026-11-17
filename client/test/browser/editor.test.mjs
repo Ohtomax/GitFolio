@@ -37,9 +37,9 @@ test('sections can be added edited reordered hidden removed restored and saved',
   const f = await projectsFixture(t, browser, { projects: [project] });
   await f.goto(`/projects/${project.id}/edit`);
   await f.page.getByLabel('Section heading', { exact: true }).fill('A better introduction');
-  await f.page.getByRole('button', { name: 'Undo', exact: true }).click();
+  await f.page.getByLabel('Section heading', { exact: true }).press('Control+z');
   assert.equal(await f.page.getByLabel('Section heading', { exact: true }).inputValue(), 'Your name');
-  await f.page.getByRole('button', { name: 'Redo', exact: true }).click();
+  await f.page.getByLabel('Section heading', { exact: true }).press('Control+Shift+z');
   await f.page.getByLabel('Add a section', { exact: true }).selectOption('projects');
   await f.page.getByRole('button', { name: 'Add section', exact: true }).click();
   await f.page.getByRole('button', { name: 'Add entry', exact: true }).click();
@@ -117,4 +117,147 @@ test('live preview renders every section type, validates links, escapes text, an
   await preview.getByRole('heading', { name: hostile, exact: true }).waitFor({ state: 'detached' });
   await f.page.setViewportSize({ width: 320, height: 900 });
   assert.ok(await f.page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+});
+
+test('autosave debounces typing and persists the latest document without a manual save', async (t) => {
+  const project = projectFixtureData('Autosave');
+  const f = await projectsFixture(t, browser, { projects: [project] });
+  await f.goto(`/projects/${project.id}/edit`);
+  const input = f.page.getByLabel('Section heading', { exact: true });
+  await input.fill('First draft'); await input.fill('Latest draft');
+  await f.page.waitForTimeout(200); assert.equal(f.state.editorSaves, 0);
+  await f.page.getByText('All changes saved', { exact: true }).waitFor();
+  assert.equal(f.state.editorSaves, 1); assert.equal(f.state.projects[0].sections[0].content.heading, 'Latest draft');
+  await f.page.reload(); assert.equal(await input.inputValue(), 'Latest draft');
+  assert.equal(f.state.editorSaves, 1);
+});
+
+test('typing during an in-flight autosave queues a newer snapshot with the acknowledged revision', async (t) => {
+  let release;
+  const project = projectFixtureData('Queued saves');
+  const f = await projectsFixture(t, browser, { projects: [project], waitForEditor: new Promise((resolve) => { release = resolve; }) });
+  await f.goto(`/projects/${project.id}/edit`);
+  const input = f.page.getByLabel('Section heading', { exact: true });
+  await input.fill('First snapshot'); await f.page.getByText('Saving…', { exact: true }).waitFor();
+  await input.fill('Newer while saving'); await f.page.waitForTimeout(1000);
+  assert.equal(f.state.editorSaves, 1);
+  release(); await f.page.getByText('All changes saved', { exact: true }).waitFor();
+  assert.equal(await input.inputValue(), 'Newer while saving');
+  assert.deepEqual(f.state.editorBodies.map((body) => body.baseRevision), [0, 1]);
+  assert.equal(f.state.projects[0].sections[0].content.heading, 'Newer while saving');
+});
+
+test('failed autosaves preserve edits, stop automatic retries, and recover with Retry save', async (t) => {
+  const project = projectFixtureData('Offline draft');
+  const f = await projectsFixture(t, browser, { projects: [project], failEditor: true });
+  await f.goto(`/projects/${project.id}/edit`);
+  const input = f.page.getByLabel('Section heading', { exact: true });
+  await input.fill('Keep this draft');
+  await f.page.getByRole('button', { name: 'Retry save', exact: true }).waitFor();
+  assert.equal(await input.inputValue(), 'Keep this draft');
+  await f.page.waitForTimeout(1100); assert.equal(f.state.editorSaves, 1);
+  f.state.failEditor = false;
+  await f.page.getByRole('button', { name: 'Retry save', exact: true }).click();
+  await f.page.getByText('All changes saved', { exact: true }).waitFor();
+  assert.equal(f.state.projects[0].sections[0].content.heading, 'Keep this draft');
+});
+
+test('a lost acknowledgement cannot silently overwrite the server revision on retry', async (t) => {
+  const project = projectFixtureData('Lost response');
+  const f = await projectsFixture(t, browser, { projects: [project], loseEditorResponseOnce: true });
+  await f.goto(`/projects/${project.id}/edit`);
+  const input = f.page.getByLabel('Section heading', { exact: true });
+  await input.fill('Already committed');
+  await f.page.getByRole('button', { name: 'Retry save', exact: true }).waitFor();
+  assert.equal(f.state.projects[0].editorRevision, 1);
+  await input.fill('New local changes');
+  await f.page.getByRole('button', { name: 'Retry save', exact: true }).click();
+  await f.page.getByText(/A newer version was saved elsewhere/).waitFor();
+  assert.equal(await input.inputValue(), 'New local changes');
+  assert.equal(f.state.projects[0].sections[0].content.heading, 'Already committed');
+});
+
+test('an auth-service interruption recovers the owner draft and resumes only after checking the server', async (t) => {
+  const project = projectFixtureData('Recovered draft');
+  const f = await projectsFixture(t, browser, { projects: [project], failEditor: true });
+  await f.goto(`/projects/${project.id}/edit`);
+  const input = f.page.getByLabel('Section heading', { exact: true });
+  await input.fill('Recovered content');
+  await f.page.getByRole('button', { name: 'Retry save', exact: true }).waitFor();
+  f.state.unavailable = true;
+  await f.page.evaluate(() => {
+    const originalNow = Date.now;
+    Date.now = () => originalNow() + 6 * 60 * 1000;
+    window.dispatchEvent(new Event('visibilitychange'));
+  });
+  await f.page.getByRole('heading', { name: 'We couldn’t check your session.', exact: true }).waitFor();
+  f.state.unavailable = false;
+  await f.page.getByRole('button', { name: 'Try again', exact: true }).click();
+  await f.page.getByRole('button', { name: 'Resume draft', exact: true }).waitFor();
+  assert.equal(await input.inputValue(), 'Recovered content');
+  const attempts = f.state.editorSaves;
+  await f.page.waitForTimeout(1000); assert.equal(f.state.editorSaves, attempts);
+  f.state.failEditor = false;
+  await f.page.getByRole('button', { name: 'Resume draft', exact: true }).click();
+  await f.page.getByText('All changes saved', { exact: true }).waitFor();
+  assert.equal(f.state.projects[0].sections[0].content.heading, 'Recovered content');
+  assert.deepEqual(await f.page.evaluate(() => ({ ...localStorage, ...sessionStorage })), {});
+});
+
+test('revision conflicts retain local changes until an explicit confirmed reload', async (t) => {
+  const project = projectFixtureData('Conflict');
+  const f = await projectsFixture(t, browser, { projects: [project] });
+  await f.goto(`/projects/${project.id}/edit`);
+  const input = f.page.getByLabel('Section heading', { exact: true });
+  await input.fill('My unsaved draft');
+  f.state.projects[0].editorRevision++; f.state.projects[0].sections[0].content.heading = 'Saved in another tab';
+  await f.page.getByText(/A newer version was saved elsewhere/).waitFor();
+  assert.equal(await input.inputValue(), 'My unsaved draft');
+  assert.equal(await f.page.getByRole('button', { name: 'Save changes', exact: true }).isDisabled(), true);
+  await f.page.waitForTimeout(1000); assert.equal(f.state.editorSaves, 1);
+  f.page.once('dialog', (dialog) => dialog.dismiss());
+  await f.page.getByRole('button', { name: 'Reload saved version', exact: true }).click();
+  assert.equal(await input.inputValue(), 'My unsaved draft');
+  f.state.failProjects = true;
+  f.page.once('dialog', (dialog) => dialog.accept());
+  await f.page.getByRole('button', { name: 'Reload saved version', exact: true }).click();
+  await f.page.getByText('The request could not be completed. Please try again.', { exact: true }).waitFor();
+  assert.equal(await f.page.getByRole('button', { name: 'Save changes', exact: true }).isDisabled(), true);
+  assert.equal(await f.page.getByText('Save paused', { exact: true }).count(), 1);
+  f.state.failProjects = false;
+  f.page.once('dialog', (dialog) => dialog.accept());
+  await f.page.getByRole('button', { name: 'Reload saved version', exact: true }).click();
+  await f.page.getByText('All changes saved', { exact: true }).waitFor();
+  assert.equal(await input.inputValue(), 'Saved in another tab');
+});
+
+test('unsaved navigation and sign-out require a user choice, including browser history navigation', async (t) => {
+  const project = projectFixtureData('Navigation');
+  const f = await projectsFixture(t, browser, { projects: [project], failEditor: true });
+  await f.goto('/dashboard');
+  await f.page.getByRole('link', { name: 'Edit Navigation', exact: true }).click();
+  const input = f.page.getByLabel('Section heading', { exact: true });
+  await input.fill('Do not lose this');
+  await f.page.getByRole('button', { name: 'Retry save', exact: true }).waitFor();
+  await f.page.getByRole('link', { name: 'All projects', exact: true }).click();
+  await f.page.getByRole('button', { name: 'Stay here', exact: true }).click();
+  assert.equal(await input.inputValue(), 'Do not lose this');
+  f.page.once('dialog', (dialog) => dialog.dismiss());
+  await f.page.getByRole('button', { name: 'Sign out', exact: true }).click();
+  assert.equal(f.state.authenticated, true);
+  await f.page.evaluate(() => history.back());
+  await f.page.getByRole('button', { name: 'Leave editor', exact: true }).click();
+  await f.page.waitForURL('**/dashboard');
+  await f.page.getByRole('link', { name: 'Edit Navigation', exact: true }).click();
+  assert.equal(await input.inputValue(), 'Your name');
+});
+
+test('archived editor documents remain read-only and do not autosave', async (t) => {
+  const project = { ...projectFixtureData('Archived'), status: 'ARCHIVED' };
+  const f = await projectsFixture(t, browser, { projects: [project] });
+  await f.goto(`/projects/${project.id}/edit`);
+  await f.page.getByText(/This project is archived/).waitFor();
+  assert.equal(await f.page.getByLabel('Section heading', { exact: true }).isDisabled(), true);
+  assert.equal(await f.page.getByRole('button', { name: 'Add section', exact: true }).isDisabled(), true);
+  await f.page.waitForTimeout(1000); assert.equal(f.state.editorSaves, 0);
 });

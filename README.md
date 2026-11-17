@@ -2,7 +2,7 @@
 
 A full-stack portfolio builder using React, TypeScript, Express, PostgreSQL, and Prisma. The planned product lets users design portfolios and deploy them to GitHub Pages through GitHub OAuth and Octokit.
 
-Phases 1–3 implement the foundation, GitHub authentication, owner-scoped project CRUD, seeded templates, the project dashboard, and the new-project workflow. The editor and publishing engine are later phases in [ARCHITECTURE.md](ARCHITECTURE.md). Real GitHub sign-in requires registered OAuth credentials and a browser consent check.
+Phases 1–4 implement the foundation, GitHub authentication, owner-scoped projects, seeded templates, the dashboard/new-project workflow, and the portfolio editor with live preview, undo/redo, and autosave. Publishing remains Phase 5 in [ARCHITECTURE.md](ARCHITECTURE.md). Real GitHub sign-in requires registered OAuth credentials and a browser consent check.
 
 Read [System Overview](SYSTEM_OVERVIEW.md) for GitFolio's objective, planned user workflow, benefit analysis, limitations, and success measures. [Architecture](ARCHITECTURE.md#implementation-status) separates implemented code from the remaining plan.
 
@@ -29,6 +29,8 @@ Register the development app using [GitHub OAuth App configuration](docs/GITHUB_
 
 The API seeds four missing starter templates automatically at startup. Select **New project**, choose a template, enter the project details, and create a draft. The dashboard supports search, status filters, pagination, metadata editing, archive/restore, and confirmed deletion. Existing template records and project content are preserved on repeat seeding. Run `npm run db:seed` to initialize the catalog without starting the API. See [Project management](docs/PROJECT_MANAGEMENT.md) for API contracts and verification boundaries. Phase 3 uses the existing database schema and requires no new migration.
 
+Select a project's **Edit** link to add/edit/reorder/hide sections, customize colors/fonts/spacing, and preview at desktop/tablet/mobile widths. Edits save after an 800 ms pause; manual save and retry remain available. Undo/redo affects the local draft, and stale saves require a confirmed reload. **Phase 4 adds `20261118000000_editor_revision`: existing installations must run `npm run db:deploy` after PostgreSQL is running.** See [Portfolio editor](docs/PORTFOLIO_EDITOR.md) for persistence, navigation protection, and recovery limits.
+
 The Vite development server proxies `/api` to the configured backend so cookies remain on the frontend origin. Keep the exact `localhost` hostname during local sign-in. A production host must similarly route `/api` to the Express server and serve the SPA for frontend routes; Vite's development proxy is not included in a production build.
 
 | Service | Address |
@@ -48,9 +50,9 @@ The API connects to PostgreSQL and Redis before listening. Liveness checks the H
 | --- | --- |
 | `npm run build` | Build shared types, generate Prisma Client, and build server and client |
 | `npm run typecheck` | Check all workspaces |
-| `npm test` | Build and run server/client foundation, auth, and project/template tests |
+| `npm test` | Build and run server/client foundation, auth, project/template, and editor tests |
 | `npm run auth:setup` | Generate missing local JWT/encryption secrets without printing them |
-| `npm run test:browser --workspace=@gitfolio/client` | Run browser auth, dashboard, and new-project tests against a running client |
+| `npm run test:browser --workspace=@gitfolio/client` | Run browser auth, project, and editor workflows against a running client |
 | `npm run oauth:check` | Validate local GitHub OAuth settings without printing credentials |
 | `npm run db:validate` | Validate the Prisma schema |
 | `npm run db:deploy` | Apply the committed migrations without resetting data |
@@ -74,6 +76,6 @@ Remove-Item Env:GITFOLIO_TEST_DATABASE_URL
 
 The database tests reject other database names, use synthetic fixtures, and remove their fixtures afterward. Set `GITFOLIO_TEST_REDIS_URL` to a disposable Redis instance too to test server startup, readiness, and shutdown against both real services. Tests do not enqueue jobs or write Redis keys.
 
-Browser tests use synthetic API responses and cover OAuth, guards, project search/pagination, edit/archive/delete, template selection, creation/validation/conflicts, and mobile layout. They do not contact GitHub. After installing dependencies, run `npx playwright install chromium`, start `npm run dev:client` in another terminal, and run the browser command above. Alternatively, set `PLAYWRIGHT_CHANNEL=msedge` or `chrome` to use an installed browser. `GITFOLIO_BROWSER_BASE_URL` overrides the default `http://127.0.0.1:5173`. Passing browser tests do not verify real credentials, database persistence, or the consent round trip. The optional project-storage test exercises the real Prisma repositories and seeds against an explicitly named disposable database.
+Browser tests use synthetic API responses and cover OAuth, guards, projects/templates, section editing, themes, safe responsive preview, queued autosaves, failures/conflicts, and unsaved navigation. They do not contact GitHub. After installing dependencies, run `npx playwright install chromium`, start `npm run dev:client` in another terminal, and run the browser command above. Alternatively, set `PLAYWRIGHT_CHANNEL=msedge` or `chrome` to use an installed browser. `GITFOLIO_BROWSER_BASE_URL` overrides the default `http://127.0.0.1:5173`. Passing browser tests do not verify real credentials, database persistence, or the consent round trip. The optional project/editor-storage tests exercise real Prisma repositories, seeds, atomic section/theme updates, rollback, and concurrent revision checks against an explicitly named disposable database.
 
 Keep credentials and generated assets out of source changes; this repository already contains tracked `node_modules` files, so `.gitignore` only prevents newly generated files from being added.

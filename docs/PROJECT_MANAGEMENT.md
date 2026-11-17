@@ -24,7 +24,7 @@ All `/api/projects` routes require a verified JWT/session. The owner ID comes ex
 | PATCH | `/api/projects/:id` | Updates name, slug, repository name, or draft/archive state; does not change template or section content |
 | DELETE | `/api/projects/:id` | Deletes the owned project and cascading database records; does not delete a GitHub repository |
 
-Lists use the same pagination envelope as templates, with a maximum page size of 50. Slugs are lowercase, use single hyphens, and are unique per owner. Duplicate slugs return `409 PROJECT_SLUG_TAKEN`. `PUBLISHED` is read-only in Phase 3; publishing and section/theme editing belong to later phases. Project creation copies defaults into independent database JSON/section records rather than linking mutable template content. No new schema migration is needed for Phase 3; the foundation already defines these tables.
+Lists use the same pagination envelope as templates, with a maximum page size of 50. Slugs are lowercase, use single hyphens, and are unique per owner. Duplicate slugs return `409 PROJECT_SLUG_TAKEN`. Publishing remains a later phase; section/theme editing is covered by the [Phase 4 editor](PORTFOLIO_EDITOR.md). Project creation copies defaults into independent database JSON/section records rather than linking mutable template content. No new schema migration is needed for Phase 3; Phase 4 adds the editor revision counter.
 
 ## Client data layer
 
@@ -32,7 +32,7 @@ Lists use the same pagination envelope as templates, with a maximum page size of
 
 ## Dashboard
 
-Successful sign-in now defaults to `/dashboard`; explicit protected return destinations are preserved. The dashboard lists six projects per page, searches by name, filters by status, and sorts by update time/name using the API. Empty, loading, error/retry, and mobile states are provided. Manage opens project metadata settings; archive/restore retain content, while delete requires confirmation. `/account` remains available from workspace navigation. The portfolio editor and publishing actions remain separate later phases.
+Successful sign-in defaults to `/dashboard`; explicit protected return destinations are preserved. The dashboard lists six projects per page, searches by name, filters by status, and sorts by update time/name using the API. Empty, loading, error/retry, and mobile states are provided. **Edit** opens the portfolio editor; **Manage** opens project metadata settings. Archive/restore retain content, while delete requires confirmation. `/account` remains available from workspace navigation. Publishing actions remain planned.
 
 ## Creating a project
 

@@ -25,10 +25,9 @@ export function createEditorSaveCoordinator<Result extends { editorRevision: num
         const result = await options.request(snapshot, revision);
         revision = result.editorRevision;
         savedKey = key;
-        if (!options.active || options.active()) {
-          options.onSaved(snapshot, result);
-          options.onStatus({ phase: 'saved' });
-        }
+        // An acknowledged snapshot still belongs to its original draft after navigation.
+        options.onSaved(snapshot, result);
+        if (!options.active || options.active()) options.onStatus({ phase: 'saved' });
       } catch (error) {
         const code = typeof error === 'object' && error !== null && 'code' in error ? error.code : undefined;
         blocked = code === 'EDITOR_CONFLICT' || code === 'PROJECT_ARCHIVED';

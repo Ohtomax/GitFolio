@@ -13,16 +13,28 @@ import { SectionInspector } from '../components/editor/SectionInspector.tsx';
 import { useEditorPersistence } from '../hooks/useEditorPersistence.ts';
 import { ThemeControls } from '../components/editor/ThemeControls.tsx';
 import { EditorCanvas } from '../components/editor/EditorCanvas.tsx';
+import { useEditorNavigation } from '../hooks/useEditorNavigation.ts';
 
 function EditorWorkspace({ project }: { project: Project }) {
   const dirty = useEditor((state) => state.dirty);
   const panel = useEditor((state) => state.panel);
   const persistence = useEditorPersistence(project);
+  const navigation = useEditorNavigation();
   const readOnly = project.status === 'ARCHIVED';
   const disabled = readOnly || persistence.reloading;
-  return <EditorFrame name={project.name}
-    toolbar={<><span role="status" className="mr-2 text-xs text-stone-500">{persistence.status.phase === 'saving' ? 'Saving…' : dirty ? 'Unsaved changes' : 'All changes saved'}</span><EditorHistoryToolbar disabled={disabled} /><button type="button" className="rounded-lg border border-stone-300 bg-white px-3 py-2 text-xs disabled:opacity-40" disabled={persistence.status.phase === 'saving' || persistence.reloading} onClick={() => void persistence.reload()}>Reload saved version</button><button type="button" className="primary-button" disabled={disabled || !dirty || persistence.status.phase === 'saving' || persistence.status.phase === 'conflict'} onClick={() => void persistence.save()}>Save changes</button></>}
-    notice={persistence.message && <p role="alert" className="mb-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">{persistence.message}</p>}
+  const phase = persistence.status.phase;
+  const saveStatus = phase === 'saving' ? 'Saving…'
+    : phase === 'conflict' ? 'Save paused'
+    : phase === 'error' ? 'Changes not saved'
+    : !dirty ? 'All changes saved'
+    : persistence.recovered ? 'Recovered unsaved draft' : 'Unsaved changes · autosaves soon';
+  return <EditorFrame name={project.name} beforeLogout={navigation.beforeLogout}
+    toolbar={<><span role="status" className="mr-2 text-xs text-stone-500">{saveStatus}</span><EditorHistoryToolbar disabled={disabled} /><button type="button" className="rounded-lg border border-stone-300 bg-white px-3 py-2 text-xs disabled:opacity-40" disabled={persistence.status.phase === 'saving' || persistence.reloading} onClick={() => void persistence.reload()}>Reload saved version</button><button type="button" className="primary-button" disabled={disabled || !dirty || persistence.recovered || persistence.status.phase === 'saving' || persistence.status.phase === 'conflict'} onClick={() => void persistence.save()}>{persistence.status.phase === 'error' ? 'Retry save' : 'Save changes'}</button></>}
+    notice={<>
+      {navigation.blocker.state === 'blocked' && <div role="alert" className="mb-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950"><p>You have unsaved changes. Stay to finish saving, or leave the editor.</p><div className="mt-3 flex gap-3"><button type="button" className="rounded-lg border border-amber-300 px-3 py-2 text-xs font-semibold" onClick={() => navigation.blocker.reset?.()}>Stay here</button><button type="button" className="rounded-lg bg-amber-950 px-3 py-2 text-xs font-semibold text-white" onClick={navigation.leave}>Leave editor</button></div></div>}
+      {persistence.recovered && <div role="status" className="mb-5 rounded-xl border border-lime-200 bg-lime-50 p-4 text-sm text-stone-800"><p>An unsaved draft from this page session was recovered. Resume checks the saved version before autosave restarts.</p><button type="button" disabled={persistence.reloading || persistence.status.phase === 'conflict'} className="mt-3 rounded-lg border border-lime-700 px-3 py-2 text-xs font-semibold disabled:opacity-40" onClick={() => void persistence.resume()}>Resume draft</button></div>}
+      {persistence.message && <p role="alert" className="mb-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">{persistence.message}{phase === 'error' && (persistence.recovered ? ' Your draft is still here. Resume when the connection is available.' : ' Your changes are still here. Retry the save when ready.')}</p>}
+    </>}
     navigation={<SectionNavigation disabled={disabled} />}
     inspector={panel === 'sections' ? <SectionInspector disabled={disabled} /> : <ThemeControls project={project} disabled={disabled} />}
   >
@@ -36,6 +48,6 @@ export default function EditorPage() {
   const userId = useAuthStore((state) => state.user?.id ?? '');
   if (!valid) return <WorkspaceShell><main role="alert" className="mx-auto max-w-xl px-6 py-20"><h1 className="text-2xl font-semibold">This project link is invalid.</h1></main></WorkspaceShell>;
   if (project.isPending) return <PageSkeleton label="Loading your project" />;
-  if (project.isError) return <WorkspaceShell><main role="alert" className="mx-auto max-w-xl px-6 py-20"><h1 className="text-2xl font-semibold">This project couldn’t load.</h1><p className="my-4 text-stone-600">{errorMessage(project.error)}</p><button className="primary-button" onClick={() => void project.refetch()}>Try again</button></main></WorkspaceShell>;
-  return <EditorProvider key={`${userId}:${project.data.id}`} project={project.data}><EditorWorkspace project={project.data} /></EditorProvider>;
+  if (!project.data) return <WorkspaceShell><main role="alert" className="mx-auto max-w-xl px-6 py-20"><h1 className="text-2xl font-semibold">This project couldn’t load.</h1><p className="my-4 text-stone-600">{errorMessage(project.error)}</p><button className="primary-button" onClick={() => void project.refetch()}>Try again</button></main></WorkspaceShell>;
+  return <EditorProvider key={`${userId}:${project.data.id}`} ownerId={userId} project={project.data}><EditorWorkspace project={project.data} /></EditorProvider>;
 }

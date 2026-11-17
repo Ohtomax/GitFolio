@@ -52,3 +52,18 @@ test('network errors can be retried without marking an unsaved document clean', 
   edit(store, 'Offline draft'); assert.equal(await coordinator.flush(), false); assert.equal(store.getState().dirty, true);
   fail = false; assert.equal(await coordinator.flush(), true); assert.equal(store.getState().dirty, false);
 });
+
+test('a late acknowledgement updates only the original draft and does not start another request after unmount', async () => {
+  const store = createEditorStore(initial()); let active = true; let calls = 0; let savedRevision = 0;
+  let finish: (result: { editorRevision: number }) => void = () => {};
+  const coordinator = createEditorSaveCoordinator({ revision: 0, baseline: store.getState().savedDocument,
+    getDocument: () => store.getState().document, active: () => active, onStatus: () => {},
+    onSaved(snapshot, result) { savedRevision = result.editorRevision; store.getState().markSaved(snapshot); },
+    request: async () => { calls++; return new Promise<{ editorRevision: number }>((resolve) => { finish = resolve; }); },
+  });
+  edit(store, 'Sent'); const pending = coordinator.flush();
+  edit(store, 'Still local'); void coordinator.flush(); active = false;
+  finish({ editorRevision: 1 }); assert.equal(await pending, false);
+  assert.equal(savedRevision, 1); assert.equal(calls, 1); assert.equal(store.getState().dirty, true);
+  assert.equal(store.getState().document.sections[0].content.heading, 'Still local');
+});
