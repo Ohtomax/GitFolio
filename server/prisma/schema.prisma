@@ -30,6 +30,10 @@ model User {
   name                 String?
   avatarUrl            String?
   encryptedAccessToken String       @db.Text
+  encryptedRefreshToken String?      @db.Text
+  accessTokenExpiresAt  DateTime?     @db.Timestamptz(3)
+  refreshTokenExpiresAt DateTime?     @db.Timestamptz(3)
+  githubScopes          String        @default("")
   createdAt            DateTime     @default(now()) @db.Timestamptz(3)
   updatedAt            DateTime     @updatedAt @db.Timestamptz(3)
   projects             Project[]

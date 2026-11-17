@@ -915,7 +915,7 @@ Phase 1 implementation and local setup commands are documented in [README.md](RE
 - [ ] Auth module (controller, service, routes), including one-time state and PKCE
 - [ ] JWT issuance & verification middleware
 - [x] GitHub access token encryption/decryption using AES-256-GCM
-- [ ] GitHub token expiration, refresh-token rotation, and supporting storage
+- [x] GitHub token expiration, refresh-token rotation, and supporting storage
 - [ ] Client auth store (Zustand)
 - [ ] Login page & OAuth callback component
 - [ ] AuthGuard route wrapper
