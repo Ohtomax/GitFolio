@@ -955,7 +955,7 @@ Phase 1 implementation and local setup commands are documented in [README.md](RE
 
 - [x] BullMQ queue setup & worker registration
 - [x] Static site generation (Mustache templates → HTML/CSS/JS)
-- [ ] React project generation (with GitHub Actions workflow)
+- [x] React project generation (with GitHub Actions workflow)
 - [ ] GitHub provider: repo creation, tree commit, Pages enablement
 - [ ] Deploy status API + client polling
 - [ ] Deploy history & logs UI
