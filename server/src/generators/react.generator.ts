@@ -30,7 +30,9 @@ const mount = ${mountPortfolioInteractions.toString()};
 function Node({node}) {
   if(typeof node==='string') return node;
   const {class:className,tabindex,...attrs}=node.attrs;
-  return createElement(node.tag,{...attrs,className,...(tabindex?{tabIndex:Number(tabindex)}:{})},
+  const aliases={for:'htmlFor',maxlength:'maxLength',autocomplete:'autoComplete',spellcheck:'spellCheck'};
+  const reactAttrs=Object.fromEntries(Object.entries(attrs).map(([key,value])=>[aliases[key]||key,value]));
+  return createElement(node.tag,{...reactAttrs,className,...(tabindex?{tabIndex:Number(tabindex)}:{})},
     ...(node.tag==='input'?[]:node.children.map((child,index)=><Node key={index} node={child}/>)));
 }
 export default function App(){const root=useRef(null);useEffect(()=>mount(root.current),[]);

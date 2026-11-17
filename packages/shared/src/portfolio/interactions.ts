@@ -17,7 +17,7 @@ export function mountPortfolioInteractions(root: ParentNode): () => void {
         links: Array.from(form.querySelectorAll<HTMLAnchorElement>('a')).map((a) => `${a.textContent}: ${a.href}`).join(' | ') || 'No links configured.',
       };
       const row = document.createElement('p');
-      row.textContent = `$ ${command}\n${lines[command] ?? 'Unknown command. Type help for available commands.'}`;
+      row.textContent = `$ ${command}\n${Object.hasOwn(lines, command) ? lines[command] : 'Unknown command. Type help for available commands.'}`;
       output.append(row);
       while (output.childElementCount > 6) output.firstElementChild?.remove();
       input.value = '';

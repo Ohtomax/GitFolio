@@ -12,6 +12,8 @@ export function DesignedPortfolio({ document, selectedId, onSelect, interactive 
   function render(node: PortfolioNode, key: number | string): ReactNode {
     if (typeof node === 'string') return node;
     const { class: className = '', tabindex, ...attrs } = node.attrs;
+    const reactAttrs: Record<string, string> = {};
+    const aliases: Record<string, string> = { for: 'htmlFor', maxlength: 'maxLength', autocomplete: 'autoComplete', spellcheck: 'spellCheck' };
     const sectionId = attrs['data-section-id'];
     const children = node.children.map((child, i) => render(child, i));
     if (sectionId && onSelect) children.unshift(<button key="edit" className="pf-edit" type="button" aria-pressed={selectedId === sectionId}
@@ -19,8 +21,9 @@ export function DesignedPortfolio({ document, selectedId, onSelect, interactive 
     const isExternal = node.tag === 'a' && !attrs.href?.startsWith('#');
     if ((!interactive || thumbnail) && isExternal) { delete attrs.href; delete attrs.target; delete attrs.rel; }
     if (thumbnail) { delete attrs.id; delete attrs['aria-label']; }
+    Object.entries(attrs).forEach(([key, value]) => { reactAttrs[aliases[key] ?? key] = value; });
     return createElement(node.tag === 'a' && isExternal && (!interactive || thumbnail) ? 'span' : node.tag,
-      { ...attrs, className: `${className}${sectionId && onSelect && selectedId === sectionId ? ' pf-selected' : ''}`,
+      { ...reactAttrs, className: `${className}${sectionId && onSelect && selectedId === sectionId ? ' pf-selected' : ''}`,
         ...(tabindex ? { tabIndex: Number(tabindex) } : {}), ...(thumbnail ? { tabIndex: -1 } : {}),
         ...(['input', 'button'].includes(node.tag) && (!interactive || thumbnail) ? { disabled: true } : {}), key },
       ...(node.tag === 'input' ? [] : children));

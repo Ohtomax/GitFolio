@@ -36,7 +36,7 @@ for (const template of BUILTIN_TEMPLATES) {
     if(c.items?.length) lines.push('');
     if(c.buttonLabel) lines.push(`CTA: [${c.buttonLabel}](${c.buttonUrl})`, '');
   });
-  writeFileSync(new URL(`${theme.layout}.md`, root), lines.join('\n')+'\n');
+  writeFileSync(new URL(`${theme.layout}.md`, root), lines.join('\n').trimEnd()+'\n');
 }
 writeFileSync(new URL('../docs/portfolio-templates.json', import.meta.url), JSON.stringify(BUILTIN_TEMPLATES, null, 2)+'\n');
 const index = `# GitFolio portfolio templates

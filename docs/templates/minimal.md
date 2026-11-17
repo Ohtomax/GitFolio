@@ -101,4 +101,3 @@ I’m interested in small, ambitious teams building products people rely on. Tel
 Tags: Open to thoughtful collaborations
 
 CTA: [alex@example.com ↗](mailto:alex@example.com)
-

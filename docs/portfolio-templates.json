@@ -160,5 +160,174 @@
         }
       ]
     }
+  },
+  {
+    "id": "10000000-0000-4000-8000-000000000002",
+    "name": "The Terminal / Cyberpunk",
+    "description": "A compact, phosphor-lit command-line portfolio for engineers who make complex systems dependable.",
+    "category": "developer",
+    "thumbnailUrl": null,
+    "isReact": true,
+    "defaultConfig": {
+      "theme": {
+        "colors": {
+          "accent": "#86EFAC",
+          "background": "#0B0F0C",
+          "text": "#E4F1E8",
+          "muted": "#A0B4A6",
+          "surface": "#101812",
+          "border": "#2C4332"
+        },
+        "font": "mono",
+        "spacing": "compact",
+        "layout": "terminal",
+        "headingFont": "mono",
+        "demo": true
+      },
+      "sections": [
+        {
+          "type": "hero",
+          "content": {
+            "heading": "Systems that stay boring. In the best way.",
+            "description": "I build the infrastructure behind the interface: observable services, repeatable deployments, and failure modes you can actually explain. Based in Toronto. Comfortable on call.",
+            "eyebrow": "Jules Park / Infrastructure engineer",
+            "subtitle": "Backend · Platform · Reliability",
+            "buttonLabel": "open contact →",
+            "buttonUrl": "mailto:jules@example.com",
+            "tags": [
+              "Go",
+              "Rust",
+              "Linux"
+            ],
+            "metrics": [
+              {
+                "value": "99.95%",
+                "label": "Example service SLO"
+              },
+              {
+                "value": "8 min",
+                "label": "Recovery drill target"
+              },
+              {
+                "value": "42",
+                "label": "Runbooks maintained"
+              }
+            ]
+          },
+          "visible": true
+        },
+        {
+          "type": "experience",
+          "content": {
+            "heading": "git log --experience",
+            "description": "A changelog of problems I’ve helped make smaller.",
+            "items": [
+              {
+                "title": "Staff Platform Engineer · Signal Harbor",
+                "subtitle": "2024 → HEAD",
+                "description": "Standardized service ownership and rollback paths across 18 services. Turned incident reviews into tracked reliability improvements.",
+                "tags": [
+                  "Kubernetes",
+                  "OpenTelemetry",
+                  "Go"
+                ]
+              },
+              {
+                "title": "Backend Engineer · Packet Works",
+                "subtitle": "2021 → 2024",
+                "description": "Built event ingestion and idempotent processing pipelines. Replaced manual release steps with repeatable, reviewable automation.",
+                "tags": [
+                  "PostgreSQL",
+                  "Terraform",
+                  "Kafka"
+                ]
+              }
+            ]
+          },
+          "visible": true
+        },
+        {
+          "type": "projects",
+          "content": {
+            "heading": "ls ~/repositories",
+            "description": "Small tools. Clear contracts. Fewer surprises.",
+            "items": [
+              {
+                "title": "watchtower",
+                "subtitle": "Service health without the guesswork",
+                "description": "A lightweight probe runner with useful exit codes, structured logs, and an intentionally small configuration surface.",
+                "url": "https://example.com/watchtower",
+                "tags": [
+                  "Go",
+                  "Observability"
+                ]
+              },
+              {
+                "title": "driftctl-lab",
+                "subtitle": "Infrastructure changes, explained",
+                "description": "An experimental plan reviewer that annotates infrastructure diffs with ownership and rollback notes.",
+                "url": "https://example.com/driftctl-lab",
+                "tags": [
+                  "Rust",
+                  "Terraform"
+                ]
+              },
+              {
+                "title": "queue-notes",
+                "subtitle": "Distributed systems, tested locally",
+                "description": "Executable notes on retries, idempotency, dead letters, and what happens when the worker disappears.",
+                "url": "https://example.com/queue-notes",
+                "tags": [
+                  "TypeScript",
+                  "Redis"
+                ]
+              }
+            ]
+          },
+          "visible": true
+        },
+        {
+          "type": "skills",
+          "content": {
+            "heading": "cat toolchain.toml",
+            "description": "Tools I reach for after understanding the constraints.",
+            "items": [
+              {
+                "title": "[languages]",
+                "description": "Go · Rust · Python · TypeScript · SQL"
+              },
+              {
+                "title": "[platform]",
+                "description": "Linux · Docker · Kubernetes · Terraform · GitHub Actions"
+              },
+              {
+                "title": "[practice]",
+                "description": "Threat modeling · SLOs · Incident response · Capacity planning"
+              }
+            ]
+          },
+          "visible": true
+        },
+        {
+          "type": "about",
+          "content": {
+            "heading": "cat README.md",
+            "description": "I’m Jules. I like tracing a vague symptom to a concrete cause, writing down what I learn, and leaving a system easier to operate than I found it.\n\nMy favorite fix is often a smaller abstraction, a better error message, or a runbook someone can trust at 3 a.m."
+          },
+          "visible": true
+        },
+        {
+          "type": "contact",
+          "content": {
+            "heading": "./connect",
+            "description": "Working on a reliability problem, an infrastructure tool, or a team that values operational craft? Send a note. The shell below supports help, email, links, and clear.",
+            "subtitle": "No handshake ceremony required.",
+            "buttonLabel": "jules@example.com",
+            "buttonUrl": "mailto:jules@example.com"
+          },
+          "visible": true
+        }
+      ]
+    }
   }
 ]
