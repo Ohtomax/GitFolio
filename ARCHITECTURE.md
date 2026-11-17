@@ -914,7 +914,7 @@ Phase 1 implementation and local setup commands are documented in [README.md](RE
 - [ ] GitHub OAuth App registration and local credentials — credentials are missing; registration is unverified as of this review
 - [ ] Auth module (controller, service, routes), including one-time state and PKCE
 - [ ] JWT issuance & verification middleware
-- [ ] GitHub access token encryption/decryption using AES-256-GCM
+- [x] GitHub access token encryption/decryption using AES-256-GCM
 - [ ] GitHub token expiration, refresh-token rotation, and supporting storage
 - [ ] Client auth store (Zustand)
 - [ ] Login page & OAuth callback component
