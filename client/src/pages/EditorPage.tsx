@@ -1,4 +1,5 @@
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
+import type { MouseEvent } from 'react';
 import { IdParamsSchema, type Project } from '@gitfolio/shared';
 import { EditorFrame } from '../components/editor/EditorFrame.tsx';
 import { PageSkeleton } from '../components/common/PageSkeleton.tsx';
@@ -38,6 +39,7 @@ function EditorWorkspace({ project }: { project: Project }) {
     navigation={<SectionNavigation disabled={disabled} />}
     inspector={panel === 'sections' ? <SectionInspector disabled={disabled} /> : <ThemeControls project={project} disabled={disabled} />}
   >
+    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-stone-200 bg-white px-4 py-3"><p className="text-[11px] text-stone-400">{readOnly ? 'View previous deployments for this archived project.' : dirty ? 'Save your changes before publishing.' : 'Your saved version is ready to publish.'}</p><Link to={`/projects/${project.id}/deployments`} aria-disabled={dirty || phase === 'saving' || persistence.reloading} onClick={(event: MouseEvent<HTMLAnchorElement>) => { if (dirty || phase === 'saving' || persistence.reloading) event.preventDefault(); }} className={`rounded-lg border border-stone-300 px-3 py-2 text-xs font-semibold ${dirty || phase === 'saving' ? 'text-stone-300' : 'text-lime-800'}`}>Publish &amp; history</Link></div>
     <EditorCanvas archived={readOnly} />
   </EditorFrame>;
 }

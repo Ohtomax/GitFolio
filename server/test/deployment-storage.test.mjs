@@ -83,6 +83,15 @@ test('real deployment storage enforces ownership/idempotency, captures immutable
     await assert.rejects(failure(failed.id), { message: 'Deployment could not finish' });
     assert.ok(!JSON.stringify(await service.get(f.ownerId, failed.id)).includes('private-provider'));
     assert.equal((await service.get(f.ownerId, failed.id)).errorCode, 'DEPLOYMENT_FAILED');
+    const fastFailure = await repository.start(f.ownerId, fresh.id, inputFor(fresh));
+    const buildUrl = 'https://github.com/fixture-user/gitfolio-lease-fixture/actions/runs/789';
+    const fastProcessor = createDeploymentProcessor(worker, { async getAccessToken() { return 'private-token'; } }, () => ({
+      async prepare() { return {}; }, async publish() { return { ...source, repo: 'gitfolio-lease-fixture', repositoryUrl: 'https://github.com/fixture-user/gitfolio-lease-fixture' }; },
+      async check() { return { status: 'failed', buildUrl }; },
+    }));
+    await assert.rejects(fastProcessor(fastFailure.id));
+    const failedBuild = await service.get(f.ownerId, fastFailure.id);
+    assert.equal(failedBuild.errorCode, 'BUILD_FAILED'); assert.equal(failedBuild.buildUrl, buildUrl);
     const race = await projects.create(f.ownerId, { name: 'Race fixture', slug: 'race-fixture', templateId: templateSeedData[0].id });
     const raceEdit = SaveEditorSchema.parse({ baseRevision: 0, themeConfig: race.themeConfig, sections: race.sections.map(({ sortOrder, ...section }) => section) });
     raceEdit.sections[0].content.heading = 'Concurrent edit';

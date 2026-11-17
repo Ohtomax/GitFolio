@@ -2,7 +2,7 @@
 
 Open a project's **Edit** link on the dashboard to reach `/projects/:id/edit`. The lazy-loaded route uses AuthGuard and the owner-scoped project detail API. Its responsive layout has section navigation, a canvas, and a property panel, with explicit loading/error/empty states. Archived projects are identified in the workspace.
 
-All six Phase 4 checklist items are implemented and committed separately. Publishing remains Phase 5.
+All six Phase 4 checklist items are implemented and committed separately. After saving, **Publish & history** opens the [Phase 5 deployment workspace](DEPLOYMENT_ENGINE.md). Pending local edits disable that link until they are saved; publishing snapshots a reviewed saved version rather than streaming every edit to GitHub.
 
 ## Editor state
 

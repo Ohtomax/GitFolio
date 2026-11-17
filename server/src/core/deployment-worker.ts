@@ -11,7 +11,9 @@ import { createGitHubProvider } from '../providers/github.js';
 import { createEncryptionService } from '../utils/encryption.js';
 import type { Worker } from 'bullmq';
 
-export async function startDeploymentWorker(environment: Environment, logger: Logger) {
+export async function startDeploymentWorker(environment: Environment, logger: Logger, options: {
+  publisher?: Parameters<typeof createDeploymentProcessor>[2]; queuePrefix?: string;
+} = {}) {
   const oauth = getGitHubOAuthConfiguration(environment);
   if (!oauth || !environment.ENCRYPTION_KEY) return null;
   const database = createDatabase(environment);
@@ -30,8 +32,8 @@ export async function startDeploymentWorker(environment: Environment, logger: Lo
     await database.$connect();
     const repository = createDeploymentWorkerRepository(database);
     const tokens = createGitHubTokenService(createAuthRepository(database), createGitHubProvider(oauth), createEncryptionService(environment.ENCRYPTION_KEY));
-    queue = createDeploymentQueue(environment.REDIS_URL, logger);
-    worker = registerDeploymentWorker(environment.REDIS_URL, logger, createDeploymentProcessor(repository, tokens, undefined, () => stopping));
+    queue = createDeploymentQueue(environment.REDIS_URL, logger, options.queuePrefix);
+    worker = registerDeploymentWorker(environment.REDIS_URL, logger, createDeploymentProcessor(repository, tokens, options.publisher, () => stopping), options.queuePrefix);
     let connectionTimeout: ReturnType<typeof setTimeout> | undefined;
     try {
       await Promise.race([Promise.all([worker.waitUntilReady(), queue.queue.waitUntilReady()]), new Promise<never>((_resolve, reject) => {

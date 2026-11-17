@@ -2,7 +2,7 @@
 
 > A planned full-stack SaaS for designing static or React portfolios and publishing them to GitHub Pages through a browser-based workflow.
 
-**Status reviewed: November 18, 2026 (Asia/Manila).** Phases 1–4 are implemented in source, including authentication, project management, and the portfolio editor. Live GitHub consent and production verification remain separate checks. The diagrams and feature contracts below describe the target architecture unless explicitly marked as implemented.
+**Status reviewed: November 18, 2026 (Asia/Manila).** Phases 1–5 are implemented in source, including authentication, project management, the portfolio editor, and the deployment engine. Live GitHub consent/Pages publishing and production verification remain separate checks. The diagrams and feature contracts below describe the target architecture unless explicitly marked as implemented.
 
 For the product objective, user workflow, benefits, and limitations, read [System Overview](SYSTEM_OVERVIEW.md). For installation commands, read [README.md](README.md).
 
@@ -46,25 +46,26 @@ These statuses are based on the checked-in source, rather than the presence of a
 | GitHub authentication | Code implemented; registration/live consent pending | [Auth module](server/src/modules/auth/auth.module.ts), one-time state/PKCE, JWT verification/revocation, AES-256-GCM, and token refresh; [details](docs/AUTHENTICATION.md) |
 | Project management | Implemented | [Project module](server/src/modules/project/project.route.ts), [seeded catalog](server/src/modules/template/template.seed.ts), dashboard, template picker/setup form, and query hooks; [guide](docs/PROJECT_MANAGEMENT.md) |
 | Portfolio editor | Implemented | [Editor workspace](client/src/pages/EditorPage.tsx), sections, theme controls, live preview, undo/redo, and debounced revision-checked saves; [guide](docs/PORTFOLIO_EDITOR.md) |
-| Publishing | Planned | No GitHub repository/Pages provider, site generator, BullMQ queue, or deployment worker is implemented |
+| Publishing | Implemented in source | [Generators](server/src/generators), [GitHub provider](server/src/providers/github-deploy.ts), [worker](server/src/core/deployment-worker.ts), [deployment API](server/src/modules/deployment/deployment.route.ts), and [history UI](client/src/pages/DeploymentsPage.tsx); [guide](docs/DEPLOYMENT_ENGINE.md) |
 | Production operation | Planned | No production deployment or end-to-end GitHub Pages publishing has been verified |
 
 ### Current executable behavior
 
-- `npm run dev` builds the shared package, generates Prisma Client, and starts the shared, server, and client watchers.
-- The API connects to both PostgreSQL and Redis before listening. Redis is already a startup dependency; queue processing itself is still planned.
+- `npm run dev` builds shared/server code, generates Prisma Client, and starts shared, API, client, and deployment-worker watchers.
+- The API connects to PostgreSQL and Redis before listening. The separate BullMQ worker uses those services for queued publishing and recovery.
 - `GET /api/health` checks the HTTP process. `GET /api/health/ready` queries PostgreSQL and pings Redis, returning HTTP 503 if a dependency check fails. Both routes are under the API rate limiter.
-- The frontend processes OAuth callbacks and protects `/account`, `/dashboard`, `/projects/new`, and `/projects/:id/edit` with AuthGuard. Successful sign-in defaults to the dashboard. Vite proxies `/api` to Express for same-origin cookies.
+- The frontend processes OAuth callbacks and protects `/account`, `/dashboard`, `/projects/new`, `/projects/:id/edit`, and `/projects/:id/deployments` with AuthGuard. Successful sign-in defaults to the dashboard. Vite proxies `/api` to Express for same-origin cookies.
 - `/api/projects` implements owner-scoped CRUD and paginated search/filtering. `/api/templates` supplies an authenticated catalog with validated defaults. Four missing templates are seeded at startup; `npm run db:seed` is also available.
 - `PATCH /api/projects/:id/editor` atomically saves ordered sections/theme against a base revision. The editor uses an isolated Zustand history, responsive live preview, and 800 ms debounced TanStack Query mutations. Apply the editor-revision migration before using saves.
 - `/api/auth/github`, `/api/auth/github/callback`, `/api/auth/me`, and `/api/auth/logout` implement authentication. Missing OAuth credentials or application secrets disable auth safely with HTTP 503.
+- `/api/auth/github/publish` explicitly authorizes publishing permissions for the current GitHub account. Deployment creation snapshots the reviewed version/target; status/history reads enforce ownership and reveal a Pages URL only after a matching successful build.
 - `npm run oauth:check` validates local configuration without connecting to PostgreSQL or Redis. It does not verify GitHub-issued credentials or perform sign-in.
 
 ### Verification boundaries
 
 Automated tests exist for HTTP behavior, configuration, OAuth callback rules, credential redaction, database relationships, and server lifecycle. Database and full server integration tests require explicitly supplied disposable service URLs and may be skipped during a normal test run. A committed migration, a passing configuration check, and a working live deployment are separate pieces of evidence.
 
-Unit/HTTP tests and browser tests with synthetic API responses validate authentication, project management, and editor behavior. Real database/Redis integrations require explicitly supplied disposable service URLs and are skipped when unavailable. The editor-storage suite verifies concurrent saves and rollback with real Prisma transactions. GitHub consent and production deployment remain separate verification steps.
+Unit/HTTP tests and browser tests with synthetic API responses validate authentication, projects, editor, and deployment workflows. Real PostgreSQL suites verify concurrent saves, immutable deployment snapshots, idempotency, active-target constraints, and worker leases. Generated React output is independently installed/built, and both formats are checked under project-site paths in a browser. Redis-backed checks require a disposable Redis URL. Live GitHub consent, real repository/Pages operations, and production deployment remain separate verification steps.
 
 ---
 
@@ -90,7 +91,7 @@ GitHub Pages serves static websites and has plan, usage, and content restriction
 
 ## 2. High-Level Architecture
 
-**Planned product architecture.** The foundation, authentication, templates, project management, and portfolio editor are implemented. The deployment pipeline shown here remains future work.
+**Product architecture.** The foundation, authentication, templates, project management, portfolio editor, and deployment pipeline are implemented in source. Production hosting and a real GitHub consent/Pages round trip remain unverified.
 
 ```
 ┌───────────────────────────────────────────────────────────────────┐
@@ -261,7 +262,7 @@ gitfolio/
 
 ## 5. Client Architecture
 
-The login, callback, account, dashboard, template picker/setup form, auth store, feature query hooks, and AuthGuard are implemented. The frontend development server is pinned to port 5173. Editor and deployment screens remain planned.
+Login/callback/account pages, project/template workflows, editor, deployment history/logs, state stores, query hooks, and AuthGuard are implemented. The frontend development server is pinned to port 5173.
 
 ### 5.1 Routing
 
@@ -272,8 +273,8 @@ The login, callback, account, dashboard, template picker/setup form, auth store,
 | `/dashboard`                 | Dashboard           | Implemented owner list, search/filter/pagination, metadata editing, archive/restore/delete |
 | `/projects/new`              | New Project         | Implemented template selection and validated project setup |
 | `/projects/:id/edit`         | Editor              | Visual portfolio editor              |
-| `/projects/:id/deploy`       | Deploy              | Deploy trigger & status tracking     |
-| `/projects/:id/settings`     | Project Settings    | Repo name, custom domain, etc.       |
+| `/projects/:id/deployments`  | Deployments         | Publishing, progress, paginated history, and logs |
+| `/projects/:id/settings`     | Planned route       | Current metadata settings use the dashboard dialog; custom domains are unsupported |
 | `/account`                   | Account             | Protected connected profile and logout; preferences remain planned |
 
 ### 5.2 State Management Strategy
@@ -340,7 +341,7 @@ modules/<feature>/
 
 ### 6.2 Module Breakdown
 
-Authentication, project CRUD, and the template catalog are implemented. Editing content, revision tracking, user profile updates, and deployment remain planned.
+Authentication, projects/templates, editor saves, deployment snapshots, and the publishing pipeline are implemented. Persistent editor-version rollback and user profile updates remain planned.
 
 #### Auth Module
 - **OAuth Flow**: Redirect → GitHub → Callback → Token exchange
@@ -389,13 +390,13 @@ Future feature routes must add server-side JWT verification, ownership checks, a
 
 ### 6.4 Providers (External Services)
 
-The OAuth provider [github.ts](server/src/providers/github.ts) handles code exchange, refresh, and profile reads. Repository/Pages and queue provider files below remain planned. Database and Redis clients are created in [database.ts](server/src/config/database.ts) and [redis.ts](server/src/config/redis.ts); lifecycle handling lives in [server.ts](server/src/core/server.ts).
+The OAuth provider [github.ts](server/src/providers/github.ts) handles exchange, refresh, and profile reads. [github-deploy.ts](server/src/providers/github-deploy.ts) implements managed repository/Pages operations. [deployment.queue.ts](server/src/queues/deployment.queue.ts) registers producers/workers. Database and Redis clients live in [database.ts](server/src/config/database.ts) and [redis.ts](server/src/config/redis.ts); API/worker runtime composition lives under `server/src/core`.
 
 ```
 providers/
-├── github.provider.ts          # Octokit wrapper — repo ops, commits, Pages API
-├── redis.provider.ts           # ioredis connection singleton
-└── queue.provider.ts           # BullMQ queue/worker factory
+├── github.ts                   # OAuth exchange, refresh, identity
+└── github-deploy.ts            # Octokit repo/tree/Pages/build operations
+queues/deployment.queue.ts      # BullMQ producer/worker factory
 ```
 
 ---
@@ -412,10 +413,12 @@ packages/shared/src/
 ├── validation/api.schema.ts       # ApiErrorSchema and HealthResponseSchema
 ├── validation/auth.schema.ts      # Auth user/session and OAuth callback schemas
 ├── validation/template.schema.ts  # Template defaults, pagination, theme/section shapes
-└── validation/project.schema.ts   # Create/update/query and project response DTOs
+├── validation/project.schema.ts   # Project request/response DTOs
+├── validation/editor.schema.ts    # Sections, links, revision-checked saves
+└── validation/deployment.schema.ts # Publishing, history, status, and safe links
 ```
 
-Auth, project, and template schemas and pagination contracts are implemented. Deployment payload schemas remain planned. Shared browser validation complements server validation; it does not replace server enforcement.
+Auth, project/template, editor, and deployment schemas and pagination contracts are implemented. Shared browser validation complements server validation; it does not replace server enforcement.
 
 ---
 
@@ -509,7 +512,7 @@ erDiagram
 - **Ownership constraint**: A deployment references the composite project key `(id, userId)`, preventing a mismatched deployment owner at the database boundary. Future API services must still authenticate the caller and filter by ownership.
 - **Uniqueness and deletion**: Project slugs are unique per user. User/project deletion cascades to dependent records; templates referenced by projects cannot be deleted.
 - **Indexes**: Owner/update-time, section ordering, template category, and deployment history/status indexes support the planned access patterns.
-- **Remaining storage design**: Project revisions remain planned. Expiring GitHub tokens use PostgreSQL; one-time OAuth state and revocable application sessions use Redis TTLs.
+- **Version storage**: Editor revision counters prevent stale writes; deployment snapshots retain the exact submitted version/target. Persistent editor rollback/history remains planned. Expiring GitHub tokens use PostgreSQL; OAuth state and application sessions use Redis TTLs.
 
 ---
 
@@ -601,17 +604,17 @@ The auth API restricts profile reads to the JWT's user ID, and logout revokes it
 
 ## 10. GitHub Integration Pipeline
 
-**Planned for Phase 5.** No GitHub repository, file commit, workflow, or Pages operation is implemented yet.
+**Implemented in Phase 5.** Generators, managed repositories, tree commits, workflow/Pages settings, exact-commit build verification, and history UI are implemented. Live GitHub operation is unverified; [Deployment engine](docs/DEPLOYMENT_ENGINE.md) is the current contract and recovery guide.
 
 ### Octokit Operations
 
-The planned `github.provider.ts` will wrap these Octokit capabilities:
+`github-deploy.ts` calls the Octokit REST operations below after checking account/project ownership:
 
 | Operation                      | Octokit Method                                 | When Used                     |
 |-------------------------------|-----------------------------------------------|-------------------------------|
 | Create repository              | `octokit.repos.createForAuthenticatedUser()`  | First deploy                  |
 | Check repo exists              | `octokit.repos.get()`                          | Subsequent deploys            |
-| Create/update file             | `octokit.repos.createOrUpdateFileContents()`  | Each file in the portfolio    |
+| Update branch ref              | Git refs API with `force: false`             | Publish one generated tree    |
 | Create tree + commit (batch)   | `octokit.git.createTree()` / `createCommit()` | Bulk file commit              |
 | Enable GitHub Pages            | `octokit.repos.createPagesSite()`              | First deploy                  |
 | Get Pages deployment status    | `octokit.repos.getPages()`                     | Status polling                |
@@ -621,24 +624,19 @@ The planned `github.provider.ts` will wrap these Octokit capabilities:
 ```
 <user>.github.io/<repo>/
 ├── index.html              # Main portfolio page
-├── styles/
-│   └── main.css            # Generated styles
-├── scripts/
-│   └── main.js             # Optional interactivity
-├── assets/
-│   └── ...                 # User-uploaded images
-└── .github/
-    └── workflows/
-        └── deploy.yml      # GitHub Actions workflow (if React)
+├── style.css               # Static output styles
+├── script.js               # Static output interactivity
+├── .nojekyll
+└── .gitfolio.json          # Managed project/deployment/file manifest
 ```
 
-For React-based templates, the planned generator will supply a GitHub Actions workflow to build static output for Pages. Generation must account for project-site base paths such as `/<repo>/`; it cannot publish an Express server to Pages.
+React templates instead contain a standalone package/lockfile, Vite configuration, `src/` JSX/JSON/CSS, `public/.nojekyll`, and `.github/workflows/pages.yml`. Pinned actions build and deploy its static `dist/` output. Both formats use relative assets for repository subpaths; Pages does not host the Express API or worker.
 
 ---
 
 ## 11. Background Job Processing
 
-**Planned for Phase 5.** Redis connection/ping support is implemented, and BullMQ is installed. Queue creation, worker registration, retries, and persistent job/status coordination are not implemented.
+**Implemented in Phase 5.** The queue contains only deployment UUIDs. PostgreSQL supplies immutable snapshots, idempotency, active-project/target constraints, leases, safe logs, and an outbox that the separate worker reconciles. Real Redis execution remains an optional service-backed verification step.
 
 ### BullMQ Architecture
 
@@ -670,15 +668,17 @@ PENDING  →  BUILDING  →  PUSHING  →  DEPLOYING  →  LIVE
 
 ### Queue Configuration
 
-The following are proposed operating targets, not current settings. Worker timeouts need explicit enforcement during implementation, and retries must avoid duplicate repositories or unsafe repeated writes. Concurrency/backoff must respect GitHub's [API limits](https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api).
+Current settings are below. Redis reconnection, stalled-job recovery, and delayed build verification are distinct from a user starting a new attempt after a terminal GitHub failure. GitHub's [API limits](https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api) still apply.
 
 | Setting              | Value              | Rationale                          |
 |---------------------|--------------------|------------------------------------|
-| **Concurrency**      | 3                  | Respect GitHub API rate limits     |
-| **Max Retries**      | 3                  | Handle transient API failures      |
-| **Backoff**          | Exponential (2s)   | Avoid hammering on failures        |
-| **Job Timeout**      | 120s               | Prevent stuck jobs                 |
-| **Remove on Complete** | After 24h        | Keep recent history for debugging  |
+| **Concurrency**      | 2                  | Bounded publishing work            |
+| **Queue Attempts**   | 1; up to 2 stalled recoveries | Database/outbox and manifest support crash recovery |
+| **Build Checks**     | Delayed 5 seconds  | Verify the exact published commit  |
+| **Attempt Deadline** | 30 minutes         | Fail attempts that do not finish   |
+| **Database Lease**   | 90s; heartbeat 20s | Fence overlapping worker attempts  |
+| **Completed Jobs**   | 24h / 1000 jobs    | Persistent history stays in PostgreSQL |
+| **Failed Jobs**      | 7 days / 1000 jobs | Safe generic failure reasons       |
 
 ---
 
@@ -701,7 +701,7 @@ These paths are relative to `/api`. Health and auth responses have `Cache-Contro
 
 ### Feature Endpoints
 
-Auth, project, and template endpoints below are implemented. Deployment and user profile-update contracts remain planned. All project/template routes require authentication; project queries and mutations are owner-scoped.
+Auth, project, template, editor, and deployment endpoints are implemented. User profile updates remain planned. Feature routes require authentication and owner predicates; see [Deployment engine](docs/DEPLOYMENT_ENGINE.md) for strict publish inputs, capability checks, and safe status/history responses.
 
 #### Auth
 
@@ -951,14 +951,14 @@ Phase 1 implementation and local setup commands are documented in [README.md](RE
 - [x] Auto-save with debounced mutations
 - [x] Editor Zustand store for undo/redo
 
-### Phase 5 — Deployment Engine
+### Phase 5 — Deployment Engine *(Implemented in source; live GitHub verification pending)*
 
 - [x] BullMQ queue setup & worker registration
 - [x] Static site generation (Mustache templates → HTML/CSS/JS)
 - [x] React project generation (with GitHub Actions workflow)
 - [x] GitHub provider: repo creation, tree commit, Pages enablement
 - [x] Deploy status API + client polling
-- [ ] Deploy history & logs UI
+- [x] Deploy history & logs UI
 
 ### Phase 6 — Polish & Launch
 

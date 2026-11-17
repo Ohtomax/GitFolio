@@ -23,6 +23,7 @@ export function createDeploymentProcessor(repository: DeploymentWorkerRepository
     const record = claimed.record;
     if (!record) return;
     let lost = false;
+    let buildUrl: string | undefined;
     const heartbeat = setInterval(() => void repository.heartbeat(deploymentId, token).then((valid) => { if (!valid) lost = true; }).catch(() => { lost = true; }), 20000);
     heartbeat.unref();
     const assertActive = async () => {
@@ -47,6 +48,7 @@ export function createDeploymentProcessor(repository: DeploymentWorkerRepository
         await repository.transition(deploymentId, token, 'DEPLOYING', 'DEPLOYING', { source: asJson(source), commitSha: source.commitSha });
       }
       const progress = await provider.check(source);
+      buildUrl = progress.buildUrl;
       await assertActive();
       if (progress.status === 'failed') throw new ServiceError(409, 'BUILD_FAILED', 'The GitHub build failed.');
       if (progress.status === 'live' && progress.pagesUrl) {
@@ -61,7 +63,7 @@ export function createDeploymentProcessor(repository: DeploymentWorkerRepository
       const parsed = DeploymentLogCodeSchema.safeParse(error instanceof ServiceError ? error.code : 'DEPLOYMENT_FAILED');
       const code = parsed.success ? parsed.data : 'DEPLOYMENT_FAILED';
       // Do not copy raw errors/provider bodies into either PostgreSQL history or Redis failure reasons.
-      await repository.transition(deploymentId, token, 'FAILED', code, { errorCode: code }).catch(() => {});
+      await repository.transition(deploymentId, token, 'FAILED', code, { errorCode: code, ...(buildUrl ? { buildUrl } : {}) }).catch(() => {});
       throw new Error('Deployment could not finish');
     } finally { clearInterval(heartbeat); }
   };

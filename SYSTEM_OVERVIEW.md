@@ -39,7 +39,7 @@ This audience assessment is a product judgment based on the proposed workflow. N
 
 ## 3. Current implementation
 
-The repository contains the technical foundation, authentication, project management, and portfolio editor:
+The repository contains the technical foundation, authentication, project management, portfolio editor, and deployment engine:
 
 - An npm workspace monorepo with React/Vite, Express/TypeScript, and a shared types/validation package.
 - A Prisma schema and initial migration for users, templates, projects, sections, and deployments.
@@ -48,13 +48,13 @@ The repository contains the technical foundation, authentication, project manage
 - Docker Compose configuration for local PostgreSQL and Redis, plus setup instructions and development/check commands.
 - Server-side OAuth settings, callback validation, initial sign-in scopes, secret redaction, and a configuration checker.
 
-The frontend has GitHub login/callback pages, a connected-account page, AuthGuard, a project dashboard, a template picker/setup form, and a portfolio editor. The backend implements one-time state, PKCE, encrypted token storage/refresh, revocable JWT sessions, owner-scoped project CRUD, four seeded templates, and atomic revision-checked editor saves. Real GitHub consent remains a separate verification step. Generated portfolio files, GitHub publishing, and deployment progress screens remain planned.
+The frontend has GitHub login/callback pages, an account page, AuthGuard, project/template workflows, a portfolio editor, and deployment history/progress/logs. The backend implements one-time state, PKCE, encrypted credentials, revocable JWT sessions, owner-scoped projects, seeded templates, revision-checked editor saves, immutable deployment snapshots, generators, GitHub repository/Pages operations, and a separate BullMQ worker. Live GitHub consent and Pages publishing remain separate verification steps.
 
-Users can create and manage portfolio drafts with copied template themes and sections, edit content/order/visibility and styling, preview changes, undo/redo, and autosave drafts. Publishing a live portfolio remains Phase 5.
+Users can create and manage portfolio drafts, edit content/order/visibility and styling, preview, undo/redo, autosave, authorize publishing, and follow a confirmed deployment attempt. Source implementation and tests do not establish a successful real-account deployment.
 
-## 4. Planned user workflow
+## 4. User workflow
 
-The following journey describes the target experience after the remaining phases are implemented.
+The following journey is implemented in source through Phase 5. Production operation and a live GitHub consent/Pages round trip still require verification.
 
 ```mermaid
 flowchart LR
@@ -76,7 +76,7 @@ The GitHub token authorizes GitHub API operations; the GitFolio JWT authorizes r
 
 ### Step 2: Create a project
 
-The user selects a template and enters a project name. GitFolio will create an owner-linked project with a theme, sections, and a draft status. A template supplies starting structure and appearance; the saved project stores that user's content and choices.
+The user selects a template and enters a project name. GitFolio creates an owner-linked project with a theme, sections, and draft status. A template supplies starting structure and appearance; the saved project stores that user's content and choices.
 
 ### Step 3: Edit and preview
 
@@ -86,17 +86,17 @@ Strict validation, React text escaping, safe preview links, loading/error feedba
 
 ### Step 4: Request publishing
 
-The backend will verify that the signed-in user owns the project, validate the publishable data, check the required GitHub permission, record a deployment attempt, and enqueue work. Queue processing lets the UI track progress without keeping one HTTP request open for the entire build and publishing process.
+The backend verifies ownership, the reviewed saved version/target, and publishing permissions, records an immutable attempt, and enqueues work. PostgreSQL retains pending attempts if Redis is unavailable, and the worker recovers them. The UI follows progress without holding one HTTP request open for the whole build.
 
-The initial sign-in configuration requests profile and email access. Repository and workflow access must be added through an explicit authorization step when deployment features need them.
+Normal sign-in requests profile/email access. A separate, account-bound publishing consent step requests the repository permission required by Pages and workflow access for React projects. The screen explains that repository access includes private repositories; GitFolio's publisher uses public targets. [Publishing permissions and safeguards](docs/DEPLOYMENT_ENGINE.md).
 
 ### Step 5: Generate and publish files
 
-The worker will generate static HTML/CSS/JavaScript or a React project's source and build workflow, create or update the chosen repository in the user's GitHub account, commit the output, and configure publishing. Project-site paths such as `/my-portfolio/` must be handled correctly so links and assets work after publication.
+The worker generates static HTML/CSS/JavaScript or a locked React project with a Pages workflow, creates or updates a compatible managed repository, commits without force-pushing, and configures publishing. Relative assets support project-site paths such as `/my-portfolio/`. Hidden sections never enter the public output.
 
-The intended deployment states are `PENDING → BUILDING → PUSHING → DEPLOYING → LIVE`, with `FAILED` available when an attempt cannot complete. The constants and database enum already exist; the worker transitions do not.
+The worker implements `PENDING → BUILDING → PUSHING → DEPLOYING → LIVE`, with `FAILED` for unsuccessful attempts. Ownership-scoped status/history APIs provide safe logs and validated links.
 
-GitFolio should confirm successful publication before showing a deployment as live. If a build or API operation fails, the user should receive a safe explanation and a controlled retry path. Retrying must preserve the saved project and avoid duplicate repositories or conflicting writes.
+GitFolio requires a successful GitHub build for the matching commit before showing `LIVE`. Failures preserve the project and expose a safe explanation and build link when available. Request IDs, database leases, repository markers, and non-forced ref updates support retry/recovery; they do not promise exactly-once external effects.
 
 ### Step 6: Share and update
 
@@ -104,7 +104,7 @@ The user shares the confirmed portfolio URL. Later edits can be saved as drafts 
 
 ## 5. Components and responsibilities
 
-This is the planned integration between components. Feature connections beyond the foundation are still to be built.
+These component connections are implemented in source. Service-backed and live-account verification remain separate from architecture and unit/browser checks.
 
 ```mermaid
 flowchart TD
@@ -122,12 +122,12 @@ flowchart TD
 
 | Component | Responsibility | Current state |
 | --- | --- | --- |
-| React client | Forms, dashboard, editing, previews, progress | Login/account, AuthGuard, dashboard, new-project workflow, and portfolio editor implemented; publishing screens planned |
-| Express API | Validate requests, enforce ownership, save drafts, coordinate publishing | Middleware, health, auth, project CRUD, and seeded template routes implemented; publishing planned |
+| React client | Forms, dashboard, editing, previews, progress | Login/account, AuthGuard, project/editor workflows, publishing, and history/logs implemented |
+| Express API | Validate requests, enforce ownership, save drafts, coordinate publishing | Foundation/auth/project/template/editor/deployment APIs implemented |
 | PostgreSQL / Prisma | Persist account links, content, templates, and deployment records | Schema/migration and connection code implemented |
-| Redis | OAuth state, session revocation, queued background work | Auth state/sessions and connection/ping implemented; queue planned |
-| BullMQ worker | Generate files, call GitHub, and update deployment progress | Planned |
-| GitHub OAuth and API | Sign-in authorization and repository operations | OAuth code implemented; registration/live consent pending; repository operations planned |
+| Redis | OAuth state, session revocation, queued background work | Auth state/sessions, connection/ping, and BullMQ queue implemented; live Redis tests require a running service |
+| BullMQ worker | Generate files, call GitHub, and update deployment progress | Separate runtime with reconciliation, leases, generation, provider calls, and verification implemented |
+| GitHub OAuth and API | Sign-in authorization and repository operations | Account-bound consent and managed repository/Pages code implemented; real consent/publishing unverified |
 | GitHub Pages | Serve the published static portfolio | Intended destination; no publishing integration verified |
 
 PostgreSQL can run locally or use a compatible hosted service such as Supabase. A hosted database changes where data is stored; GitFolio still needs its API, worker, and Redis services. A Supabase connection has not been verified as part of this implementation.
