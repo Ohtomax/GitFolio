@@ -2,5 +2,6 @@
   "watch": ["src", "../packages/shared/dist"],
   "ext": "ts,js,json",
   "ignore": ["src/**/*.spec.ts", "src/generators/role-sources.json"],
+  "delay": 1500,
   "exec": "npm run build && node dist/index.js"
 }
