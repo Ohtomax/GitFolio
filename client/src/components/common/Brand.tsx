@@ -1,9 +1,13 @@
-import { Code2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import logo from '../../assets/logo.jpg';
+import wordmark from '../../assets/Gitfolio text and logo.jpg';
 
 export function Brand() {
-  return <Link to="/" className="inline-flex items-center gap-2.5 text-xl font-bold tracking-tight" aria-label="GitFolio home">
-    <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-stone-900 text-lime-300"><Code2 size={22} aria-hidden="true" /></span>
-    GitFolio<span className="text-lime-600">.</span>
+  return <Link to="/" className="inline-flex shrink-0 overflow-hidden rounded-lg bg-stone-900" aria-label="GitFolio home">
+    <picture>
+      <source media="(max-width: 374px)" srcSet={logo} />
+      <img src={wordmark} alt="GitFolio" width={176} height={44}
+        className="h-10 w-36 object-cover max-[374px]:w-10 sm:h-11 sm:w-44" />
+    </picture>
   </Link>;
 }
