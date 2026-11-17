@@ -1,19 +1,13 @@
 import { Check, Github, LogOut } from 'lucide-react';
-import { Navigate } from 'react-router-dom';
 import { Brand } from '../components/common/Brand.tsx';
-import { PageSkeleton } from '../components/common/PageSkeleton.tsx';
-import { useAuthSession, useLogout } from '../hooks/useAuth.ts';
+import { useLogout } from '../hooks/useAuth.ts';
 import { useAuthStore } from '../stores/auth.store.ts';
 import { errorMessage } from '../utils/errorParser.ts';
 
 export default function AccountPage() {
-  const session = useAuthSession();
   const user = useAuthStore((state) => state.user);
-  const status = useAuthStore((state) => state.status);
   const logout = useLogout();
-  if (status === 'checking') return <PageSkeleton />;
-  if (status === 'unavailable') return <main className="mx-auto max-w-xl px-6 py-24" role="alert"><h1 className="text-2xl font-semibold">We couldn’t check your session.</h1><p className="my-4 text-stone-600">{errorMessage(session.error)}</p><button className="primary-button" disabled={session.isFetching} onClick={() => void session.refetch()}>Try again</button></main>;
-  if (!user || status !== 'authenticated') return <Navigate to="/login" replace />;
+  if (!user) return null;
   return <div className="min-h-screen"><header className="mx-auto flex max-w-5xl items-center justify-between px-6 py-7"><Brand /><button className="flex items-center gap-2 rounded-lg border border-stone-300 px-4 py-2 text-sm hover:bg-white disabled:opacity-50" onClick={() => logout.mutate()} disabled={logout.isPending}><LogOut size={15} aria-hidden="true" />{logout.isPending ? 'Signing out…' : 'Sign out'}</button></header>
     <main className="mx-auto max-w-3xl px-6 pb-20 pt-14">
       {logout.isError && <p role="alert" className="mb-6 rounded-xl bg-amber-50 p-4 text-sm text-amber-900">{errorMessage(logout.error)}</p>}

@@ -5,12 +5,12 @@ import { apiFetch } from './api.ts';
 // StrictMode and remounts may request the same one-time callback more than once.
 let pendingCallback: { state: string; request: Promise<AuthSession> } | undefined;
 export const authService = {
-  getSession: () => apiFetch('/api/auth/me', AuthSessionSchema),
+  getSession: (signal?: AbortSignal) => apiFetch('/api/auth/me', AuthSessionSchema, { signal }),
   completeOAuth(input: OAuthCallback): Promise<AuthSession> {
     const callback = OAuthCallbackSchema.parse(input);
     if (pendingCallback?.state === callback.state) return pendingCallback.request;
     const request = apiFetch('/api/auth/github/callback', AuthSessionSchema, { method: 'POST',
-      headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(callback) });
+      headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(callback), signal: AbortSignal.timeout(45000) });
     pendingCallback = { state: callback.state, request };
     return request;
   },

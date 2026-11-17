@@ -39,7 +39,7 @@ This audience assessment is a product judgment based on the proposed workflow. N
 
 ## 3. Current implementation
 
-The repository contains the technical foundation and local OAuth preparation:
+The repository contains the technical foundation and authentication implementation:
 
 - An npm workspace monorepo with React/Vite, Express/TypeScript, and a shared types/validation package.
 - A Prisma schema and initial migration for users, templates, projects, sections, and deployments.
@@ -48,7 +48,7 @@ The repository contains the technical foundation and local OAuth preparation:
 - Docker Compose configuration for local PostgreSQL and Redis, plus setup instructions and development/check commands.
 - Server-side OAuth settings, callback validation, initial sign-in scopes, secret redaction, and a configuration checker.
 
-The current frontend is still the Vite starter. Sign-in, project creation, a template catalog, the editor, generated portfolio files, GitHub publishing, and deployment progress screens are not implemented. The local OAuth checker currently reports missing credentials; GitHub registration and real sign-in are unverified.
+The frontend has GitHub login/callback pages, a connected-account page, and an auth guard. The backend implements one-time state, PKCE, encrypted token storage/refresh, and revocable JWT sessions. GitHub app registration and real consent remain pending by request. Project creation, a template catalog, the editor, generated portfolio files, GitHub publishing, and deployment progress screens remain planned.
 
 Having a `Project` or `Deployment` database model does not mean a user can create a portfolio or deploy one. The application code that connects those actions is still planned.
 
@@ -72,7 +72,7 @@ flowchart LR
 
 The user selects Sign in with GitHub and authorizes GitFolio on GitHub's website. GitHub returns an authorization code to GitFolio's callback. The backend must validate the sign-in request, exchange the code, confirm the user's identity, protect stored GitHub tokens, and issue a GitFolio session.
 
-The GitHub token authorizes GitHub API operations; the GitFolio JWT authorizes requests to GitFolio's API. The OAuth client secret belongs to the application and stays on the backend. This flow still needs implementation, including state, PKCE, token expiration, and refresh handling. [GitHub OAuth flow](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps).
+The GitHub token authorizes GitHub API operations; the GitFolio JWT authorizes requests to GitFolio's API. The OAuth client secret stays on the backend. State, PKCE, token expiration, refresh handling, and the client flow are implemented; a real consent round trip still requires registered credentials. [GitHub OAuth flow](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps).
 
 ### Step 2: Create a project
 
@@ -122,12 +122,12 @@ flowchart TD
 
 | Component | Responsibility | Current state |
 | --- | --- | --- |
-| React client | Forms, dashboard, editing, previews, progress | Starter UI only |
-| Express API | Validate requests, enforce ownership, save drafts, coordinate publishing | Middleware and health routes implemented; feature APIs planned |
+| React client | Forms, dashboard, editing, previews, progress | Login/callback/account and AuthGuard implemented; product screens planned |
+| Express API | Validate requests, enforce ownership, save drafts, coordinate publishing | Middleware, health, and auth routes implemented; other feature APIs planned |
 | PostgreSQL / Prisma | Persist account links, content, templates, and deployment records | Schema/migration and connection code implemented |
-| Redis | Support queued background work | Connection/ping implemented; queue planned |
+| Redis | OAuth state, session revocation, queued background work | Auth state/sessions and connection/ping implemented; queue planned |
 | BullMQ worker | Generate files, call GitHub, and update deployment progress | Planned |
-| GitHub OAuth and API | Sign-in authorization and repository operations | Local OAuth configuration prepared; real integration planned |
+| GitHub OAuth and API | Sign-in authorization and repository operations | OAuth code implemented; registration/live consent pending; repository operations planned |
 | GitHub Pages | Serve the published static portfolio | Intended destination; no publishing integration verified |
 
 PostgreSQL can run locally or use a compatible hosted service such as Supabase. A hosted database changes where data is stored; GitFolio still needs its API, worker, and Redis services. A Supabase connection has not been verified as part of this implementation.

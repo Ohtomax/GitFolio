@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react';
 import { Link, Route, Routes } from 'react-router-dom';
 import { ChunkErrorBoundary } from './components/common/ChunkErrorBoundary.tsx';
 import { PageSkeleton } from './components/common/PageSkeleton.tsx';
+import { AuthGuard } from './components/auth/AuthGuard.tsx';
 
 const LoginPage = lazy(() => import('./pages/LoginPage.tsx'));
 const OAuthCallbackPage = lazy(() => import('./pages/OAuthCallbackPage.tsx'));
@@ -12,7 +13,7 @@ export default function App() {
     <Route path="/" element={<LoginPage />} />
     <Route path="/login" element={<LoginPage />} />
     <Route path="/auth/callback" element={<OAuthCallbackPage />} />
-    <Route path="/account" element={<AccountPage />} />
+    <Route element={<AuthGuard />}><Route path="/account" element={<AccountPage />} /></Route>
     <Route path="*" element={<main className="mx-auto max-w-xl px-6 py-24"><h1 className="text-3xl font-semibold">Page not found.</h1><Link className="mt-6 inline-block underline" to="/">Back to GitFolio</Link></main>} />
   </Routes></Suspense></ChunkErrorBoundary>;
 }

@@ -1,6 +1,6 @@
 # GitHub OAuth App configuration
 
-Local configuration is prepared. The GitHub account owner must register the OAuth App and supply its credentials before this checklist item is complete. The remaining Phase 2 tasks implement the auth endpoints, token storage, and login UI.
+The Phase 2 auth endpoints, encrypted token storage, refresh handling, login UI, and route guard are implemented. The GitHub account owner must register the OAuth App and supply its credentials before registration and live sign-in can be verified. Registration is intentionally pending in the checklist.
 
 ## Register the development app
 
@@ -14,7 +14,7 @@ Open [Register a new OAuth application](https://github.com/settings/applications
 | Authorization callback URL | `http://localhost:5173/auth/callback` |
 | Enable Device Flow | Leave disabled; GitFolio uses the web application flow |
 
-Keep the default expiring-token setting if GitHub displays it. The remaining authentication implementation must support token expiration and refresh before sign-in is shipped. Register the application, copy its Client ID, and generate a client secret. GitHub may ask you to reauthenticate for secret generation.
+Keep the default expiring-token setting if GitHub displays it. The server supports expiring tokens and refresh-token rotation, as well as non-expiring responses. Register the application, copy its Client ID, and generate a client secret. GitHub may ask you to reauthenticate for secret generation.
 
 This project uses an OAuth App. Its configuration needs the Client ID and client secret; an installation ID, GitHub App ID, PEM private key, or a personal access token is not a substitute.
 
@@ -32,6 +32,8 @@ GITHUB_CALLBACK_URL=http://localhost:5173/auth/callback
 
 Keep both credentials in the backend environment. Do not put the client secret in the frontend, give it a `VITE_` prefix, use it in shell arguments, or paste it into chat. The `.env.example` file must keep empty credential values.
 
+Run `npm run auth:setup` to generate missing `JWT_SECRET` and `ENCRYPTION_KEY` values locally. It preserves existing secrets. All four secrets must be present before the server enables sign-in. Restart the API after changing its environment.
+
 The callback must use the same origin as `CLIENT_URL`, including the hostname and port, followed by exactly `/auth/callback`. The local Vite server is pinned to port 5173 and fails if that port is occupied, so it cannot silently switch to an unregistered callback port. Stop an existing instance before starting another one.
 
 For a deployed environment, use HTTPS and register its exact frontend callback URL with GitHub. Use separate development and production registrations to keep credentials and callback settings independent.
@@ -48,6 +50,6 @@ This builds the configuration code, validates settings, and reports only the hom
 
 The configured sign-in scopes are `read:user` and `user:email`. Repository and workflow permissions will be requested when implementing deployment functionality rather than being added to basic sign-in now. Reference: [OAuth scopes](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/scopes-for-oauth-apps).
 
-GitHub redirects the browser to the frontend callback. The forthcoming callback component sends the code to the backend's `POST /api/auth/github/callback` endpoint for exchange. The auth module must validate the OAuth `state` and use PKCE; those protections belong to the next implementation step. Reference: [Authorizing OAuth apps](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps).
+GitHub redirects the browser to the frontend callback. The callback component sends `{ code, state }` to `POST /api/auth/github/callback` for server-side exchange. Redis state is browser-bound, expires after ten minutes, and is consumed atomically. The exchange includes the original S256 PKCE verifier. Reference: [Authorizing OAuth apps](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps).
 
-Only the health endpoints currently exist. Registering the app and setting its credentials does not create the callback handler or login page.
+After starting PostgreSQL/Redis and applying migrations with `npm run db:deploy`, run `npm run dev` and open `http://localhost:5173/login`. Complete GitHub consent, check the connected account at `/account`, reload to verify the session, and sign out. Denied consent and expired attempts offer a fresh sign-in. See [Authentication](AUTHENTICATION.md) for storage, API, session revocation, and verification limits.

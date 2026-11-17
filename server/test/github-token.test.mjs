@@ -76,9 +76,12 @@ test('GitHub provider uses server credentials and handles refresh errors without
   assert.equal(requests[0].init.body.get('client_secret'), configuration.clientSecret);
   assert.equal(requests[0].init.body.get('refresh_token'), 'fixture-refresh');
   assert.equal(requests[0].init.redirect, 'error');
+  await provider.exchangeCode('fixture-code', 'fixture-verifier');
+  assert.equal(requests[1].init.body.get('code_verifier'), 'fixture-verifier');
+  assert.equal(requests[1].init.body.get('redirect_uri'), configuration.callbackUrl);
   const rejected = createGitHubProvider(configuration, async () => Response.json({
     error: 'bad_refresh_token', error_description: 'private-provider-message',
-  }));
+  }, { status: 400 }));
   await assert.rejects(rejected.refreshToken('fixture-refresh'), (error) => {
     assert.equal(error.code, 'GITHUB_REAUTH_REQUIRED');
     assert.ok(!error.message.includes('private'));

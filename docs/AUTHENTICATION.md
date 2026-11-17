@@ -34,4 +34,6 @@ Keep `ENCRYPTION_KEY` stable across restarts and preserve it in recovery backups
 
 ## Verification limits
 
+The client keeps user/status data in a non-persistent Zustand store and reconstructs the session through TanStack Query's `/me` request after reload. `AuthGuard` withholds protected content during verification, redirects anonymous/expired sessions, and offers retry during an outage. Successful sign-in and logout clear cached data from previous sessions. OAuth callback requests are deduplicated for React StrictMode, and code/state query parameters are removed from browser history. Post-login destinations are restricted to internal protected routes. Only the nonsensitive return destination uses sessionStorage.
+
 The automated auth tests use synthetic GitHub responses and check encryption, PKCE, browser binding, replay rejection, JWT verification/revocation, and refresh rotation. Actual GitHub sign-in still requires registered credentials and a browser consent round trip. Database/Redis integration tests run only when their explicitly named disposable service URLs are provided.

@@ -33,11 +33,13 @@ export interface GitHubProvider {
 }
 
 export function createGitHubProvider(configuration: GitHubOAuthConfiguration, fetcher = fetch): GitHubProvider {
-  async function request(url: string, init: RequestInit): Promise<unknown> {
+  async function request(url: string, init: RequestInit, oauth = false): Promise<unknown> {
     try {
       const response = await fetcher(url, { ...init, redirect: 'error', signal: AbortSignal.timeout(10000) });
       const body: unknown = await response.json();
       if (!response.ok) {
+        // GitHub may return a structured OAuth rejection with HTTP 400 as well as HTTP 200.
+        if (oauth && z.object({ error: z.string() }).safeParse(body).success) return body;
         if (response.status === 401) throw new ServiceError(401, 'GITHUB_REAUTH_REQUIRED', 'Sign in with GitHub again.');
         throw new Error();
       }
@@ -55,7 +57,7 @@ export function createGitHubProvider(configuration: GitHubOAuthConfiguration, fe
       body: new URLSearchParams({
         client_id: configuration.clientId, client_secret: configuration.clientSecret, ...parameters,
       }),
-    });
+    }, true);
     const oauthError = z.object({ error: z.string() }).safeParse(body);
     if (oauthError.success) {
       if (['bad_verification_code', 'invalid_grant', 'bad_refresh_token', 'expired_token'].includes(oauthError.data.error)) {

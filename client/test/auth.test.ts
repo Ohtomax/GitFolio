@@ -63,6 +63,21 @@ test('duplicate OAuth completions share one request instead of replaying one-tim
   assert.equal(requests, 1);
 });
 
+test('cancelling an old session check cannot overwrite a newly accepted login', async (t) => {
+  const queryClient = new QueryClient();
+  t.after(() => queryClient.clear());
+  t.mock.method(globalThis, 'fetch', (_path, init) => new Promise((_resolve, reject) => {
+    init?.signal?.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError')), { once: true });
+  }));
+  const pending = queryClient.fetchQuery(sessionQueryOptions);
+  const rejected = assert.rejects(pending);
+  await queryClient.cancelQueries({ queryKey: sessionKey });
+  useAuthStore.getState().setSession(session);
+  await rejected;
+  assert.equal(useAuthStore.getState().status, 'authenticated');
+  assert.equal(useAuthStore.getState().user?.id, session.user.id);
+});
+
 test('malformed and HTML error responses do not expose server details', async (t) => {
   t.mock.method(globalThis, 'fetch', async () => new Response('<html>private-error</html>', { status: 502 }));
   await assert.rejects(authService.getSession(), { code: 'INVALID_RESPONSE', message: 'The server returned an unexpected response.' });

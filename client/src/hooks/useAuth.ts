@@ -8,12 +8,13 @@ import { useAuthStore } from '../stores/auth.store.ts';
 export const sessionKey = ['auth', 'session'] as const;
 export const sessionQueryOptions = queryOptions({
   queryKey: sessionKey,
-  queryFn: async () => {
+  queryFn: async ({ signal }) => {
     try {
-      const session = await authService.getSession();
+      const session = await authService.getSession(signal);
       useAuthStore.getState().setSession(session);
       return session;
     } catch (error) {
+      if (signal.aborted) throw error;
       if (error instanceof ApiError && error.status === 401) {
         useAuthStore.getState().clearSession();
         return null;

@@ -2,7 +2,7 @@
 
 > A planned full-stack SaaS for designing static or React portfolios and publishing them to GitHub Pages through a browser-based workflow.
 
-**Status reviewed: November 17, 2026 (Asia/Manila).** Phase 1 is implemented. Phase 2 has local OAuth configuration and validation, while registration, credentials, and the sign-in flow remain unfinished or unverified. The diagrams and feature contracts below describe the target architecture unless explicitly marked as implemented.
+**Status reviewed: November 17, 2026 (Asia/Manila).** Phase 1 and the Phase 2 authentication code are implemented. GitHub OAuth App registration and live sign-in verification remain pending by request. The diagrams and feature contracts below describe the target architecture unless explicitly marked as implemented.
 
 For the product objective, user workflow, benefits, and limitations, read [System Overview](SYSTEM_OVERVIEW.md). For installation commands, read [README.md](README.md).
 
@@ -37,14 +37,14 @@ These statuses are based on the checked-in source, rather than the presence of a
 | Area | Status | Source / evidence |
 | --- | --- | --- |
 | Monorepo and development commands | Implemented | [Root scripts](package.json), workspace packages, and TypeScript configurations |
-| Frontend foundation | Implemented; starter UI only | [App.tsx](client/src/App.tsx), [main.tsx](client/src/main.tsx), and [fixed Vite port](client/vite.config.ts); no application routes or login screens |
+| Frontend authentication | Implemented | [Routes](client/src/App.tsx), login/callback/account pages, Zustand auth store, TanStack Query hooks, and [AuthGuard](client/src/components/auth/AuthGuard.tsx) |
 | Express foundation | Implemented | [App middleware and health routes](server/src/core/app.ts), [service connections and shutdown](server/src/core/server.ts), [entry point](server/src/index.ts) |
 | Environment configuration | Implemented | [Zod environment schema](server/src/config/env.schema.ts), root `.env` loader, and Prisma CLI wrapper |
 | Database structure | Schema and initial migration implemented | [Five Prisma models](server/prisma/schema.prisma) and [initial migration](server/prisma/migrations/20261116000000_init/migration.sql); application to a normal development or production database is not established by these files |
 | Shared package | Implemented foundation | [Exports](packages/shared/src/index.ts): deployment statuses, API response types, API error schema, and health response schema |
 | GitHub OAuth configuration | Local preparation implemented | [Server-only OAuth configuration](server/src/config/github-oauth.ts), callback validation, secret redaction, [configuration checker](server/scripts/check-github-oauth.mjs), and [registration guide](docs/GITHUB_OAUTH_SETUP.md) |
-| GitHub registration and sign-in | Incomplete / unverified | The local checker reports missing credentials on this review date; no code exchange, JWT middleware, token encryption, or client auth flow exists |
-| Portfolio management and publishing | Planned | No project/template feature endpoints, editor, GitHub provider, site generator, BullMQ queue, or deployment worker is implemented |
+| GitHub authentication | Code implemented; registration/live consent pending | [Auth module](server/src/modules/auth/auth.module.ts), one-time state/PKCE, JWT verification/revocation, AES-256-GCM, and token refresh; [details](docs/AUTHENTICATION.md) |
+| Portfolio management and publishing | Planned | No project/template feature endpoints, editor, GitHub repository/Pages provider, site generator, BullMQ queue, or deployment worker is implemented |
 | Production operation | Planned | No production deployment or end-to-end GitHub Pages publishing has been verified |
 
 ### Current executable behavior
@@ -52,14 +52,15 @@ These statuses are based on the checked-in source, rather than the presence of a
 - `npm run dev` builds the shared package, generates Prisma Client, and starts the shared, server, and client watchers.
 - The API connects to both PostgreSQL and Redis before listening. Redis is already a startup dependency; queue processing itself is still planned.
 - `GET /api/health` checks the HTTP process. `GET /api/health/ready` queries PostgreSQL and pings Redis, returning HTTP 503 if a dependency check fails. Both routes are under the API rate limiter.
-- The frontend displays the Vite starter. Installing React Router, TanStack Query, Zustand, or Octokit has not implemented their planned product features.
+- The frontend displays the GitHub login page, processes OAuth callbacks, and protects `/account` with AuthGuard. Vite proxies `/api` to Express for same-origin cookies.
+- `/api/auth/github`, `/api/auth/github/callback`, `/api/auth/me`, and `/api/auth/logout` implement authentication. Missing OAuth credentials or application secrets disable auth safely with HTTP 503.
 - `npm run oauth:check` validates local configuration without connecting to PostgreSQL or Redis. It does not verify GitHub-issued credentials or perform sign-in.
 
 ### Verification boundaries
 
 Automated tests exist for HTTP behavior, configuration, OAuth callback rules, credential redaction, database relationships, and server lifecycle. Database and full server integration tests require explicitly supplied disposable service URLs and may be skipped during a normal test run. A committed migration, a passing configuration check, and a working live deployment are separate pieces of evidence.
 
-This documentation review inspected source and ran the credential-safe OAuth checker. It did not register an OAuth App, apply migrations to a live database, or exercise a GitHub login or deployment.
+Unit/HTTP tests and browser tests with synthetic API responses validate the auth implementation. GitHub registration, real consent, live service migrations, and deployment are separate verification steps and remain unverified in this environment.
 
 ---
 
@@ -85,7 +86,7 @@ GitHub Pages serves static websites and has plan, usage, and content restriction
 
 ## 2. High-Level Architecture
 
-**Planned product architecture.** The implemented foundation currently consists of the client scaffold, Express middleware and health checks, PostgreSQL/Redis connection code, shared contracts, and local OAuth configuration. The feature modules and deployment pipeline shown here are future work.
+**Planned product architecture.** The foundation and authentication module are implemented. Project management, the editor, and the deployment pipeline shown here are future work.
 
 ```
 ┌───────────────────────────────────────────────────────────────────┐
@@ -256,20 +257,20 @@ gitfolio/
 
 ## 5. Client Architecture
 
-**Planned application UI.** The current client has the Vite starter and a development server pinned to port 5173. The routing, state layers, screens, and API services in this section have not been implemented.
+The login, OAuth callback, account page, auth store, session hooks, and AuthGuard are implemented. The frontend development server is pinned to port 5173. Dashboard, editor, project, and deployment screens remain planned.
 
 ### 5.1 Routing
 
 | Route                        | Page               | Description                          |
 |------------------------------|---------------------|--------------------------------------|
-| `/`                          | Landing             | Marketing / hero page                |
+| `/` and `/login`             | Login               | GitHub sign-in, implemented          |
 | `/auth/callback`             | OAuth Callback      | Handles GitHub OAuth redirect        |
 | `/dashboard`                 | Dashboard           | List of user's portfolio projects    |
 | `/projects/new`              | New Project         | Template selection & project setup   |
 | `/projects/:id/edit`         | Editor              | Visual portfolio editor              |
 | `/projects/:id/deploy`       | Deploy              | Deploy trigger & status tracking     |
 | `/projects/:id/settings`     | Project Settings    | Repo name, custom domain, etc.       |
-| `/account`                   | Account             | User profile & preferences           |
+| `/account`                   | Account             | Protected connected profile and logout; preferences remain planned |
 
 ### 5.2 State Management Strategy
 
@@ -285,7 +286,7 @@ gitfolio/
 │  └─ User profile                             │
 │                                              │
 │  Client State (Zustand)                      │
-│  ├─ Auth store (JWT, user session)           │
+│  ├─ Auth store (user/status; JWT in cookie) │
 │  ├─ Editor store (unsaved changes, canvas)   │
 │  └─ UI store (modals, toasts, sidebar)       │
 │                                              │
@@ -308,8 +309,8 @@ Components follow a layered pattern:
 ### 5.4 API Service Layer
 
 ```typescript
-// services/api.ts — Axios instance with interceptors
-// services/auth.service.ts — login(), logout(), refreshToken()
+// services/api.ts — validated same-origin apiFetch() wrapper
+// services/auth.service.ts — getSession(), completeOAuth(), logout()
 // services/project.service.ts — getProjects(), createProject(), updateProject()
 // services/template.service.ts — getTemplates(), getTemplateById()
 // services/deploy.service.ts — triggerDeploy(), getDeployStatus()
@@ -321,7 +322,7 @@ Components follow a layered pattern:
 
 ### 6.1 Module Pattern (Vertical Slices)
 
-Future feature modules under `server/src/modules/` will follow this structure. No feature controller, service, repository, or route implementation is currently present:
+The implemented auth module uses controller → service → repository boundaries. Future feature modules under `server/src/modules/` follow the same structure:
 
 ```
 modules/<feature>/
@@ -335,18 +336,18 @@ modules/<feature>/
 
 ### 6.2 Module Breakdown
 
-The following are planned module responsibilities.
+Authentication is implemented; the other module responsibilities below remain planned.
 
 #### Auth Module
 - **OAuth Flow**: Redirect → GitHub → Callback → Token exchange
-- **JWT Issuance**: Sign JWT containing `userId`, `githubId`, `login`
+- **JWT Issuance**: HS256 with user/session identifiers, issuer, audience, and timestamps; no GitHub tokens or private profile data
 - **Token Refresh**: Handle expiring GitHub access tokens and refresh-token rotation when issued; define application JWT/session refresh separately
-- **Session Management**: Stateless via JWT; token stored client-side
+- **Session Management**: JWT in an HttpOnly cookie, with Redis-backed revocation and expiry
 
 #### User Module
 - **Profile CRUD**: Read/update GitHub-sourced profile data
 - **Settings**: Notification preferences, default deploy options
-- **Token Storage**: Planned AES-256-GCM encryption of GitHub access tokens; encryption helpers are not implemented
+- **Token Storage**: Auth module encrypts access/refresh tokens and private name/email fields with AES-256-GCM
 
 #### Project Module
 - **CRUD Operations**: Create, read, update, delete portfolio projects
@@ -375,7 +376,7 @@ Request
   ├─ express.json()              # JSON body parsing; 1 MB limit
   │
   ▼
-Health Route → notFound → errorHandler
+Health / Auth Routes → notFound → errorHandler
 ```
 
 The client receives safe JSON errors instead of internal stack traces. Request logs contain request IDs, method, response status, and duration; URLs, headers, and request bodies are omitted.
@@ -384,7 +385,7 @@ Future feature routes must add server-side JWT verification, ownership checks, a
 
 ### 6.4 Providers (External Services)
 
-The provider files below are planned. Currently, database and Redis clients are created in [database.ts](server/src/config/database.ts) and [redis.ts](server/src/config/redis.ts), and lifecycle handling lives in [server.ts](server/src/core/server.ts). Installing Octokit and BullMQ has not created a provider or worker.
+The OAuth provider [github.ts](server/src/providers/github.ts) handles code exchange, refresh, and profile reads. Repository/Pages and queue provider files below remain planned. Database and Redis clients are created in [database.ts](server/src/config/database.ts) and [redis.ts](server/src/config/redis.ts); lifecycle handling lives in [server.ts](server/src/core/server.ts).
 
 ```
 providers/
@@ -404,16 +405,17 @@ packages/shared/src/
 ├── index.ts                    # Public package exports
 ├── constants/deploy-status.ts  # Status tuple and DeployStatus type
 ├── types/api.types.ts          # ApiResponse<T> success/error envelope
-└── validation/api.schema.ts    # ApiErrorSchema and HealthResponseSchema
+├── validation/api.schema.ts    # ApiErrorSchema and HealthResponseSchema
+└── validation/auth.schema.ts   # Auth user/session and OAuth callback schemas
 ```
 
-User, project, template, and deployment payload schemas, limits, category constants, and pagination contracts will be added with their feature modules. Shared browser validation will complement server validation; it will not replace server enforcement.
+Project, template, and deployment payload schemas, limits, category constants, and pagination contracts will be added with their feature modules. Shared browser validation complements server validation; it does not replace server enforcement.
 
 ---
 
 ## 8. Database Schema
 
-**Implemented schema:** [schema.prisma](server/prisma/schema.prisma). The matching initial SQL migration is [20261116000000_init](server/prisma/migrations/20261116000000_init/migration.sql). These files define storage; they do not implement CRUD endpoints, encrypt values, seed templates, or prove that a live database has been migrated.
+**Implemented schema:** [schema.prisma](server/prisma/schema.prisma), [initial migration](server/prisma/migrations/20261116000000_init/migration.sql), and [token lifecycle migration](server/prisma/migrations/20261117000000_github_token_lifecycle/migration.sql). Auth encrypts values before writing; schema files alone do not prove that a live database has been migrated. CRUD and template seeds remain planned.
 
 ### Entity Relationship Diagram
 
@@ -433,6 +435,10 @@ erDiagram
         string name
         string avatarUrl
         string encryptedAccessToken
+        string encryptedRefreshToken
+        datetime accessTokenExpiresAt
+        datetime refreshTokenExpiresAt
+        string githubScopes
         datetime createdAt
         datetime updatedAt
     }
@@ -487,7 +493,7 @@ erDiagram
 
 ### Key Design Decisions
 
-- **`encryptedAccessToken`**: A required ciphertext column. The Phase 2 auth service must encrypt/decrypt tokens using AES-256-GCM before this column can be used safely; that service does not exist yet.
+- **Credential ciphertext**: The auth service encrypts access/refresh tokens and private name/email fields with AES-256-GCM. The Phase 2 migration adds refresh-token ciphertext, access/refresh expiration dates, and granted scopes.
 - **`json` fields**: `themeConfig`, `content`, and `logs` use PostgreSQL's JSONB for flexible schemas
 - **`slug`**: URL-safe project identifier derived from project name
 - **`repoName`**: Target GitHub repository name (e.g., `my-portfolio`)
@@ -497,13 +503,13 @@ erDiagram
 - **Ownership constraint**: A deployment references the composite project key `(id, userId)`, preventing a mismatched deployment owner at the database boundary. Future API services must still authenticate the caller and filter by ownership.
 - **Uniqueness and deletion**: Project slugs are unique per user. User/project deletion cascades to dependent records; templates referenced by projects cannot be deleted.
 - **Indexes**: Owner/update-time, section ordering, template category, and deployment history/status indexes support the planned access patterns.
-- **Remaining storage design**: Expiring GitHub token support needs refresh-token/expiry storage; project revisions and any server-side session revocation also require further design. Those fields/models are not present.
+- **Remaining storage design**: Project revisions remain planned. Expiring GitHub tokens use PostgreSQL; one-time OAuth state and revocable application sessions use Redis TTLs.
 
 ---
 
 ## 9. Authentication & Authorization
 
-### Implemented OAuth preparation
+### Implemented authentication
 
 - Server-only `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, and `GITHUB_CALLBACK_URL` settings; the credentials must be supplied together.
 - A callback constrained to the `CLIENT_URL` origin and `/auth/callback` path, without embedded credentials, query parameters, or fragments.
@@ -512,11 +518,11 @@ erDiagram
 - Configured sign-in scopes: `read:user` and `user:email`. Repository/workflow access is deferred to the deployment feature.
 - A credential-safe `npm run oauth:check` command and [GitHub registration instructions](docs/GITHUB_OAUTH_SETUP.md). OAuth client secrets are redacted by the structured logger.
 
-On this review date the local checker reports missing credentials. OAuth App registration, real token exchange, and sign-in are unverified. The callback component, auth endpoints, JWT guard, encryption service, and browser auth store remain unimplemented.
+The auth module, callback component, JWT middleware, encryption service, token lifecycle handling, browser auth store, and AuthGuard are implemented. OAuth App registration, real token exchange, and consent remain pending. See [Authentication](docs/AUTHENTICATION.md) for exact API and storage behavior.
 
 ### OAuth Flow
 
-**Planned.** The backend will create and verify a one-time OAuth `state`, use PKCE, exchange the authorization code server-side, and revalidate the GitHub identity before issuing an application JWT. Expiring GitHub tokens require refresh handling. See [GitHub's OAuth flow](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps).
+The backend verifies browser-bound, one-time Redis state and S256 PKCE, exchanges codes server-side, revalidates GitHub identity, and issues an application JWT cookie. Expiring GitHub tokens are refreshed under a database row lock. See [GitHub's OAuth flow](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps).
 
 ```
 ┌────────┐         ┌──────────┐         ┌──────────┐
@@ -551,22 +557,23 @@ On this review date the local checker reports missing credentials. OAuth App reg
     │  10. JWT + user   │  Upsert user in DB │
     │◄──────────────────┤  Encrypt & store   │
     │                   │  access token      │
-    │  11. Store JWT    │                    │
-    │  in memory/store  │                    │
+    │  11. HttpOnly JWT │                    │
+    │  cookie + session │                    │
     └───────────────────┘                    │
 ```
 
-The intended exchange endpoint is `POST /api/auth/github/callback`; GitHub's browser redirect goes to the frontend `/auth/callback` route. Neither endpoint handler is implemented yet.
+The exchange endpoint is `POST /api/auth/github/callback`; GitHub's browser redirect goes to the frontend `/auth/callback` route. Code/state parameters are removed from browser history after capture.
 
 ### JWT Structure
 
-Proposed payload; no JWT is currently issued or verified by the application.
+Issued payload; verification fixes the HS256 algorithm, issuer, audience, and expiration, and checks the Redis session:
 
 ```json
 {
   "sub": "user-uuid",
-  "githubId": "12345678",
-  "login": "octocat",
+  "jti": "session-uuid",
+  "iss": "gitfolio",
+  "aud": "gitfolio-client",
   "iat": 1700000000,
   "exp": 1700604800
 }
@@ -574,7 +581,7 @@ Proposed payload; no JWT is currently issued or verified by the application.
 
 ### Authorization Rules
 
-Planned server-enforced rules. The current public health endpoints do not grant access to any user resource. Logout revocation must be designed explicitly; clearing a browser token alone does not invalidate an otherwise valid JWT.
+The auth API restricts profile reads to the JWT's user ID, and logout revokes its Redis session immediately. The resource permissions below describe future feature modules; profile updates are not yet exposed. Public health endpoints do not grant access to user resources.
 
 | Resource        | Owner  | Others | Unauthenticated |
 |----------------|--------|--------|-----------------|
@@ -684,11 +691,11 @@ http://127.0.0.1:3001/api
 | GET | `/health` | No | HTTP liveness; returns `{ success: true, data: { status: "ok" } }` |
 | GET | `/health/ready` | No | PostgreSQL query and Redis ping; returns HTTP 503 on a dependency-check failure |
 
-These paths are relative to `/api`. Both have `Cache-Control: no-store` and pass through the API limiter. Other routes currently return the shared JSON 404 response.
+These paths are relative to `/api`. Health and auth responses have `Cache-Control: no-store` and pass through the API limiter. Unknown endpoints return the shared JSON 404 response, except disabled auth groups, which return HTTP 503.
 
 ### Planned Feature Endpoints
 
-All endpoints below are unimplemented contracts for later phases.
+Auth endpoints below are implemented. Project/template/deployment/user CRUD contracts remain planned.
 
 #### Auth
 
@@ -817,13 +824,13 @@ User clicks "Deploy"
 
 | Concern | Implemented foundation | Required before the relevant feature ships |
 | --- | --- | --- |
-| **XSS** | Helmet headers and React's normal text escaping in the starter | Sanitize generated HTML with `sanitize-html`; validate links and editable content in the editor/generator |
-| **OAuth CSRF / code interception** | Callback URL validation only | One-time state, PKCE, server-side code exchange, and appropriate session/cookie handling |
-| **SQL injection** | Prisma model/query infrastructure and a constant tagged readiness query | Validate all feature inputs and use parameterized Prisma queries |
-| **Token theft** | Server-only environment settings and OAuth-secret log redaction | AES-256-GCM token encryption, key management, and secure token refresh/session handling |
-| **Request abuse** | API limiter; default 100 requests per IP per minute | Auth/deploy-specific limits and safe proxy configuration for production |
+| **XSS** | Helmet headers and React's normal text escaping | Sanitize generated HTML with `sanitize-html`; validate links and editable content in the editor/generator |
+| **OAuth CSRF / code interception** | Browser-bound one-time state, S256 PKCE, server-side code exchange, Origin checks, and HttpOnly cookies | Preserve these controls in future sign-in changes |
+| **SQL injection** | Validated auth inputs, Prisma operations, and parameterized tagged SQL for readiness/refresh locks | Validate future feature inputs and use parameterized queries |
+| **Token theft** | AES-256-GCM for access/refresh tokens, HttpOnly JWT cookies, Redis revocation, and secret log redaction | Production key management and recovery verification |
+| **Request abuse** | API limiter plus a dedicated sign-in limiter | Deploy-specific limits and safe proxy configuration for production |
 | **Transport security** | OAuth callback configuration requires HTTPS in production | HTTPS termination and trusted-proxy behavior in the actual production deployment |
-| **Ownership** | Composite deployment/project ownership foreign key | JWT verification and ownership-scoped service/repository queries on every protected operation |
+| **Ownership** | JWT verification, current-user profile queries, and composite deployment/project ownership foreign key | Ownership-scoped queries on future project/deploy operations |
 | **Operational logging** | Request IDs and safe metadata; URLs, headers, and bodies omitted from request logs | Continue sanitizing feature errors, job logs, and provider responses |
 | **Dependencies** | Package manifests/lockfile are present | Dependency review/update automation; existing tracked `node_modules` still need repository cleanup |
 
@@ -832,12 +839,12 @@ User clicks "Deploy"
 | Secret                  | Storage               | Notes                                 |
 |------------------------|-----------------------|---------------------------------------|
 | `JWT_SECRET`           | Environment variable  | Min 32 chars, rotatable               |
-| `ENCRYPTION_KEY`       | Environment variable  | Exactly 32 UTF-8 bytes; encryption helper pending |
+| `ENCRYPTION_KEY`       | Environment variable  | 64 hex characters encoding 32 bytes; legacy 32-byte UTF-8 keys supported |
 | `GITHUB_CLIENT_SECRET` | Environment variable  | GitHub OAuth App secret               |
 | `DATABASE_URL`         | Environment variable  | PostgreSQL connection string          |
-| User GitHub Tokens     | PostgreSQL (planned ciphertext) | AES-256-GCM; storage column exists, encryption not implemented |
+| User GitHub Tokens     | PostgreSQL ciphertext | AES-256-GCM with per-user/field associated data |
 
-Secret-length checks are implemented, but JWT issuance and encryption are not. Keep credentials out of generated portfolio repositories and frontend bundles. Do not store or log real user tokens while the corresponding protections are unfinished.
+JWT issuance, verification/revocation, and token encryption/refresh are implemented. Keep credentials out of generated portfolio repositories, frontend bundles, and logs. Preserve encryption keys for database recovery; rotating them requires re-encrypting stored data.
 
 ---
 
@@ -904,21 +911,21 @@ The providers below are candidates, not configured deployments. The platform nee
 - [x] Shared build/dev watchers and root build/type-check/test/database commands
 - [x] Foundation and configuration test suites; optional service integration tests
 
-Phase 1 implementation and local setup commands are documented in [README.md](README.md). The only API routes currently exposed are `/api/health` (liveness) and `/api/health/ready` (PostgreSQL + Redis readiness); feature routes begin in Phase 2.
+Phase 1 implementation and local setup commands are documented in [README.md](README.md). Phase 2 adds `/api/auth` routes alongside `/api/health` (liveness) and `/api/health/ready` (PostgreSQL + Redis readiness).
 
-### Phase 2 — Authentication *(Local OAuth preparation implemented)*
+### Phase 2 — Authentication *(Code implemented; GitHub registration pending)*
 
 - [x] Server-only GitHub OAuth configuration, paired credential checks, and callback validation
 - [x] Read-only sign-in scopes, a fixed local frontend port, and OAuth client-secret log redaction
 - [x] Credential-safe `npm run oauth:check` command and [registration guide](docs/GITHUB_OAUTH_SETUP.md)
-- [ ] GitHub OAuth App registration and local credentials — credentials are missing; registration is unverified as of this review
+- [ ] GitHub OAuth App registration and local credentials — intentionally pending by request; real sign-in remains unverified
 - [x] Auth module (controller, service, routes), including one-time state and PKCE
 - [x] JWT issuance & verification middleware
 - [x] GitHub access token encryption/decryption using AES-256-GCM
 - [x] GitHub token expiration, refresh-token rotation, and supporting storage
 - [x] Client auth store (Zustand)
 - [x] Login page & OAuth callback component
-- [ ] AuthGuard route wrapper
+- [x] AuthGuard route wrapper
 
 ### Phase 3 — Project Management
 

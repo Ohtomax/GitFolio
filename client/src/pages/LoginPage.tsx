@@ -52,7 +52,7 @@ export default function LoginPage() {
           <button className="primary-button mt-8 flex w-full items-center justify-between py-4" onClick={signIn} disabled={status === 'checking' || session.isError}>
             <span className="flex items-center gap-3"><Github size={19} aria-hidden="true" />{status === 'checking' ? 'Checking your session…' : 'Continue with GitHub'}</span><ArrowRight size={18} aria-hidden="true" />
           </button>
-          <div className="mt-5 flex items-start gap-2.5 text-xs leading-5 text-stone-500"><LockKeyhole size={14} className="mt-0.5 shrink-0" aria-hidden="true" /><p>Only your GitHub profile and email are requested. Your credentials stay with GitHub.</p></div>
+          <div className="mt-5 flex items-start gap-2.5 text-xs leading-5 text-stone-500"><LockKeyhole size={14} className="mt-0.5 shrink-0" aria-hidden="true" /><p>Only your GitHub profile and email are requested. Your GitHub password stays with GitHub.</p></div>
           <div className="my-8 h-px bg-stone-100" />
           <p className="text-xs font-semibold uppercase tracking-[0.13em] text-stone-400">From first commit to first impression</p>
           <ol className="mt-5 space-y-4">
