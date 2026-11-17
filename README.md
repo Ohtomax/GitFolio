@@ -4,6 +4,8 @@ A full-stack portfolio builder using React, TypeScript, Express, PostgreSQL, and
 
 Phase 1 supplies the monorepo foundation, database schema and migration, validated configuration, and API bootstrap. Authentication, project APIs, the editor, and deployments are later phases in [ARCHITECTURE.md](ARCHITECTURE.md).
 
+Read [System Overview](SYSTEM_OVERVIEW.md) for GitFolio's objective, planned user workflow, benefit analysis, limitations, and success measures. [Architecture](ARCHITECTURE.md#implementation-status) separates implemented code from the remaining plan.
+
 ## Local setup
 
 Use Node.js 22 or later, npm, and a running Docker Desktop. Run these PowerShell commands from the repository root:
