@@ -1,11 +1,13 @@
 import { z } from 'zod';
 
-export const PortfolioUrlSchema = z.string().trim().max(2048).refine((value) => {
+export function isPortfolioUrl(value: string): boolean {
+  if (value.length > 2048) return false;
   if (value === '') return true;
   if (/^mailto:[^\s<>@?]+@[^\s<>@?]+\.[^\s<>@?]+$/.test(value)) return true;
   try { const url = new URL(value); return ['https:', 'http:'].includes(url.protocol) && !url.username && !url.password; }
   catch { return false; }
-}, 'Use an http://, https://, or mailto: link.');
+}
+export const PortfolioUrlSchema = z.string().trim().max(2048).refine(isPortfolioUrl, 'Use an http://, https://, or mailto: link.');
 export const ProjectVisualSchema = z.enum(['dashboard', 'mobile', 'typography', 'architecture', 'code']);
 export const EditorItemSchema = z.object({
   title: z.string().max(120), subtitle: z.string().max(160).optional(),

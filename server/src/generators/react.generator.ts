@@ -1,5 +1,5 @@
 import Mustache from 'mustache';
-import { ProjectSchema, buildPortfolioTree, mountPortfolioInteractions, type Project } from '@gitfolio/shared';
+import { ProjectSchema, portfolioRendererSource, mountPortfolioInteractions, type Project } from '@gitfolio/shared';
 import packageJson from './react-package.json' with { type: 'json' };
 import lockfile from './react-lock.json' with { type: 'json' };
 import { validateArtifact, type GeneratedFile } from './artifact.js';
@@ -24,8 +24,9 @@ export default function App() {
     <footer className="portfolio-footer">{portfolio.name} · {new Date().getFullYear()}</footer></main>;
 }
 `;
-const designedComponent = `import {createElement,useEffect,useRef} from 'react';
+const designedComponent = (layout: Project['themeConfig']['layout']) => `import {createElement,useEffect,useRef} from 'react';
 import portfolio from './portfolio.json';
+${portfolioRendererSource(layout)}
 const mount = ${mountPortfolioInteractions.toString()};
 function Node({node}) {
   if(typeof node==='string') return node;
@@ -36,7 +37,7 @@ function Node({node}) {
     ...(node.tag==='input'?[]:node.children.map((child,index)=><Node key={index} node={child}/>)));
 }
 export default function App(){const root=useRef(null);useEffect(()=>mount(root.current),[]);
-  return <div ref={root}><Node node={portfolio.tree}/></div>;
+  return <div ref={root}><Node node={renderTemplate(portfolio)}/></div>;
 }
 `;
 export const REACT_PAGES_WORKFLOW = [
@@ -59,7 +60,7 @@ export function generateReactProject(input: Project): GeneratedFile[] {
   const project = ProjectSchema.parse(input);
   const designed = Boolean(project.themeConfig.layout && project.themeConfig.layout !== 'classic');
   const sections = [...project.sections].sort((a, b) => a.sortOrder - b.sortOrder).filter((section) => section.visible).map((section) => ({
-    id: section.id, type: section.type, content: { heading: section.content.heading, description: section.content.description,
+    id: section.id, type: section.type, ...(designed ? { visible: true } : {}), content: { heading: section.content.heading, description: section.content.description,
       ...(section.type === 'hero' ? { eyebrow: section.content.eyebrow } : {}),
       ...(['hero', 'contact'].includes(section.type) ? { buttonLabel: section.content.buttonLabel, buttonUrl: section.content.buttonUrl } : {}),
       ...(['projects', 'skills', 'experience', 'education', 'writing', 'now'].includes(section.type) ? { items: section.content.items } : {}),
@@ -72,8 +73,8 @@ export function generateReactProject(input: Project): GeneratedFile[] {
     { path: 'package-lock.json', content: JSON.stringify(lockfile, null, 2) + '\n' },
     { path: 'index.html', content: Mustache.render('<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{{name}}</title></head><body><div id="root"></div><script type="module" src="./src/main.jsx"></script></body></html>\n', { name: project.name }) },
     { path: 'src/main.jsx', content: "import React from 'react';\nimport {createRoot} from 'react-dom/client';\nimport App from './App.jsx';\nimport './style.css';\ncreateRoot(document.getElementById('root')).render(<React.StrictMode><App /></React.StrictMode>);\n" },
-    { path: 'src/App.jsx', content: designed ? designedComponent : component }, { path: 'src/portfolio.json', content: JSON.stringify({ name: project.name, sections,
-      ...(designed ? { tree: buildPortfolioTree({ themeConfig: project.themeConfig, sections: sections.map((section) => ({ ...section, visible: true })) }) } : {}) }, null, 2) + '\n' },
+    { path: 'src/App.jsx', content: designed ? designedComponent(project.themeConfig.layout) : component }, { path: 'src/portfolio.json', content: JSON.stringify({ name: project.name, sections,
+      ...(designed ? { themeConfig: project.themeConfig } : {}) }, null, 2) + '\n' },
     { path: 'src/style.css', content: portfolioStyles(project.themeConfig) },
     { path: 'vite.config.js', content: "import {defineConfig} from 'vite';\nimport react from '@vitejs/plugin-react';\nexport default defineConfig({plugins:[react()],base:'./'});\n" },
     { path: 'public/.nojekyll', content: '' },

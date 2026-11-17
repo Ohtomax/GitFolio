@@ -16,7 +16,10 @@ for (const template of BUILTIN_TEMPLATES) test(`${template.name}: accessible pre
   const reactFiles = Object.fromEntries(generateReactProject(project).map((f) => [f.path,f.content]));
   const tree = buildPortfolioTree(project);
   assert.ok(staticFiles['index.html'].includes(serializePortfolioTree(tree)));
-  assert.deepEqual(JSON.parse(reactFiles['src/portfolio.json']).tree, tree);
+  const exported = JSON.parse(reactFiles['src/portfolio.json']);
+  assert.deepEqual(buildPortfolioTree(exported), tree);
+  assert.equal(exported.tree, undefined, 'React content must be rendered from editable sections');
+  assert.match(reactFiles['src/App.jsx'], /renderTemplate\(portfolio\)/);
   assert.match(staticFiles['style.css'], /data:font\/woff2;base64,/);
   assert.match(staticFiles['style.css'], /SIL OPEN FONT LICENSE/);
   assert.match(staticFiles['index.html'], /Illustrative portfolio/);

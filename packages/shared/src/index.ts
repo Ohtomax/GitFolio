@@ -4,7 +4,7 @@ export { DeploymentLogCodeSchema, StartDeploymentSchema, DeploymentQuerySchema, 
   PublishCapabilitySchema, type StartDeploymentInput, type Deployment, type DeploymentQuery, type DeploymentPage, type PublishCapability } from './validation/deployment.schema.js';
 export type { ApiResponse } from './types/api.types.js';
 export { BUILTIN_TEMPLATES, PORTFOLIO_CSS, buildPortfolioTree, portfolioVariables, accentText, contrastRatio, serializePortfolioTree,
-  mountPortfolioInteractions, type PortfolioDocument, type PortfolioElement, type PortfolioNode } from './portfolio/index.js';
+  mountPortfolioInteractions, portfolioRendererSource, type PortfolioDocument, type PortfolioElement, type PortfolioNode } from './portfolio/index.js';
 export { ProjectVisualSchema } from './validation/section-content.schema.js';
 export { PortfolioLayoutSchema } from './validation/template.schema.js';
 export { PortfolioUrlSchema, EditorItemSchema, SectionContentSchema, EditorSectionSchema, SaveEditorSchema,

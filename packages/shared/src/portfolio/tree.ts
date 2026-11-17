@@ -1,4 +1,4 @@
-import { PortfolioUrlSchema } from '../validation/section-content.schema.js';
+import { isPortfolioUrl } from '../validation/section-content.schema.js';
 import type { EditorSection, EditorItem, SectionContent } from '../validation/editor.schema.js';
 import type { ThemeConfig } from '../validation/template.schema.js';
 
@@ -12,8 +12,8 @@ export const el = (tag: PortfolioTag, className: string, children: Array<Portfol
   ({ tag, attrs: { ...(className ? { class: className } : {}), ...attrs }, children: children.filter((node): node is PortfolioNode => node !== undefined && node !== false) });
 export const text = (value?: string) => value || undefined;
 export function link(url: string | undefined, label: string, className = ''): PortfolioElement {
-  const safe = PortfolioUrlSchema.safeParse(url ?? '');
-  return safe.success && safe.data ? el('a', className, [label], { href: safe.data, target: '_blank', rel: 'noopener noreferrer' }) : el('span', className, [label]);
+  const candidate = typeof url === 'string' ? url.trim() : '';
+  return candidate && isPortfolioUrl(candidate) ? el('a', className, [label], { href: candidate, target: '_blank', rel: 'noopener noreferrer' }) : el('span', className, [label]);
 }
 export const sectionNames = { hero: 'Hero', about: 'About', projects: 'Projects', skills: 'Skills', experience: 'Experience', education: 'Education', contact: 'Contact', writing: 'Writing', now: 'Now' } as const;
 export const itemsFor = (section: EditorSection) => ['projects', 'skills', 'experience', 'education', 'writing', 'now'].includes(section.type) ? section.content.items ?? [] : [];
