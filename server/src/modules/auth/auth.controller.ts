@@ -16,6 +16,16 @@ export function createAuthController(environment: Environment, auth: AuthService
       response.redirect(302, attempt.authorizationUrl);
     }).catch(next);
   };
+  const publish: RequestHandler = (request, response, next) => {
+    try {
+      if (!request.auth) throw new ServiceError(401, 'UNAUTHENTICATED', 'Please sign in.');
+      const input = z.object({ format: z.enum(['static', 'react']) }).strict().parse(request.query);
+      auth.beginPublish(request.auth.userId, input.format === 'react').then((attempt) => {
+        response.cookie(OAUTH_COOKIE, attempt.binding, { ...oauthOptions, maxAge: 600000 });
+        response.redirect(302, attempt.authorizationUrl);
+      }).catch(next);
+    } catch (error) { next(error); }
+  };
   const callback: RequestHandler = (request, response, next) => {
     response.clearCookie(OAUTH_COOKIE, oauthOptions);
     try {
@@ -45,5 +55,5 @@ export function createAuthController(environment: Environment, auth: AuthService
       response.json({ success: true, data: null } satisfies ApiResponse<null>);
     }).catch(next);
   };
-  return { github, callback, me, logout };
+  return { github, publish, callback, me, logout };
 }

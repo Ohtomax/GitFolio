@@ -2,6 +2,8 @@
 
 The Phase 2 auth endpoints, encrypted token storage, refresh handling, login UI, and route guard are implemented. The GitHub account owner must register the OAuth App and supply its credentials before registration and live sign-in can be verified. Registration is intentionally pending in the checklist.
 
+Phase 5 adds a separate publishing authorization step using the same OAuth App and callback. Normal sign-in keeps profile/email scopes. Publishing requests `repo` (required by GitHub's Pages REST API), plus `workflow` for React projects. These grants are requested explicitly from the deployment screen and bound to the signed-in GitHub account. See [Deployment engine](DEPLOYMENT_ENGINE.md).
+
 ## Register the development app
 
 Open [Register a new OAuth application](https://github.com/settings/applications/new) while signed in to the account that will own GitFolio. Use these values:

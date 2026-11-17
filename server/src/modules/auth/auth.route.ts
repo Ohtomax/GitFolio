@@ -21,6 +21,7 @@ export function createAuthRouter(environment: Environment, auth: AuthService, se
     message: { success: false, error: { code: 'RATE_LIMITED', message: 'Too many sign-in attempts. Please try again later.' } } });
   router.use((_request, response, next) => { response.setHeader('Cache-Control', 'no-store'); next(); });
   router.get('/github', signInLimiter, controller.github);
+  router.get('/github/publish', signInLimiter, guard, controller.publish);
   router.post('/github/callback', signInLimiter, controller.callback);
   router.get('/me', guard, controller.me);
   router.post('/logout', guard, controller.logout);

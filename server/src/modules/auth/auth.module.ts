@@ -30,7 +30,7 @@ export function createRedisAuthStores(redis: Redis) {
       if (!saved) return null;
       try {
         const parsed = z.object({ verifier: z.string().regex(/^[A-Za-z0-9_-]{43}$/),
-          bindingHash: z.string().regex(/^[a-f0-9]{64}$/) }).safeParse(JSON.parse(saved));
+          bindingHash: z.string().regex(/^[a-f0-9]{64}$/), publishFor: z.string().regex(/^\d+$/).optional() }).safeParse(JSON.parse(saved));
         return parsed.success ? parsed.data : null;
       } catch { return null; }
     },

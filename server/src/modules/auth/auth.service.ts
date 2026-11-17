@@ -7,7 +7,7 @@ import { ServiceError } from '../../utils/service-error.js';
 import type { AuthRepository, StoredProfile } from './auth.repository.js';
 import { encryptGitHubTokens } from './github-token.service.js';
 
-export interface OAuthState { verifier: string; bindingHash: string }
+export interface OAuthState { verifier: string; bindingHash: string; publishFor?: string }
 export interface OAuthStateStore {
   put(state: string, value: OAuthState, seconds: number): Promise<void>;
   take(state: string): Promise<OAuthState | null>;
@@ -23,17 +23,23 @@ export function createAuthService(configuration: GitHubOAuthConfiguration, repos
       email: stored.email === null ? null : encryption.decrypt(stored.email, `github:${stored.githubId}:email`),
     };
   }
-  return {
-    async begin() {
+  async function begin(publish?: { githubId: string; workflow: boolean }) {
       const state = randomBytes(32).toString('base64url');
       const binding = randomBytes(32).toString('base64url');
       const verifier = randomBytes(32).toString('base64url');
-      await states.put(state, { verifier, bindingHash: hash(binding).toString('hex') }, 600);
+      await states.put(state, { verifier, bindingHash: hash(binding).toString('hex'), ...(publish ? { publishFor: publish.githubId } : {}) }, 600);
       const url = new URL(configuration.authorizationUrl);
       url.search = new URLSearchParams({ client_id: configuration.clientId,
-        redirect_uri: configuration.callbackUrl, scope: configuration.scopes.join(' '), state,
+        redirect_uri: configuration.callbackUrl, scope: [...configuration.scopes, ...(publish ? ['repo', ...(publish.workflow ? ['workflow'] : [])] : [])].join(' '), state,
         code_challenge: hash(verifier).toString('base64url'), code_challenge_method: 'S256' }).toString();
       return { authorizationUrl: url.href, binding };
+  }
+  return {
+    begin: () => begin(),
+    async beginPublish(userId: string, workflow: boolean) {
+      const user = await repository.findProfile(userId);
+      if (!user) throw new ServiceError(401, 'UNAUTHENTICATED', 'Please sign in.');
+      return begin({ githubId: user.githubId, workflow });
     },
     async complete(callback: OAuthCallback, binding: string) {
       // Atomic GETDEL consumes the state before any provider request, including failed exchanges.
@@ -45,6 +51,7 @@ export function createAuthService(configuration: GitHubOAuthConfiguration, repos
       const tokens = await provider.exchangeCode(callback.code, saved.verifier);
       // Revalidate GitHub identity for every code exchange; never trust callback profile fields.
       const profile = await provider.getProfile(tokens.access_token);
+      if (saved.publishFor && saved.publishFor !== profile.id) throw new ServiceError(403, 'GITHUB_ACCOUNT_MISMATCH', 'Use the same GitHub account when authorizing publishing.');
       const stored = await repository.upsertProfile({ githubId: profile.id, login: profile.login,
         name: profile.name ? encryption.encrypt(profile.name, `github:${profile.id}:name`) : null,
         email: profile.email ? encryption.encrypt(profile.email, `github:${profile.id}:email`) : null,

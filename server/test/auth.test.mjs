@@ -23,6 +23,7 @@ async function fixture(t, { failProvider = false, production = false } = {}) {
   const sessions = new Map();
   let stored;
   let exchanges = 0;
+  let profileId = '123';
   const provider = {
     async exchangeCode(code, verifier) {
       exchanges++;
@@ -34,7 +35,7 @@ async function fixture(t, { failProvider = false, production = false } = {}) {
     },
     async getProfile(token) {
       assert.equal(token, 'fixture-private-access');
-      return { id: '123', login: 'fixture-user', name: 'Private Fixture', email: 'fixture@example.test',
+      return { id: profileId, login: 'fixture-user', name: 'Private Fixture', email: 'fixture@example.test',
         avatar_url: 'https://avatars.githubusercontent.com/u/123' };
     },
   };
@@ -74,8 +75,29 @@ async function fixture(t, { failProvider = false, production = false } = {}) {
   const complete = (attempt, overrides = {}) => fetch(`${url}/github/callback`, { method: 'POST',
     headers: { Origin: environment.CLIENT_URL, 'Content-Type': 'application/json', Cookie: attempt.cookie },
     body: JSON.stringify({ ...attempt.input, ...overrides }) });
-  return { url, begin, complete, states, stored: () => stored, exchanges: () => exchanges, environment };
+  return { url, begin, complete, states, stored: () => stored, exchanges: () => exchanges, environment,
+    setProfileId: (id) => { profileId = id; } };
 }
+
+test('publishing consent requires a session, adds only needed scopes, and cannot switch the account', async (t) => {
+  const f = await fixture(t);
+  assert.equal((await fetch(f.url + '/github/publish?format=react', { redirect: 'manual' })).status, 401);
+  const session = await f.complete(await f.begin());
+  const cookie = session.headers.getSetCookie().find(value => value.startsWith('gitfolio_session=')).split(';')[0];
+  const result = await fetch(f.url + '/github/publish?format=react', { redirect: 'manual', headers: { Cookie: cookie } });
+  assert.equal(result.status, 302);
+  const location = new URL(result.headers.get('location'));
+  assert.equal(location.searchParams.get('scope'), 'read:user user:email repo workflow');
+  const attempt = { cookie: result.headers.getSetCookie().find(value => value.startsWith('gitfolio_oauth=')).split(';')[0],
+    input: { code: 'fixture-code', state: location.searchParams.get('state') } };
+  assert.equal(f.states.get(attempt.input.state).publishFor, '123');
+  f.setProfileId('999');
+  const mismatch = await f.complete(attempt);
+  assert.equal(mismatch.status, 403); assert.equal((await mismatch.json()).error.code, 'GITHUB_ACCOUNT_MISMATCH');
+  assert.equal(f.stored().githubId, '123');
+  const minimal = await fetch(f.url + '/github/publish?format=static', { redirect: 'manual', headers: { Cookie: cookie } });
+  assert.equal(new URL(minimal.headers.get('location')).searchParams.get('scope'), 'read:user user:email repo');
+});
 
 test('OAuth uses browser-bound, one-time state and S256 PKCE, encrypts data, and returns a revocable session', async (t) => {
   const f = await fixture(t);

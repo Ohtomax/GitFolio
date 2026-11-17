@@ -16,11 +16,12 @@ Without all four secrets, auth endpoints return `503 AUTH_NOT_CONFIGURED`; healt
 | Method | Endpoint | Behavior |
 | --- | --- | --- |
 | GET | `/api/auth/github` | Stores state/PKCE in Redis for ten minutes, sets a browser binding cookie, and redirects to GitHub |
+| GET | `/api/auth/github/publish?format=static\|react` | Requires the current session; requests publishing scopes and binds consent to its GitHub account |
 | POST | `/api/auth/github/callback` | Accepts strictly validated `{ code, state }`, consumes state atomically, exchanges code, persists encrypted credentials, sets a session cookie, and returns `{ user, expiresAt }` |
 | GET | `/api/auth/me` | Verifies the JWT and Redis session, then returns the current user and session expiration |
 | POST | `/api/auth/logout` | Revokes the current Redis session and clears the session cookie |
 
-Responses use the shared API envelope. Auth responses are never cached. Callback and cookie-authenticated mutations require the configured frontend `Origin`. The API group and sign-in routes have rate limits. The public OAuth endpoints intentionally do not require an existing JWT; `/me` and `/logout` use `verifyToken`.
+Responses use the shared API envelope. Auth responses are never cached. Callback and cookie-authenticated mutations require the configured frontend `Origin`. The API group and sign-in routes have rate limits. Normal sign-in and its callback do not require an existing JWT; publishing consent, `/me`, and `/logout` use `verifyToken`. Publishing consent cannot switch accounts or overwrite credentials for another GitHub identity. See [Deployment engine](DEPLOYMENT_ENGINE.md) for permissions.
 
 JWTs use HS256 with fixed issuer/audience and contain only user/session identifiers and timestamps. The browser receives an HttpOnly, SameSite=Lax cookie scoped to `/api`; it becomes Secure with HTTPS or production configuration. Protected server routes must use `verifyToken` and ownership-scoped repository queries. Bearer JWTs are supported for server API clients. Logging omits URLs, headers, bodies, provider responses, tokens, codes, and personal information.
 
