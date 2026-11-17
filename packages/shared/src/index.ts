@@ -3,6 +3,9 @@ export { DEPLOYMENT_MESSAGES, type DeploymentLogCode } from './constants/deploym
 export { DeploymentLogCodeSchema, StartDeploymentSchema, DeploymentQuerySchema, DeploymentSchema, DeploymentPageSchema,
   PublishCapabilitySchema, type StartDeploymentInput, type Deployment, type DeploymentQuery, type DeploymentPage, type PublishCapability } from './validation/deployment.schema.js';
 export type { ApiResponse } from './types/api.types.js';
+export { ROLE_LAYOUTS, isRoleLayout, type RoleLayout, type RoleWidget, type RoleMetric, type RoleDocument, type RoleSection, type RoleItem,
+  type RolePortfolioProps, type ApiWidget, type SecurityWidget, type TokenWidget, type SandboxWidget, type FlowWidget } from './portfolio/role-contracts.js';
+export { RoleWidgetSchema } from './validation/role-widget.schema.js';
 export { BUILTIN_TEMPLATES, PORTFOLIO_CSS, buildPortfolioTree, portfolioVariables, accentText, contrastRatio, serializePortfolioTree,
   mountPortfolioInteractions, portfolioRendererSource, type PortfolioDocument, type PortfolioElement, type PortfolioNode } from './portfolio/index.js';
 export { ProjectVisualSchema } from './validation/section-content.schema.js';

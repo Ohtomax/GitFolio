@@ -1,5 +1,6 @@
 import Mustache from 'mustache';
-import { ProjectSchema, portfolioRendererSource, mountPortfolioInteractions, type Project } from '@gitfolio/shared';
+import { ProjectSchema, portfolioRendererSource, mountPortfolioInteractions, isRoleLayout, type Project } from '@gitfolio/shared';
+import { generateRoleReactProject } from './role.generator.js';
 import packageJson from './react-package.json' with { type: 'json' };
 import lockfile from './react-lock.json' with { type: 'json' };
 import { validateArtifact, type GeneratedFile } from './artifact.js';
@@ -58,6 +59,7 @@ export const REACT_PAGES_WORKFLOW = [
 ].join('\n');
 export function generateReactProject(input: Project): GeneratedFile[] {
   const project = ProjectSchema.parse(input);
+  if (isRoleLayout(project.themeConfig.layout)) return generateRoleReactProject(project, REACT_PAGES_WORKFLOW);
   const designed = Boolean(project.themeConfig.layout && project.themeConfig.layout !== 'classic');
   const sections = [...project.sections].sort((a, b) => a.sortOrder - b.sortOrder).filter((section) => section.visible).map((section) => ({
     id: section.id, type: section.type, ...(designed ? { visible: true } : {}), content: { heading: section.content.heading, description: section.content.description,

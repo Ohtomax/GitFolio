@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { RepoNameSchema } from '@gitfolio/shared';
 import { validateArtifact, type GeneratedFile } from '../generators/artifact.js';
 import { ServiceError } from '../utils/service-error.js';
+import { ROLE_ARTIFACT_PATHS } from '../generators/role.generator.js';
 
 const sha = z.string().regex(/^[a-f0-9]{40}$/);
 const login = z.string().regex(/^[a-zA-Z0-9-]{1,39}$/);
@@ -14,7 +15,7 @@ const refSchema = z.object({ object: z.object({ sha }) });
 const commitSchema = z.object({ sha, message: z.string(), tree: z.object({ sha }) });
 const allowedPaths = new Set(['index.html', 'style.css', 'script.js', '.nojekyll', 'package.json', 'package-lock.json',
   'src/main.jsx', 'src/App.jsx', 'src/portfolio.json', 'src/style.css', 'vite.config.js', 'public/.nojekyll', '.gitignore',
-  '.github/workflows/pages.yml', 'README.md']);
+  '.github/workflows/pages.yml', 'README.md', ...ROLE_ARTIFACT_PATHS]);
 const manifestSchema = z.object({ version: z.literal(1), projectId: z.string().uuid(), deploymentId: z.string().uuid(),
   format: z.enum(['static', 'react']), files: z.array(z.string().refine((path) => allowedPaths.has(path))).max(30) }).strict();
 type Manifest = z.infer<typeof manifestSchema>;

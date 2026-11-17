@@ -15,7 +15,7 @@ export function link(url: string | undefined, label: string, className = ''): Po
   const candidate = typeof url === 'string' ? url.trim() : '';
   return candidate && isPortfolioUrl(candidate) ? el('a', className, [label], { href: candidate, target: '_blank', rel: 'noopener noreferrer' }) : el('span', className, [label]);
 }
-export const sectionNames = { hero: 'Hero', about: 'About', projects: 'Projects', skills: 'Skills', experience: 'Experience', education: 'Education', contact: 'Contact', writing: 'Writing', now: 'Now' } as const;
+export const sectionNames = { hero: 'Hero', about: 'About', projects: 'Projects', skills: 'Skills', experience: 'Experience', education: 'Education', contact: 'Contact', writing: 'Writing', now: 'Now', interactive: 'Interactive demo' } as const;
 export const itemsFor = (section: EditorSection) => ['projects', 'skills', 'experience', 'education', 'writing', 'now'].includes(section.type) ? section.content.items ?? [] : [];
 export function sectionShell(section: EditorSection, children: PortfolioNode[], className = ''): PortfolioElement {
   return el('section', `pf-section pf-${section.type} ${className}`, children,

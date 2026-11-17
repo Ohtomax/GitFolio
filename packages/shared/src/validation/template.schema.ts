@@ -11,7 +11,7 @@ export const PageMetaSchema = z.object({
   total: z.number().int().nonnegative(), totalPages: z.number().int().nonnegative(),
 });
 export const TemplateCategorySchema = z.enum(['minimal', 'developer', 'professional', 'creative']);
-export const PortfolioLayoutSchema = z.enum(['classic', 'minimal', 'terminal', 'editorial', 'bento', 'executive']);
+export const PortfolioLayoutSchema = z.enum(['classic', 'minimal', 'terminal', 'editorial', 'bento', 'executive', 'backend', 'security', 'quality', 'frontend', 'fullstack']);
 const color = z.string().regex(/^#[0-9a-fA-F]{6}$/);
 export const ThemeConfigSchema = z.object({
   colors: z.object({
@@ -19,13 +19,14 @@ export const ThemeConfigSchema = z.object({
     background: z.string().regex(/^#[0-9a-fA-F]{6}$/),
     text: z.string().regex(/^#[0-9a-fA-F]{6}$/),
     muted: color.optional(), surface: color.optional(), border: color.optional(),
+    primary: color.optional(), success: color.optional(), warning: color.optional(), danger: color.optional(),
   }).strict(),
   font: z.enum(['sans', 'serif', 'mono']),
   spacing: z.enum(['compact', 'comfortable', 'spacious']),
   layout: PortfolioLayoutSchema.optional(), headingFont: z.enum(['sans', 'serif', 'mono']).optional(),
   demo: z.boolean().optional(),
 }).strict();
-export const SectionTypeSchema = z.enum(['hero', 'about', 'projects', 'skills', 'experience', 'education', 'contact', 'writing', 'now']);
+export const SectionTypeSchema = z.enum(['hero', 'about', 'projects', 'skills', 'experience', 'education', 'contact', 'writing', 'now', 'interactive']);
 export const TemplateConfigSchema = z.object({
   theme: ThemeConfigSchema,
   sections: z.array(z.object({

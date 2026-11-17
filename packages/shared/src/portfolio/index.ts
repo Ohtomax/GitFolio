@@ -2,6 +2,7 @@ import type { Template } from '../validation/template.schema.js';
 import { el, main, pageFrame, sectionShell, sectionHeading, sectionNames, entry, itemsFor, art, action, metrics, tags, navigation, link,
   type PortfolioDocument, type PortfolioElement } from './tree.js';
 import { isPortfolioUrl } from '../validation/section-content.schema.js';
+import { isRoleLayout } from './role-contracts.js';
 import { PORTFOLIO_BASE_CSS } from './styles.js';
 import { minimalTemplate, renderMinimal, MINIMAL_CSS } from './minimal.js';
 import { terminalTemplate, renderTerminal, TERMINAL_CSS } from './terminal.js';
@@ -22,7 +23,7 @@ export function buildPortfolioTree(document: PortfolioDocument): PortfolioElemen
 }
 export function portfolioRendererSource(layout: PortfolioDocument['themeConfig']['layout']): string {
   const renderers = { minimal: renderMinimal, terminal: renderTerminal, editorial: renderEditorial, bento: renderBento, executive: renderExecutive };
-  if (!layout || layout === 'classic') throw new Error('A design layout is required');
+  if (!layout || layout === 'classic' || isRoleLayout(layout)) throw new Error('A design layout is required');
   // These are application-owned functions compiled by TypeScript, never user code.
   // Keeping the actual renderer in the export makes portfolio.json editable and
   // avoids freezing a second, stale copy of its content in a pre-rendered tree.

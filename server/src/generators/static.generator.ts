@@ -1,5 +1,6 @@
 import Mustache from 'mustache';
-import { ProjectSchema, PORTFOLIO_CSS, buildPortfolioTree, serializePortfolioTree, portfolioVariables, mountPortfolioInteractions, type Project, type ThemeConfig } from '@gitfolio/shared';
+import { ProjectSchema, PORTFOLIO_CSS, buildPortfolioTree, serializePortfolioTree, portfolioVariables, mountPortfolioInteractions, isRoleLayout, type Project, type ThemeConfig } from '@gitfolio/shared';
+import { generateRoleStaticSite } from './role.generator.js';
 import { validateArtifact, type GeneratedFile } from './artifact.js';
 import { portfolioFontStyles } from './portfolio-fonts.js';
 
@@ -30,6 +31,7 @@ const pageTemplate = `<!doctype html>
 `;
 export function generateStaticSite(input: Project): GeneratedFile[] {
   const project = ProjectSchema.parse(input);
+  if (isRoleLayout(project.themeConfig.layout)) return generateRoleStaticSite(project);
   if (project.themeConfig.layout && project.themeConfig.layout !== 'classic') {
     const tree = buildPortfolioTree({ ...project, sections: [...project.sections].sort((a, b) => a.sortOrder - b.sortOrder) });
     const html = Mustache.render('<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{{name}}</title><link rel="stylesheet" href="./style.css"><script src="./script.js" defer></script></head><body>{{{content}}}</body></html>\n',
