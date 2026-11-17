@@ -12,11 +12,9 @@ import { SectionNavigation } from '../components/editor/SectionNavigation.tsx';
 import { SectionInspector } from '../components/editor/SectionInspector.tsx';
 import { useEditorPersistence } from '../hooks/useEditorPersistence.ts';
 import { ThemeControls } from '../components/editor/ThemeControls.tsx';
+import { EditorCanvas } from '../components/editor/EditorCanvas.tsx';
 
 function EditorWorkspace({ project }: { project: Project }) {
-  const document = useEditor((state) => state.document);
-  const selectedId = useEditor((state) => state.selectedId);
-  const setSelectedId = useEditor((state) => state.selectSection);
   const dirty = useEditor((state) => state.dirty);
   const panel = useEditor((state) => state.panel);
   const persistence = useEditorPersistence(project);
@@ -28,9 +26,7 @@ function EditorWorkspace({ project }: { project: Project }) {
     navigation={<SectionNavigation disabled={disabled} />}
     inspector={panel === 'sections' ? <SectionInspector disabled={disabled} /> : <ThemeControls project={project} disabled={disabled} />}
   >
-    <div className="flex items-center justify-between border-b border-stone-200 bg-white px-5 py-3 text-xs text-stone-500"><span>Canvas</span><span>{document.sections.filter((section) => section.visible).length} visible sections</span></div>
-    {project.status === 'ARCHIVED' && <p role="status" className="m-4 rounded-xl bg-amber-50 p-4 text-sm text-amber-900">This project is archived. Restore it from your projects to make changes.</p>}
-    <div className="space-y-4 p-4 sm:p-6">{document.sections.filter((section) => section.visible).map((section) => <button key={section.id} type="button" aria-label={`Select ${section.type} section`} onClick={() => setSelectedId(section.id)} className={`block w-full rounded-xl border bg-white p-6 text-left sm:p-9 ${section.id === selectedId ? 'border-lime-600 ring-1 ring-lime-600' : 'border-stone-200'}`}><p className="text-[10px] font-medium uppercase tracking-widest text-lime-700">{section.type}</p><h2 className="mt-3 break-words text-2xl font-semibold tracking-tight">{typeof section.content.heading === 'string' && section.content.heading || 'Untitled section'}</h2><p className="mt-3 whitespace-pre-wrap break-words text-sm leading-7 text-stone-500">{typeof section.content.description === 'string' ? section.content.description : ''}</p></button>)}{!document.sections.some((section) => section.visible) && <p className="rounded-xl bg-white p-10 text-center text-sm text-stone-500">No visible sections.</p>}</div>
+    <EditorCanvas archived={readOnly} />
   </EditorFrame>;
 }
 export default function EditorPage() {

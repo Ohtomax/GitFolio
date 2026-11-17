@@ -1,4 +1,6 @@
-.portfolio-surface { background: var(--portfolio-bg); color: var(--portfolio-text); overflow-wrap: anywhere; }
+.portfolio-surface { container-type: inline-size; background: var(--portfolio-bg); color: var(--portfolio-text); overflow-wrap: anywhere; }
+.portfolio-surface .portfolio-hero { font-size: clamp(2rem, 7cqi, 4rem); }
+@container (min-width: 540px) { .portfolio-surface .portfolio-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .portfolio-surface .portfolio-section { padding: var(--portfolio-space) 1.5rem; border-bottom: 1px solid color-mix(in srgb, var(--portfolio-text) 14%, transparent); }
 .portfolio-surface .portfolio-accent { color: var(--portfolio-accent); }
 .portfolio-surface .portfolio-muted { opacity: .7; }

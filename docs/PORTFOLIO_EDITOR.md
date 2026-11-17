@@ -19,3 +19,7 @@ Manual **Save changes** acknowledges the submitted snapshot without overwriting 
 ## Theme
 
 The Theme panel edits accent/background/text colors, three local font families, and compact/comfortable/spacious section spacing. A sample updates immediately. These edits participate in undo/redo and the same document-save transaction as sections. **Use template defaults** restores the selected template's theme without changing content. Custom colors are strictly validated hex values and are applied through scoped CSS variables; font/spacing choices use fixed class maps, and no remote font requests are needed. Accent buttons select black/white text for contrast.
+
+## Live preview
+
+Canvas and Preview use the same document renderer for all seven section types, including entries, calls to action, theme styling, and visibility. Canvas provides section selection; Preview enables validated external links in new tabs and section navigation. Desktop fits the available workspace; tablet and mobile cap the pane at 768px and 375px. Container queries adapt cards and typography to the pane's actual width. The preview uses deferred rendering to keep typing responsive. Text is escaped by React, and invalid links in a local draft never become clickable. No portfolio scripts or raw HTML execute in the preview.

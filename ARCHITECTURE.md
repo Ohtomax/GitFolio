@@ -944,7 +944,7 @@ Phase 1 implementation and local setup commands are documented in [README.md](RE
 - [x] Editor page layout (canvas + sidebar panels)
 - [x] Section management (add, reorder, remove, edit)
 - [x] Theme customization (colors, fonts, spacing)
-- [ ] Live preview pane
+- [x] Live preview pane
 - [ ] Auto-save with debounced mutations
 - [x] Editor Zustand store for undo/redo
 

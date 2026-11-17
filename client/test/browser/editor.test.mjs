@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { randomUUID } from 'node:crypto';
 import { before, after, test } from 'node:test';
 import { projectFixtureData, projectsFixture } from './helpers/projects.mjs';
 
@@ -84,4 +85,36 @@ test('theme controls update colors fonts and spacing, support undo, and persist 
   assert.equal(await f.page.getByLabel('Background color', { exact: true }).inputValue(), '#123456');
   await f.page.getByRole('button', { name: 'Use template defaults', exact: true }).click();
   assert.equal(await f.page.getByLabel('Font family', { exact: true }).inputValue(), 'sans');
+});
+
+test('live preview renders every section type, validates links, escapes text, and adapts to its pane width', async (t) => {
+  const project = projectFixtureData('Preview');
+  project.sections[0].content = { heading: 'Your name', description: 'My introduction', buttonLabel: 'Contact me', buttonUrl: 'https://example.com/contact' };
+  for (const type of ['about', 'projects', 'skills', 'experience', 'education', 'contact']) {
+    project.sections.push({ id: randomUUID(), type, sortOrder: project.sections.length, visible: true,
+      content: { heading: `My ${type}`, description: `Details for ${type}`, items: ['projects', 'skills', 'experience', 'education'].includes(type)
+        ? [{ title: `${type} entry`, subtitle: 'A subtitle', description: 'Entry details', url: 'https://example.com/work' }] : [] } });
+  }
+  const f = await projectsFixture(t, browser, { projects: [project] });
+  await f.goto(`/projects/${project.id}/edit`);
+  const preview = f.page.getByRole('region', { name: 'Portfolio preview', exact: true });
+  await preview.getByRole('heading', { name: 'My education', exact: true }).waitFor();
+  assert.equal(await preview.locator('section').count(), 7);
+  await f.page.getByRole('button', { name: 'Preview', exact: true }).click();
+  const link = preview.getByRole('link', { name: 'projects entry', exact: true });
+  assert.equal(await link.getAttribute('rel'), 'noopener noreferrer');
+  assert.equal(await link.getAttribute('target'), '_blank');
+  await f.page.getByRole('button', { name: 'mobile preview width', exact: true }).click();
+  assert.ok((await f.page.getByTestId('preview-viewport').boundingBox()).width <= 375);
+  const hostile = '<script>window.portfolioScriptRan=true</script>';
+  await f.page.getByLabel('Section heading', { exact: true }).fill(hostile);
+  await preview.getByRole('heading', { name: hostile, exact: true }).waitFor();
+  assert.equal(await preview.locator('script').count(), 0);
+  assert.equal(await f.page.evaluate(() => window.portfolioScriptRan), undefined);
+  await f.page.getByLabel('Button link', { exact: true }).fill('javascript:alert(1)');
+  assert.equal(await preview.getByRole('link', { name: 'Contact me', exact: true }).count(), 0);
+  await f.page.getByLabel('Visible in portfolio', { exact: true }).uncheck();
+  await preview.getByRole('heading', { name: hostile, exact: true }).waitFor({ state: 'detached' });
+  await f.page.setViewportSize({ width: 320, height: 900 });
+  assert.ok(await f.page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
 });
