@@ -54,7 +54,7 @@ These statuses are based on the checked-in source, rather than the presence of a
 
 ### Current executable behavior
 
-- `npm run dev` builds shared/server code, generates Prisma Client, and starts shared, API, client, and deployment-worker watchers.
+- `npm run dev` builds shared/server code, generates Prisma Client only when needed, and starts shared, API, client, and deployment-worker watchers.
 - The API connects to PostgreSQL and Redis before listening. The separate BullMQ worker uses those services for queued publishing and recovery.
 - `GET /api/health` checks the HTTP process. `GET /api/health/ready` queries PostgreSQL and pings Redis, returning HTTP 503 if a dependency check fails. Both routes are under the API rate limiter.
 - The frontend processes OAuth callbacks and protects `/account`, `/dashboard`, `/projects/new`, `/projects/:id/edit`, and `/projects/:id/deployments` with AuthGuard. Successful sign-in defaults to the dashboard. Vite proxies `/api` to Express for same-origin cookies.

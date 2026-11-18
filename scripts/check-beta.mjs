@@ -1,5 +1,5 @@
 import { spawn, spawnSync } from 'node:child_process';
-import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, writeFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -33,13 +33,7 @@ async function run(name, args, environment = {}) {
 }
 try {
   if (!npm) throw new Error('Run this command through npm run beta:check');
-  const generated = join(root, 'node_modules/.prisma/client/schema.prisma');
-  await readFile(generated).catch(() => { throw new Error('Run npm run db:generate before beta acceptance'); });
-  const serverRequire = createRequire(join(root, 'server/package.json'));
-  // Prisma's diff accepts its formatter's reordered attributes. It requires no
-  // database connection and avoids replacing a DLL held by a running local API.
-  await run('generated Prisma schema (regenerate client if stale)', [serverRequire.resolve('prisma'), 'migrate', 'diff',
-    '--from-schema-datamodel', generated, '--to-schema-datamodel', join(root, 'server/prisma/schema.prisma'), '--exit-code'],
+  await run('generated Prisma schema (regenerate client if stale)', ['server/scripts/prisma.mjs', 'generate', '--check-only'],
     { DATABASE_URL: 'postgresql://fixture:fixture@127.0.0.1:1/fixture' });
   const clientRequire = createRequire(join(root, 'client/package.json'));
   const playwright = process.env.GITFOLIO_PLAYWRIGHT_MODULE || clientRequire.resolve('playwright');

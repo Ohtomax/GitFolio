@@ -48,7 +48,7 @@ The Vite development server proxies `/api` to the configured backend so cookies 
 
 The API connects to PostgreSQL and Redis before listening. Liveness checks the HTTP process; readiness queries PostgreSQL and pings Redis, returning HTTP 503 when either is unavailable. Responses use the shared `{ success, data }` / `{ success, error }` contract. API requests are rate limited; configure the limit and window through `.env`.
 
-`npm run dev` builds shared/server code and generates Prisma Client before starting shared, API, client, and deployment-worker watchers. Server changes compile once; the API restarts and the worker watches emitted files. Production runs `npm run start:worker` alongside the built API. SIGINT/SIGTERM close owned connections; worker leases recover interrupted attempts. Readiness checks PostgreSQL/Redis availability and does not prove that a publishing worker is running.
+`npm run dev` builds shared/server code and ensures a matching Prisma Client before starting shared, API, client, and deployment-worker watchers. A matching client is reused; generation runs when needed. Server changes compile once; the API restarts and the worker watches emitted files. Production runs `npm run start:worker` alongside the built API. SIGINT/SIGTERM close owned connections; worker leases recover interrupted attempts. Readiness checks PostgreSQL/Redis availability and does not prove that a publishing worker is running.
 
 ## Commands
 
@@ -64,6 +64,8 @@ The API connects to PostgreSQL and Redis before listening. Liveness checks the H
 | `npm run test:browser --workspace=@gitfolio/client` | Run browser auth, project, editor, and publishing workflows against a running client |
 | `npm run oauth:check` | Validate local GitHub OAuth settings without printing credentials |
 | `npm run db:validate` | Validate the Prisma schema |
+| `npm run db:ensure` | Generate Prisma Client when out of date or required runtime files are missing |
+| `npm run db:generate` | Explicitly regenerate Prisma Client; stop the local API/worker first on Windows |
 | `npm run db:deploy` | Apply the committed migrations without resetting data |
 | `npm run db:seed` | Add missing presets and upgrade untouched legacy defaults while preserving custom edits and drafts |
 | `npm run db:migrate -- --name describe_change` | Create/apply a migration in a development database |
@@ -85,7 +87,7 @@ Remove-Item Env:GITFOLIO_TEST_DATABASE_URL
 
 The database tests reject other database names, use synthetic fixtures, and remove their fixtures afterward. Set `GITFOLIO_TEST_REDIS_URL` to a disposable Redis instance too to test server startup/shutdown and real BullMQ consumption, delayed checks, and deduplication. The queue test writes only under a random `gitfolio_test_` prefix and removes that queue afterward; never point it at production services.
 
-The full worker-runtime test also needs `GITFOLIO_TEST_RUNTIME_DATABASE_URL`, a separate migrated database named `gitfolio_phase1_test_runtime_*`. It verifies API/outbox recovery, real BullMQ processing, worker restart, and final status with simulated GitHub operations. Keep it distinct from the general test database because worker recovery scans all pending attempts in its database. On Windows, stop running API/worker processes before `npm run build` or `db:generate` if Prisma's native DLL is locked; do not change or discard the working environment file.
+The full worker-runtime test also needs `GITFOLIO_TEST_RUNTIME_DATABASE_URL`, a separate migrated database named `gitfolio_phase1_test_runtime_*`. It verifies API/outbox recovery, real BullMQ processing, worker restart, and final status with simulated GitHub operations. Keep it distinct from the general test database because worker recovery scans all pending attempts in its database. Startup, build, typecheck, and test scripts use `db:ensure` to reuse a matching generated client. On Windows, stop running API/worker processes before explicit `db:generate`, or when a schema/package change requires regeneration, because a running process can hold Prisma's native DLL open. Keep Docker running and preserve the working environment file. Do not start a second `npm run dev` while the first is still running; stop it with Ctrl+C first.
 
 Browser tests use synthetic API responses and cover OAuth, projects, editor controls/autosave, publishing confirmation, permission redirects, lost-response retries, terminal polling, paginated history/logs, guards, and narrow screens. They do not contact GitHub. After installing dependencies, run `npx playwright install chromium`, start `npm run dev:client` in another terminal, and run the browser command above. Alternatively, set `PLAYWRIGHT_CHANNEL=msedge` or `chrome` to use an installed browser. `GITFOLIO_BROWSER_BASE_URL` overrides the default `http://127.0.0.1:5173`. The optional project/editor/deployment-storage suites exercise real Prisma repositories, atomic snapshots, ownership, concurrency, outbox recovery, and worker fencing in an explicitly named disposable database. Passing these checks does not establish a real OAuth consent round trip or live Pages deployment.
 
