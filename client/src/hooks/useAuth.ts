@@ -67,7 +67,7 @@ export function useLogout() {
     queryClient.setQueryData(sessionKey, null);
     await queryClient.invalidateQueries({ queryKey: sessionKey, refetchType: 'none' });
   };
-  return useMutation({ mutationFn: authService.logout, onSuccess: clear, retry: false,
+  return useMutation({ mutationFn: authService.logout, onSuccess: clear, retry: false, meta: { notice: {} },
     onError: (error) => { if (error instanceof ApiError && error.status === 401) return clear(); },
   });
 }

@@ -963,7 +963,7 @@ Phase 1 implementation and local setup commands are documented in [README.md](RE
 ### Phase 6 — Polish & Launch
 
 - [x] Error boundaries & fallback UI — recoverable page/chunk errors and an isolated editor preview
-- [ ] Toast notifications for async operations
+- [x] Toast notifications for async operations — project mutations, explicit saves, save errors, and deployment results
 - [ ] Responsive design audit
 - [ ] Performance optimization (code splitting, lazy loading)
 - [ ] Production deployment configuration

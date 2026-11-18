@@ -10,6 +10,7 @@ import type { EditorDocument } from '../stores/editor.store.ts';
 import { createEditorSaveCoordinator, type EditorSaveStatus } from '../utils/editor-save-coordinator.ts';
 import { errorMessage } from '../utils/errorParser.ts';
 import { ApiError } from '../services/api.ts';
+import { toast } from 'sonner';
 
 export function useEditorPersistence(project: Project) {
   const draft = useEditorDraft();
@@ -32,7 +33,12 @@ export function useEditorPersistence(project: Project) {
   const [coordinator] = useState(() => createEditorSaveCoordinator({ revision: draft.revision,
     baseline: store.getState().savedDocument, getDocument: () => store.getState().document,
     request: (snapshot, revision) => mutation.mutateAsync({ snapshot, revision }),
-    onSaved: (snapshot, saved) => { draft.revision = saved.editorRevision; store.getState().markSaved(snapshot); }, onStatus: setStatus,
+    onSaved: (snapshot, saved) => { draft.revision = saved.editorRevision; store.getState().markSaved(snapshot); }, onStatus: (next) => {
+      setStatus(next);
+      if ((next.phase === 'error' || next.phase === 'conflict') && active.current && useAuthStore.getState().user?.id === userId) {
+        toast.error(next.error instanceof ZodError ? 'Check the section fields and links before saving.' : errorMessage(next.error), { id: `editor-${project.id}` });
+      }
+    },
     active: () => active.current && useAuthStore.getState().user?.id === userId,
   }));
   useEffect(() => { active.current = true; return () => { active.current = false; }; }, []);
@@ -72,5 +78,10 @@ export function useEditorPersistence(project: Project) {
   }
   const message = status.error instanceof ZodError
     ? 'Check the section fields and links before saving.' : status.error ? errorMessage(status.error) : null;
-  return { status, message, reloading, recovered, resume, save: () => recovered ? Promise.resolve(false) : coordinator.flush(), reload };
+  async function save() {
+    const saved = !recovered && await coordinator.flush();
+    if (saved && active.current && useAuthStore.getState().user?.id === userId) toast.success('Changes saved.', { id: `editor-${project.id}` });
+    return saved;
+  }
+  return { status, message, reloading, recovered, resume, save, reload };
 }

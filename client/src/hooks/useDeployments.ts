@@ -1,4 +1,5 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
+import { toast } from 'sonner';
 import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { IdParamsSchema, type Deployment, type DeploymentQuery, type StartDeploymentInput } from '@gitfolio/shared';
 import { deploymentService } from '../services/deployment.service.ts';
@@ -37,6 +38,17 @@ const useOwner = () => useAuthStore((state) => state.status === 'authenticated' 
 export function useDeployment(id: string) {
   const owner = useOwner(), queryClient = useQueryClient();
   const query = useQuery(deploymentDetailOptions(owner, id));
+  const previous = useRef<{ id: string; status: Deployment['status'] }>();
+  useEffect(() => {
+    const current = query.data;
+    if (!current || useAuthStore.getState().user?.id !== owner) return;
+    const before = previous.current;
+    previous.current = { id: current.id, status: current.status };
+    if (before?.id !== current.id || !isDeploymentActive(before.status) || isDeploymentActive(current.status)) return;
+    const options = { id: `deployment-${current.id}` };
+    if (current.status === 'LIVE') toast.success('Your portfolio is live.', options);
+    else toast.error('Publishing stopped. Open the deployment logs for the next step.', options);
+  }, [owner, query.data]);
   useEffect(() => {
     if (!query.data || useAuthStore.getState().user?.id !== owner || isDeploymentActive(query.data.status)) return;
     void queryClient.invalidateQueries({ queryKey: deploymentKeys.histories(owner, query.data.projectId) });
@@ -54,4 +66,4 @@ export function usePublishCapability(projectId: string) {
   return useQuery({ queryKey: deploymentKeys.capability(owner, projectId), queryFn: ({ signal }) => deploymentService.capability(projectId, signal),
     enabled: Boolean(owner) && valid(projectId), staleTime: 0, retry: false });
 }
-export function useStartDeployment() { const owner = useOwner(); return useMutation(startDeploymentOptions(useQueryClient(), owner)); }
+export function useStartDeployment() { const owner = useOwner(); return useMutation({ ...startDeploymentOptions(useQueryClient(), owner), meta: { notice: { ownerId: owner, pending: 'Starting deployment…', success: 'Deployment queued.' } } }); }

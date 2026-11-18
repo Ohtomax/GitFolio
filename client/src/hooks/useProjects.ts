@@ -60,13 +60,13 @@ export function useProject(id: string) {
 }
 export function useCreateProject() {
   const userId = useAuthStore((state) => state.user?.id ?? '');
-  return useMutation(createProjectMutationOptions(useQueryClient(), userId));
+  return useMutation({ ...createProjectMutationOptions(useQueryClient(), userId), meta: { notice: { ownerId: userId, pending: 'Creating project…', success: 'Project created.' } } });
 }
 export function useUpdateProject() {
   const userId = useAuthStore((state) => state.user?.id ?? '');
-  return useMutation(updateProjectMutationOptions(useQueryClient(), userId));
+  return useMutation({ ...updateProjectMutationOptions(useQueryClient(), userId), meta: { notice: { ownerId: userId, pending: 'Updating project…', success: 'Project updated.' } } });
 }
 export function useDeleteProject() {
   const userId = useAuthStore((state) => state.user?.id ?? '');
-  return useMutation(deleteProjectMutationOptions(useQueryClient(), userId));
+  return useMutation({ ...deleteProjectMutationOptions(useQueryClient(), userId), meta: { notice: { ownerId: userId, pending: 'Deleting project…', success: 'Project deleted.' } } });
 }
