@@ -19,7 +19,13 @@ export async function projectsFixture(t, browser, options = {}) {
   const page = await context.newPage();
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
-  t.after(async () => { await context.close(); assert.deepEqual(errors, []); });
+  t.after(async () => {
+    await context.close();
+    if (options.expectedPageError) {
+      assert.ok(errors.length > 0, 'the injected failure was exercised');
+      for (const error of errors) assert.match(error, options.expectedPageError);
+    } else assert.deepEqual(errors, []);
+  });
   const state = { projects: options.projects ?? [], authenticated: true, failProjects: false, failTemplates: false,
     rejectCreate: false, creates: 0, editorSaves: 0, editorBodies: [], projectRequests: 0, templateRequests: 0, templates: templateFixtures, ...options };
   const session = { user: { id: randomUUID(), githubId: '123', login: 'fixture-user', name: 'Fixture Developer',

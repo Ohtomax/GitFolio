@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { Link, Route, Routes } from 'react-router-dom';
+import { Link, Route, Routes, useLocation } from 'react-router-dom';
 import { ChunkErrorBoundary } from './components/common/ChunkErrorBoundary.tsx';
 import { PageSkeleton } from './components/common/PageSkeleton.tsx';
 import { AuthGuard } from './components/auth/AuthGuard.tsx';
@@ -13,7 +13,8 @@ const EditorPage = lazy(() => import('./pages/EditorPage.tsx'));
 const DeploymentsPage = lazy(() => import('./pages/DeploymentsPage.tsx'));
 
 export default function App() {
-  return <ChunkErrorBoundary><Suspense fallback={<PageSkeleton label="Loading GitFolio" />}><Routes>
+  const location = useLocation();
+  return <ChunkErrorBoundary resetKey={location.pathname}><Suspense fallback={<PageSkeleton label="Loading GitFolio" />}><Routes>
     <Route path="/" element={<LoginPage />} />
     <Route path="/login" element={<LoginPage />} />
     <Route path="/auth/callback" element={<OAuthCallbackPage />} />
