@@ -2,7 +2,7 @@
 
 > A planned full-stack SaaS for designing static or React portfolios and publishing them to GitHub Pages through a browser-based workflow.
 
-**Status reviewed: November 18, 2026 (Asia/Manila).** Phases 1–5 are implemented in source, including authentication, project management, the portfolio editor, and the deployment engine. Live GitHub consent/Pages publishing and production verification remain separate checks. The diagrams and feature contracts below describe the target architecture unless explicitly marked as implemented.
+**Status reviewed: November 18, 2026 (Asia/Manila).** Phases 1–5, Phase 6 client polish, onboarding, and recovery runbooks are implemented. Production deployment configuration is intentionally deferred. Local beta acceptance and a public launch are tracked separately; real GitHub consent/Pages publishing and hosted production verification remain pending. The diagrams and feature contracts below describe the target architecture unless explicitly marked as implemented.
 
 For the product objective, user workflow, benefits, and limitations, read [System Overview](SYSTEM_OVERVIEW.md). For installation commands, read [README.md](README.md).
 
@@ -43,11 +43,14 @@ These statuses are based on the checked-in source, rather than the presence of a
 | Database structure | Schema and initial migration implemented | [Five Prisma models](server/prisma/schema.prisma) and [initial migration](server/prisma/migrations/20261116000000_init/migration.sql); application to a normal development or production database is not established by these files |
 | Shared package | Implemented | [Exports](packages/shared/src/index.ts): API/auth/project/template schemas, pagination, theme/section defaults, and deployment statuses |
 | GitHub OAuth configuration | Local preparation implemented | [Server-only OAuth configuration](server/src/config/github-oauth.ts), callback validation, secret redaction, [configuration checker](server/scripts/check-github-oauth.mjs), and [registration guide](docs/GITHUB_OAUTH_SETUP.md) |
-| GitHub authentication | Code implemented; registration/live consent pending | [Auth module](server/src/modules/auth/auth.module.ts), one-time state/PKCE, JWT verification/revocation, AES-256-GCM, and token refresh; [details](docs/AUTHENTICATION.md) |
+| GitHub authentication | Code implemented; local configuration check passes, live consent unverified | [Auth module](server/src/modules/auth/auth.module.ts), one-time state/PKCE, JWT verification/revocation, AES-256-GCM, and token refresh; [details](docs/AUTHENTICATION.md) |
 | Project management | Implemented | [Project module](server/src/modules/project/project.route.ts), [seeded catalog](server/src/modules/template/template.seed.ts), dashboard, template picker/setup form, and query hooks; [guide](docs/PROJECT_MANAGEMENT.md) |
 | Portfolio editor | Implemented | [Editor workspace](client/src/pages/EditorPage.tsx), sections, theme controls, live preview, undo/redo, and debounced revision-checked saves; [guide](docs/PORTFOLIO_EDITOR.md) |
 | Publishing | Implemented in source | [Generators](server/src/generators), [GitHub provider](server/src/providers/github-deploy.ts), [worker](server/src/core/deployment-worker.ts), [deployment API](server/src/modules/deployment/deployment.route.ts), and [history UI](client/src/pages/DeploymentsPage.tsx); [guide](docs/DEPLOYMENT_ENGINE.md) |
-| Production operation | Planned | No production deployment or end-to-end GitHub Pages publishing has been verified |
+| Client polish | Implemented and locally checked | Page/preview error boundaries, Sonner notifications, [responsive audit](docs/RESPONSIVE_AUDIT.md), and [performance budgets](docs/PERFORMANCE.md) |
+| Onboarding and operator recovery | Documented; synthetic restore verified | [User guide](docs/USER_GUIDE.md), [operations runbook](docs/OPERATIONS_RECOVERY.md) |
+| Beta launch | Local candidate; public launch pending | [Acceptance and live launch record](docs/BETA_RELEASE.md) |
+| Production operation | Configuration intentionally deferred | No production deployment or end-to-end GitHub Pages publishing has been verified |
 
 ### Current executable behavior
 
@@ -55,7 +58,7 @@ These statuses are based on the checked-in source, rather than the presence of a
 - The API connects to PostgreSQL and Redis before listening. The separate BullMQ worker uses those services for queued publishing and recovery.
 - `GET /api/health` checks the HTTP process. `GET /api/health/ready` queries PostgreSQL and pings Redis, returning HTTP 503 if a dependency check fails. Both routes are under the API rate limiter.
 - The frontend processes OAuth callbacks and protects `/account`, `/dashboard`, `/projects/new`, `/projects/:id/edit`, and `/projects/:id/deployments` with AuthGuard. Successful sign-in defaults to the dashboard. Vite proxies `/api` to Express for same-origin cookies.
-- `/api/projects` implements owner-scoped CRUD and paginated search/filtering. `/api/templates` supplies an authenticated catalog with validated defaults. Four missing templates are seeded at startup; `npm run db:seed` is also available.
+- `/api/projects` implements owner-scoped CRUD and paginated search/filtering. `/api/templates` supplies an authenticated catalog with validated defaults. Missing built-in presets from the ten-design catalog are seeded at startup; `npm run db:seed` is also available.
 - `PATCH /api/projects/:id/editor` atomically saves ordered sections/theme against a base revision. The editor uses an isolated Zustand history, responsive live preview, and 800 ms debounced TanStack Query mutations. Apply the editor-revision migration before using saves.
 - `/api/auth/github`, `/api/auth/github/callback`, `/api/auth/me`, and `/api/auth/logout` implement authentication. Missing OAuth credentials or application secrets disable auth safely with HTTP 503.
 - `/api/auth/github/publish` explicitly authorizes publishing permissions for the current GitHub account. Deployment creation snapshots the reviewed version/target; status/history reads enforce ownership and reveal a Pages URL only after a matching successful build.
@@ -920,12 +923,12 @@ The providers below are candidates, not configured deployments. The platform nee
 
 Phase 1 implementation and local setup commands are documented in [README.md](README.md). Phase 2 adds `/api/auth` routes alongside `/api/health` (liveness) and `/api/health/ready` (PostgreSQL + Redis readiness).
 
-### Phase 2 — Authentication *(Code implemented; GitHub registration pending)*
+### Phase 2 — Authentication *(Code implemented; live GitHub consent pending)*
 
 - [x] Server-only GitHub OAuth configuration, paired credential checks, and callback validation
 - [x] Read-only sign-in scopes, a fixed local frontend port, and OAuth client-secret log redaction
 - [x] Credential-safe `npm run oauth:check` command and [registration guide](docs/GITHUB_OAUTH_SETUP.md)
-- [ ] GitHub OAuth App registration and local credentials — intentionally pending by request; real sign-in remains unverified
+- [ ] GitHub OAuth App registration and real sign-in verification — local configuration check passes; GitHub credential validity/consent remain unverified
 - [x] Auth module (controller, service, routes), including one-time state and PKCE
 - [x] JWT issuance & verification middleware
 - [x] GitHub access token encryption/decryption using AES-256-GCM
@@ -969,4 +972,4 @@ Phase 1 implementation and local setup commands are documented in [README.md](RE
 - [ ] Production deployment configuration — intentionally deferred by request; no new hosting configuration or combined worker mode
 - [x] Baseline README, local setup instructions, and OAuth registration documentation
 - [x] Complete end-user onboarding and production operations/recovery documentation — [user guide](docs/USER_GUIDE.md), [operator runbook](docs/OPERATIONS_RECOVERY.md)
-- [ ] Beta launch
+- [ ] Beta launch — [local candidate passed 170 tests and a synthetic restore drill](docs/BETA_RELEASE.md); public hosting and live OAuth/Pages verification remain pending

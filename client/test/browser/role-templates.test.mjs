@@ -30,7 +30,9 @@ async function exercise(page,role){
     await page.getByRole('button',{name:'Success state',exact:true}).click();await page.getByText('Saved. You’re all set.',{exact:true}).waitFor();
   }
   if(role==='fullstack'){
-    await page.getByRole('button',{name:'Invite teammate',exact:true}).click();
+    await page.getByRole('button',{name:/^Upgrade subscription\b/}).click();
+    assert.ok((await page.locator('[data-widget="flow"]').textContent()).includes('UPDATE organizations'));
+    const invite=page.getByRole('button',{name:/^Invite teammate\b/});await invite.click();assert.equal(await invite.getAttribute('aria-pressed'),'true');
     assert.ok((await page.locator('[data-widget="flow"]').textContent()).includes('POST /api/invitations'));
     assert.ok((await page.locator('[data-widget="flow"]').textContent()).includes('INSERT INTO invitations'));
   }
@@ -46,7 +48,7 @@ for(const template of templates)test(`${template.name}: editor controls, real Re
 });
 for(const template of templates)test(`${template.name}: static export hydrates with keyboard access and no external demo requests`,async(t)=>{
   const role=template.defaultConfig.theme.layout,files=Object.fromEntries(generateStaticSite(projectFor(template)).map((file)=>[file.path,file.content]));
-  const context=await browser.newContext();t.after(()=>context.close());const page=await context.newPage(),errors=[],external=[];
+  const context=await browser.newContext({reducedMotion:'no-preference'});t.after(()=>context.close());const page=await context.newPage(),errors=[],external=[];
   page.on('pageerror',(error)=>errors.push(error.message));page.on('console',(message)=>{if(message.type()==='error')errors.push(message.text());});
   await page.route('**/*',(route)=>{const url=new URL(route.request().url());if(!url.pathname.startsWith('/__role-static/')){external.push(url.origin);return route.abort();}const file=url.pathname.split('/').at(-1)||'index.html';return route.fulfill({status:200,contentType:file.endsWith('.css')?'text/css':file.endsWith('.js')?'text/javascript':'text/html',body:files[file]??''});});
   await page.goto('http://127.0.0.1:4173/__role-static/');await page.locator('[data-role-layout]').waitFor();await page.evaluate(()=>document.fonts.ready);
@@ -54,6 +56,6 @@ for(const template of templates)test(`${template.name}: static export hydrates w
   if(role==='backend'){await page.setViewportSize({width:1440,height:1000});const inner=await page.locator('.rp-backend-hero').boundingBox(),outer=await page.locator('section[data-section-type="hero"]').boundingBox();assert.ok(inner.width>=outer.width-2,'the blueprint grid fills the hero section');}
   await page.keyboard.press('Tab');assert.equal(await page.locator(':focus').textContent(),'Skip to portfolio content');await page.keyboard.press('Enter');assert.equal(await page.locator(':focus').evaluate((node)=>node.tagName),'MAIN');
   await exercise(page,role);
-  if(role==='frontend'){await page.emulateMedia({reducedMotion:'reduce'});await page.getByRole('button',{name:'Hover state',exact:true}).click();await page.waitForFunction(()=>{const node=document.querySelector('.rp-sandbox-card'),value=getComputedStyle(node).transform,matrix=new DOMMatrixReadOnly(value==='none'?undefined:value);return Math.abs(matrix.m42)<.01&&Math.abs(matrix.m11-1)<.01;});await page.getByRole('button',{name:'Loading state',exact:true}).click();await page.getByText('Saved. You’re all set.',{exact:true}).waitFor();}
+  if(role==='frontend'){await page.getByRole('button',{name:'Hover state',exact:true}).click();await page.waitForFunction(()=>{const value=getComputedStyle(document.querySelector('.rp-sandbox-card')).transform;return value!=='none'&&new DOMMatrixReadOnly(value).m42 < -4.9;});await page.emulateMedia({reducedMotion:'reduce'});await page.waitForFunction(()=>{const node=document.querySelector('.rp-sandbox-card'),value=getComputedStyle(node).transform,matrix=new DOMMatrixReadOnly(value==='none'?undefined:value);return Math.abs(matrix.m42)<.01&&Math.abs(matrix.m11-1)<.01;});await page.getByRole('button',{name:'Loading state',exact:true}).click();await page.getByText('Saved. You’re all set.',{exact:true}).waitFor();}
   assert.deepEqual(errors,[]);assert.deepEqual(external,[]);
 });

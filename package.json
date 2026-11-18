@@ -16,6 +16,7 @@
     "start:worker": "npm run start:worker --workspace=server",
     "build": "npm run build --workspace=@gitfolio/shared && npm run db:generate && npm run build --workspace=@gitfolio/server && npm run build --workspace=@gitfolio/client",
     "check:bundle": "node scripts/check-client-bundle.mjs",
+    "beta:check": "node scripts/check-beta.mjs",
     "typecheck": "npm run build --workspace=@gitfolio/shared && npm run db:generate && npm run typecheck --workspaces --if-present",
     "test": "npm run build --workspace=@gitfolio/shared && npm test --workspace=@gitfolio/server && npm test --workspace=@gitfolio/client",
     "oauth:check": "npm run build --workspace=@gitfolio/shared && npm run db:generate && npm run oauth:check --workspace=@gitfolio/server",

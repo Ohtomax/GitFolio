@@ -172,7 +172,7 @@ test('a lost acknowledgement cannot silently overwrite the server revision on re
   assert.equal(f.state.projects[0].editorRevision, 1);
   await input.fill('New local changes');
   await f.page.getByRole('button', { name: 'Retry save', exact: true }).click();
-  await f.page.getByText(/A newer version was saved elsewhere/).waitFor();
+  await f.page.getByRole('alert').filter({ hasText: /A newer version was saved elsewhere/ }).waitFor();
   assert.equal(await input.inputValue(), 'New local changes');
   assert.equal(f.state.projects[0].sections[0].content.heading, 'Already committed');
 });
@@ -211,7 +211,7 @@ test('revision conflicts retain local changes until an explicit confirmed reload
   const input = f.page.getByLabel('Section heading', { exact: true });
   await input.fill('My unsaved draft');
   f.state.projects[0].editorRevision++; f.state.projects[0].sections[0].content.heading = 'Saved in another tab';
-  await f.page.getByText(/A newer version was saved elsewhere/).waitFor();
+  await f.page.getByRole('alert').filter({ hasText: /A newer version was saved elsewhere/ }).waitFor();
   assert.equal(await input.inputValue(), 'My unsaved draft');
   assert.equal(await f.page.getByRole('button', { name: 'Save changes', exact: true }).isDisabled(), true);
   await f.page.waitForTimeout(1000); assert.equal(f.state.editorSaves, 1);

@@ -8,6 +8,8 @@ Read [System Overview](SYSTEM_OVERVIEW.md) for GitFolio's objective, planned use
 
 For the full sign-in → create → edit → publish workflow, read the [user guide](docs/USER_GUIDE.md). Operators should use the [operations and recovery runbook](docs/OPERATIONS_RECOVERY.md), including backup/restore drills, incident recovery, and the outstanding free-tier hosting decisions. Production deployment configuration is intentionally deferred.
 
+The [beta release record](docs/BETA_RELEASE.md) separates local acceptance from the pending public launch. Run `npm run beta:check` to repeat builds, types, tests, production-browser workflows, and bundle budgets; optional service suites require disposable databases/Redis.
+
 ## Local setup
 
 Use Node.js 22.18 or later, npm, and a running Docker Desktop. Run these PowerShell commands from the repository root:
@@ -54,6 +56,8 @@ The API connects to PostgreSQL and Redis before listening. Liveness checks the H
 | --- | --- |
 | `npm run build` | Build shared types, generate Prisma Client, and build server and client |
 | `npm run typecheck` | Check all workspaces |
+| `npm run beta:check` | Run local beta acceptance and write an ignored report; does not deploy |
+| `npm run check:bundle` | Check a built client's lazy routes and download-size budgets |
 | `npm test` | Build and run server/client foundation, auth, project/editor, and deployment tests |
 | `npm run start:worker` | Run the built deployment worker alongside the API |
 | `npm run auth:setup` | Generate missing local JWT/encryption secrets without printing them |
