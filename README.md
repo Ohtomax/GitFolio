@@ -6,13 +6,15 @@ Phases 1–5 implement the foundation, GitHub authentication, projects/templates
 
 Read [System Overview](SYSTEM_OVERVIEW.md) for GitFolio's objective, planned user workflow, benefit analysis, limitations, and success measures. [Architecture](ARCHITECTURE.md#implementation-status) separates implemented code from the remaining plan.
 
+For the full sign-in → create → edit → publish workflow, read the [user guide](docs/USER_GUIDE.md). Operators should use the [operations and recovery runbook](docs/OPERATIONS_RECOVERY.md), including backup/restore drills, incident recovery, and the outstanding free-tier hosting decisions. Production deployment configuration is intentionally deferred.
+
 ## Local setup
 
 Use Node.js 22.18 or later, npm, and a running Docker Desktop. Run these PowerShell commands from the repository root:
 
 ```powershell
 npm install
-Copy-Item .env.example .env
+if (-not (Test-Path .env)) { Copy-Item .env.example .env }
 npm run auth:setup
 docker compose up -d --wait
 npm run db:deploy
@@ -27,7 +29,7 @@ If PostgreSQL already occupies port 5432, set `POSTGRES_PORT=5433` and update `D
 
 Register the development app using [GitHub OAuth App configuration](docs/GITHUB_OAUTH_SETUP.md), then run `npm run oauth:check` to validate the local configuration without connecting to the database or Redis. Open `http://localhost:5173/login` and use **Continue with GitHub** to reach `/dashboard`; `/account` remains available from workspace navigation. [Authentication](docs/AUTHENTICATION.md) documents routes, cookies, encryption, refresh, and recovery behavior.
 
-The API seeds five distinct portfolio templates automatically at startup: Modern Minimalist, Terminal, Editorial, Bento, and Executive. Full tokens, default content, and research notes are in [Portfolio templates](docs/PORTFOLIO_TEMPLATES.md). Select **New project**, choose a template, enter the project details, and create a draft. The dashboard supports search, status filters, pagination, metadata editing, archive/restore, and confirmed deletion. Custom catalog edits and existing project drafts are preserved; untouched legacy catalog rows receive the new presets. Run `npm run db:seed` to initialize the catalog without starting the API. See [Project management](docs/PROJECT_MANAGEMENT.md) for API contracts and verification boundaries. Phase 3 uses the existing database schema and requires no new migration.
+The API seeds ten distinct portfolio templates automatically at startup: the original Modern Minimalist, Terminal, Editorial, Bento, and Executive styles, plus Backend, Cybersecurity, UI/UX & QA, Frontend, and Full-Stack roles. Full tokens, default content, and research notes are in [Portfolio templates](docs/PORTFOLIO_TEMPLATES.md) and [Role templates](docs/ROLE_PORTFOLIO_TEMPLATES.md). Select **New project**, choose a template, enter the project details, and create a draft. The dashboard supports search, status filters, pagination, metadata editing, archive/restore, and confirmed deletion. Custom catalog edits and existing project drafts are preserved; untouched legacy catalog rows receive the new presets. Run `npm run db:seed` to initialize the catalog without starting the API. See [Project management](docs/PROJECT_MANAGEMENT.md) for API contracts and verification boundaries. Phase 3 uses the existing database schema and requires no new migration.
 
 Select a project's **Edit** link to add/edit/reorder/hide sections, customize colors/fonts/spacing, and preview at desktop/tablet/mobile widths. Edits save after an 800 ms pause; manual save and retry remain available. Undo/redo affects the local draft, and stale saves require a confirmed reload. **Phase 4 adds `20261118000000_editor_revision`: existing installations must run `npm run db:deploy` after PostgreSQL is running.** See [Portfolio editor](docs/PORTFOLIO_EDITOR.md) for persistence, navigation protection, and recovery limits.
 

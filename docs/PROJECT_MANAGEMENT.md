@@ -4,7 +4,7 @@ Phase 3 adds a template catalog and owner-scoped portfolio projects. Authenticat
 
 ## Templates
 
-The API seeds five design families at startup: Modern Minimalist (minimal), Terminal (developer/React), Editorial (professional), Bento (creative), and Executive (professional/React). See [Portfolio templates](PORTFOLIO_TEMPLATES.md) for exact tokens, full sample content, and accessibility/design decisions. Every template has a validated theme and ordered starter sections. No GitHub repository or published site is created by selecting a template.
+The API seeds ten designs at startup: Modern Minimalist (minimal), Terminal (developer/React), Editorial (professional), Bento (creative), Executive (professional/React), and five role-specific React templates for Backend, Cybersecurity, UI/UX & QA, Frontend, and Full-Stack work. See [Portfolio templates](PORTFOLIO_TEMPLATES.md) and [Role templates](ROLE_PORTFOLIO_TEMPLATES.md) for exact tokens, full sample content, and accessibility/design decisions. Every template has a validated theme and ordered starter sections. No GitHub repository or published site is created by selecting a template.
 
 Stable template IDs, `skipDuplicates`, and conditional legacy-fingerprint updates make seeding repeatable. Untouched old catalog rows are upgraded; custom catalog edits and existing project theme/content snapshots are preserved. To seed without running the API, use `npm run db:seed` after applying migrations. The seed command needs PostgreSQL and does not require Redis to connect.
 

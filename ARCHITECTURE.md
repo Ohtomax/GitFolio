@@ -966,7 +966,7 @@ Phase 1 implementation and local setup commands are documented in [README.md](RE
 - [x] Toast notifications for async operations — project mutations, explicit saves, save errors, and deployment results
 - [x] Responsive design audit — [workspace reflow checks and findings](docs/RESPONSIVE_AUDIT.md)
 - [x] Performance optimization (code splitting, lazy loading) — [production runtime, deferred artwork, asset budgets](docs/PERFORMANCE.md)
-- [ ] Production deployment configuration
+- [ ] Production deployment configuration — intentionally deferred by request; no new hosting configuration or combined worker mode
 - [x] Baseline README, local setup instructions, and OAuth registration documentation
-- [ ] Complete end-user onboarding and production operations/recovery documentation
+- [x] Complete end-user onboarding and production operations/recovery documentation — [user guide](docs/USER_GUIDE.md), [operator runbook](docs/OPERATIONS_RECOVERY.md)
 - [ ] Beta launch
