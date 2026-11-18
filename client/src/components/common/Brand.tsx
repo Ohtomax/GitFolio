@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
-import logo from '../../assets/logo.jpg';
-import wordmark from '../../assets/Gitfolio text and logo.jpg';
+import logo from '../../assets/brand-mark.jpg';
+import wordmark from '../../assets/brand-wordmark.jpg';
 
 export function Brand() {
   return <Link to="/" className="inline-flex shrink-0 overflow-hidden rounded-lg bg-stone-900" aria-label="GitFolio home">
