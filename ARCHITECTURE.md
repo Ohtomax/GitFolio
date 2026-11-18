@@ -964,7 +964,7 @@ Phase 1 implementation and local setup commands are documented in [README.md](RE
 
 - [x] Error boundaries & fallback UI — recoverable page/chunk errors and an isolated editor preview
 - [x] Toast notifications for async operations — project mutations, explicit saves, save errors, and deployment results
-- [ ] Responsive design audit
+- [x] Responsive design audit — [workspace reflow checks and findings](docs/RESPONSIVE_AUDIT.md)
 - [ ] Performance optimization (code splitting, lazy loading)
 - [ ] Production deployment configuration
 - [x] Baseline README, local setup instructions, and OAuth registration documentation
