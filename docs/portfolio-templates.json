@@ -3478,5 +3478,276 @@
         }
       ]
     }
+  },
+  {
+    "id": "10000000-0000-4000-8000-00000000000e",
+    "name": "Obsidian / Developer Journal",
+    "description": "A dark developer portfolio inspired by kroszborg.co, with a sticky personal profile, floating navigation, expandable experience, visual project cards, and a technical journal.",
+    "category": "premium",
+    "thumbnailUrl": null,
+    "isReact": false,
+    "defaultConfig": {
+      "theme": {
+        "colors": {
+          "accent": "#c4b5fd",
+          "background": "#0b0b0d",
+          "text": "#f5f5f7",
+          "muted": "#ababba",
+          "surface": "#17171b",
+          "border": "#303037"
+        },
+        "font": "sans",
+        "spacing": "comfortable",
+        "layout": "obsidian",
+        "headingFont": "sans",
+        "demo": true
+      },
+      "sections": [
+        {
+          "type": "hero",
+          "content": {
+            "heading": "Alex Morgan",
+            "description": "I turn interesting problems into useful web applications. I care about thoughtful interfaces, dependable systems, and sharing what I learn along the way.",
+            "eyebrow": "Building for the web",
+            "subtitle": "Full-stack developer",
+            "buttonLabel": "Get in touch",
+            "buttonUrl": "mailto:alex@example.com",
+            "tags": [
+              "React",
+              "TypeScript",
+              "Node.js",
+              "PostgreSQL"
+            ],
+            "portraitUrl": "",
+            "portraitAlt": "Alex Morgan"
+          },
+          "visible": true
+        },
+        {
+          "type": "experience",
+          "content": {
+            "heading": "Experience",
+            "description": "Where I’ve been building, learning, and contributing.",
+            "items": [
+              {
+                "title": "Northstar Studio",
+                "subtitle": "Full-stack developer · 2024 — Present · Remote",
+                "description": "Build a shared workspace for small creative teams, from accessible React interfaces to typed APIs and relational data models.\n\nRecent work includes a reusable component library, a clearer onboarding flow, and background jobs that keep longer tasks out of the request path.",
+                "url": "https://example.com/northstar",
+                "tags": [
+                  "React",
+                  "TypeScript",
+                  "Node.js",
+                  "PostgreSQL"
+                ]
+              },
+              {
+                "title": "Common Ground",
+                "subtitle": "Frontend developer · 2022 — 2024",
+                "description": "Worked with designers and product teams on a community publishing platform. Built responsive reading and editing experiences, improved keyboard navigation, and introduced focused component tests.",
+                "url": "https://example.com/common-ground",
+                "tags": [
+                  "React",
+                  "CSS",
+                  "Accessibility",
+                  "Testing"
+                ]
+              },
+              {
+                "title": "Small Hours Lab",
+                "subtitle": "Software development intern · 2021 — 2022",
+                "description": "Prototyped internal tools, wrote documentation, and learned how to turn a small feature into a maintainable part of a larger application.",
+                "url": "https://example.com/small-hours",
+                "tags": [
+                  "JavaScript",
+                  "HTML & CSS",
+                  "Git"
+                ]
+              }
+            ]
+          },
+          "visible": true
+        },
+        {
+          "type": "projects",
+          "content": {
+            "heading": "Projects",
+            "description": "A few ideas I’ve taken from a sketch to a working prototype.",
+            "items": [
+              {
+                "title": "Folio",
+                "subtitle": "A calmer workspace",
+                "description": "A project hub for independent teams. Notes, tasks, and decisions live together so the next step is always easy to find.",
+                "url": "https://example.com/folio",
+                "visual": "dashboard",
+                "tags": [
+                  "React",
+                  "TypeScript",
+                  "PostgreSQL"
+                ]
+              },
+              {
+                "title": "Relay",
+                "subtitle": "Small services, clear contracts",
+                "description": "A developer toolkit for exploring background tasks, delivery receipts, and recoverable failures through one consistent interface.",
+                "url": "https://example.com/relay",
+                "visual": "architecture",
+                "tags": [
+                  "Node.js",
+                  "Redis",
+                  "Docker"
+                ]
+              },
+              {
+                "title": "Pocket Notes",
+                "subtitle": "An idea, wherever you are",
+                "description": "An offline-friendly notebook with quick capture, searchable tags, and a reading view that gets out of the way.",
+                "url": "https://example.com/pocket-notes",
+                "visual": "mobile",
+                "tags": [
+                  "React",
+                  "IndexedDB",
+                  "PWA"
+                ]
+              },
+              {
+                "title": "Typecraft",
+                "subtitle": "A little room to experiment",
+                "description": "An interactive playground for testing type scales, spacing, and readable color combinations before building a new interface.",
+                "url": "https://example.com/typecraft",
+                "visual": "typography",
+                "tags": [
+                  "TypeScript",
+                  "CSS",
+                  "Accessibility"
+                ]
+              }
+            ]
+          },
+          "visible": true
+        },
+        {
+          "type": "writing",
+          "content": {
+            "heading": "Writing",
+            "description": "Notes from the space between an idea and its implementation.",
+            "items": [
+              {
+                "title": "Making background work feel immediate",
+                "subtitle": "November 2026 · 6 min read",
+                "description": "Progress, retries, and the small interface decisions that help people trust a task they cannot see.",
+                "url": "https://example.com/writing/background-work",
+                "visual": "architecture",
+                "tags": [
+                  "Queues",
+                  "UX",
+                  "Node.js"
+                ]
+              },
+              {
+                "title": "A component API is a conversation",
+                "subtitle": "October 2026 · 5 min read",
+                "description": "What a few ordinary form controls taught me about defaults, composition, and leaving room for the next use case.",
+                "url": "https://example.com/writing/component-api",
+                "visual": "code",
+                "tags": [
+                  "React",
+                  "TypeScript",
+                  "Design systems"
+                ]
+              }
+            ]
+          },
+          "visible": true
+        },
+        {
+          "type": "about",
+          "content": {
+            "heading": "A little about me",
+            "description": "I’m Alex, a developer who enjoys working across the whole product. I like asking questions, building a small version, and learning from the people who use it.\n\nThis journal is a place for the projects, experiments, and lessons I want to keep. Away from a screen, I’m usually walking somewhere new, reading, or making another overambitious weekend plan.",
+            "subtitle": "Curious about how things work. Even more curious about who they help."
+          },
+          "visible": true
+        },
+        {
+          "type": "skills",
+          "content": {
+            "heading": "Tools I reach for",
+            "description": "A practical toolkit, with room to keep learning.",
+            "items": [
+              {
+                "title": "Interface to infrastructure",
+                "description": "Accessible components, typed APIs, relational data, background tasks, and a clear path from local development to deployment."
+              }
+            ],
+            "tags": [
+              "React",
+              "TypeScript",
+              "Node.js",
+              "Express",
+              "PostgreSQL",
+              "Prisma",
+              "Redis",
+              "Docker",
+              "Git",
+              "Testing",
+              "Accessibility"
+            ]
+          },
+          "visible": true
+        },
+        {
+          "type": "now",
+          "content": {
+            "heading": "Beyond the commits",
+            "description": "A few things that keep the curiosity going.",
+            "items": [
+              {
+                "title": "Learning in public",
+                "subtitle": "An ongoing notebook",
+                "description": "Experiments, useful mistakes, and the ideas I’m still working through.",
+                "url": "https://example.com/journal"
+              },
+              {
+                "title": "My everyday setup",
+                "subtitle": "Tools and working habits",
+                "description": "A short list of the things that make a day of building a little better.",
+                "url": "https://example.com/setup"
+              }
+            ]
+          },
+          "visible": true
+        },
+        {
+          "type": "contact",
+          "content": {
+            "heading": "Have a good problem in mind?",
+            "description": "I’m always glad to hear about thoughtful projects, interesting technical questions, or a good reason to collaborate.",
+            "subtitle": "Let’s make something useful.",
+            "buttonLabel": "Start a conversation",
+            "buttonUrl": "mailto:alex@example.com",
+            "items": [
+              {
+                "title": "Resume",
+                "url": "https://example.com/alex/resume"
+              },
+              {
+                "title": "GitHub",
+                "url": "https://example.com/alex/code"
+              },
+              {
+                "title": "LinkedIn",
+                "url": "https://example.com/alex/profile"
+              },
+              {
+                "title": "Email",
+                "url": "mailto:alex@example.com"
+              }
+            ]
+          },
+          "visible": true
+        }
+      ]
+    }
   }
 ]

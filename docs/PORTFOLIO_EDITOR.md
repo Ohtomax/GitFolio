@@ -48,6 +48,12 @@ Both static and React exports use the same navigation. Without JavaScript, the l
 
 Select the hero to edit the optional **Portrait image URL** and **Portrait description**; an empty image shows initials. The eyebrow contains the name and role separated by `/`, and headings support line breaks. Project cover styles, tags, metrics, biography, experience, writing, and contact links use the existing editor controls. Static and React exports share the renderer, bundled fonts, motion behavior, and editable data. The default artwork and fictional sample content are original.
 
+## Premium developer journal
+
+**Obsidian / Developer Journal** is inspired by kroszborg.co and is available under **Premium**. Its desktop layout keeps the hero as a sticky profile beside the main content; the profile stacks above the content on mobile. Edit the name through the hero's **Section heading**, the role through **Subtitle / role**, and the optional **Portrait image URL** and **Portrait description** through the profile fields. An empty portrait shows initials derived from the name.
+
+Experience entries use native expandable controls. The first entry starts open; the others can be opened with a click or the keyboard in the preview and exported sites. Project and writing cards use editable cover styles, entries, tags, and links. Profile links come from the visible contact section. Navigation and disclosures work without JavaScript, and both export formats share the preview renderer. All default identities and work are fictional examples.
+
 ## Verification
 
 Unit/HTTP suites cover strict schemas, ownership, rollback, archived documents, undo/redo, acknowledgement races, owner-partitioned interrupted drafts, and serialized saves. Browser tests use synthetic API responses to verify the rendered controls, persistence across reload, safe preview, narrow screens, debounce, in-flight edits, retry/conflict recovery, and navigation protection. The optional `editor-storage.test.mjs` uses a migrated disposable PostgreSQL database to exercise real transactions, concurrent tabs, section creation timestamps, removal/restore, and foreign-ID rollback. See README for service/browser prerequisites. A passing isolated database test does not migrate the configured development database or verify live GitHub consent.

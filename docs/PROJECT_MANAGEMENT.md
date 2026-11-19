@@ -4,13 +4,13 @@ Phase 3 adds a template catalog and owner-scoped portfolio projects. Authenticat
 
 ## Templates
 
-The API seeds eighteen designs at startup: the five original design families, five role-specific React templates, Cyber HUD, Neon Editorial, Glassmorphic Bento, Dark Executive, Terminal Noir, Monochrome / Online CV, Sentinel / Cybersecurity Dossier, and Kinetic / Animated Portfolio. **Premium** is a validated category available to both the gallery and project picker; Kinetic is its first animated design. See [Portfolio templates](PORTFOLIO_TEMPLATES.md) and [Role templates](ROLE_PORTFOLIO_TEMPLATES.md) for exact tokens, full sample content, and accessibility/design decisions. Every template has a validated theme and ordered starter sections. No GitHub repository or published site is created by selecting a template.
+The API seeds nineteen designs at startup: the five original design families, five role-specific React templates, Cyber HUD, Neon Editorial, Glassmorphic Bento, Dark Executive, Terminal Noir, Monochrome / Online CV, Sentinel / Cybersecurity Dossier, Kinetic / Animated Portfolio, and Obsidian / Developer Journal. **Premium** is a validated category available to both the gallery and project picker; it includes Kinetic and Obsidian. See [Portfolio templates](PORTFOLIO_TEMPLATES.md) and [Role templates](ROLE_PORTFOLIO_TEMPLATES.md) for exact tokens, full sample content, and accessibility/design decisions. Every template has a validated theme and ordered starter sections. No GitHub repository or published site is created by selecting a template.
 
 Stable template IDs, `skipDuplicates`, and conditional legacy-fingerprint updates make seeding repeatable. Untouched old catalog rows are upgraded; custom catalog edits and existing project theme/content snapshots are preserved. To seed without running the API, use `npm run db:seed` after applying migrations. The seed command needs PostgreSQL and does not require Redis to connect.
 
 Both `GET /api/templates` and `GET /api/templates/:id` require authentication. Lists accept `page`, `pageSize` (maximum 50), and optional `category`; results contain `items`, `total`, `page`, `pageSize`, and `totalPages`. Lists exclude section defaults and include only a validated `preview` theme alongside metadata; detail requests include validated `defaultConfig`. Project summaries use their own saved preview theme so legacy drafts keep their original appearance.
 
-Template categories are `minimal`, `developer`, `professional`, and `creative`. Theme defaults contain `colors` (`accent`, `background`, `text`), `font` (`sans`, `serif`, `mono`), and `spacing` (`compact`, `comfortable`, `spacious`). Each starter section has a type, heading/description content, and visibility.
+Template categories are `minimal`, `developer`, `professional`, `creative`, and `premium`. Theme defaults contain `colors` (`accent`, `background`, `text`), `font` (`sans`, `serif`, `mono`), and `spacing` (`compact`, `comfortable`, `spacious`). Each starter section has a type, heading/description content, and visibility.
 
 ## Project API
 

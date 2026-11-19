@@ -23,6 +23,7 @@ import { terminalNoirTemplate } from './terminal-noir.js';
 import { monochromeTemplate, renderMonochrome, MONOCHROME_CSS } from './monochrome.js';
 import { dossierTemplate, renderDossier, DOSSIER_CSS } from './dossier.js';
 import { kineticTemplate, renderKinetic, KINETIC_CSS } from './kinetic.js';
+import { obsidianTemplate, renderObsidian, OBSIDIAN_CSS } from './obsidian.js';
 
 export const BUILTIN_TEMPLATES: Template[] = [
   minimalTemplate, terminalTemplate, editorialTemplate, bentoTemplate, executiveTemplate,
@@ -35,8 +36,9 @@ export const BUILTIN_TEMPLATES: Template[] = [
   monochromeTemplate,
   dossierTemplate,
   kineticTemplate,
+  obsidianTemplate,
 ];
-export const PORTFOLIO_CSS = PORTFOLIO_BASE_CSS + MINIMAL_CSS + TERMINAL_CSS + EDITORIAL_CSS + BENTO_CSS + EXECUTIVE_CSS + MONOCHROME_CSS + DOSSIER_CSS + KINETIC_CSS;
+export const PORTFOLIO_CSS = PORTFOLIO_BASE_CSS + MINIMAL_CSS + TERMINAL_CSS + EDITORIAL_CSS + BENTO_CSS + EXECUTIVE_CSS + MONOCHROME_CSS + DOSSIER_CSS + KINETIC_CSS + OBSIDIAN_CSS;
 export function buildPortfolioTree(document: PortfolioDocument): PortfolioElement {
   if (document.themeConfig.layout === 'minimal') return renderMinimal(document);
   if (document.themeConfig.layout === 'terminal') return renderTerminal(document);
@@ -46,11 +48,12 @@ export function buildPortfolioTree(document: PortfolioDocument): PortfolioElemen
   if (document.themeConfig.layout === 'monochrome') return renderMonochrome(document);
   if (document.themeConfig.layout === 'dossier') return renderDossier(document);
   if (document.themeConfig.layout === 'kinetic') return renderKinetic(document);
+  if (document.themeConfig.layout === 'obsidian') return renderObsidian(document);
   const sections = document.sections.filter((section) => section.visible);
   return pageFrame(document, main(sections.map((section) => sectionShell(section, sectionHeading(section)))));
 }
 export function portfolioRendererSource(layout: PortfolioDocument['themeConfig']['layout']): string {
-  const renderers = { minimal: renderMinimal, terminal: renderTerminal, editorial: renderEditorial, bento: renderBento, executive: renderExecutive, monochrome: renderMonochrome, dossier: renderDossier, kinetic: renderKinetic };
+  const renderers = { minimal: renderMinimal, terminal: renderTerminal, editorial: renderEditorial, bento: renderBento, executive: renderExecutive, monochrome: renderMonochrome, dossier: renderDossier, kinetic: renderKinetic, obsidian: renderObsidian };
   if (!layout || layout === 'classic' || isRoleLayout(layout)) throw new Error('A design layout is required');
   // These are application-owned functions compiled by TypeScript, never user code.
   // Keeping the actual renderer in the export makes portfolio.json editable and

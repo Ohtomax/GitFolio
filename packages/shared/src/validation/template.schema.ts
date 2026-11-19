@@ -11,7 +11,7 @@ export const PageMetaSchema = z.object({
   total: z.number().int().nonnegative(), totalPages: z.number().int().nonnegative(),
 });
 export const TemplateCategorySchema = z.enum(['minimal', 'developer', 'professional', 'creative', 'premium']);
-export const PortfolioLayoutSchema = z.enum(['classic', 'minimal', 'terminal', 'editorial', 'bento', 'executive', 'monochrome', 'dossier', 'kinetic', 'backend', 'security', 'quality', 'frontend', 'fullstack']);
+export const PortfolioLayoutSchema = z.enum(['classic', 'minimal', 'terminal', 'editorial', 'bento', 'executive', 'monochrome', 'dossier', 'kinetic', 'obsidian', 'backend', 'security', 'quality', 'frontend', 'fullstack']);
 const color = z.string().regex(/^#[0-9a-fA-F]{6}$/);
 export const ThemeConfigSchema = z.object({
   colors: z.object({

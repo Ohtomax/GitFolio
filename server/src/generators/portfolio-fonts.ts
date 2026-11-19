@@ -12,7 +12,7 @@ const cache = new Map<string, string>();
 export function portfolioFontStyles(theme: ThemeConfig): string {
   const body: keyof typeof definitions = theme.font === 'sans' && theme.layout === 'executive' ? 'executive' : theme.font;
   const headingStyle = theme.headingFont ?? theme.font;
-  const heading: keyof typeof definitions = headingStyle === 'sans' && ['bento','quality','monochrome','kinetic'].includes(theme.layout ?? '') ? 'bento'
+  const heading: keyof typeof definitions = headingStyle === 'sans' && ['bento','quality','monochrome','kinetic','obsidian'].includes(theme.layout ?? '') ? 'bento'
     : headingStyle === 'sans' && theme.layout === 'executive' ? 'executive' : headingStyle;
   return [...new Set<keyof typeof definitions>([body, heading, ...(isRoleLayout(theme.layout) || theme.layout === 'monochrome' ? ['mono' as const] : [])])].map((key) => {
     const definition = definitions[key];
