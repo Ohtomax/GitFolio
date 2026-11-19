@@ -2608,5 +2608,173 @@
         }
       ]
     }
+  },
+  {
+    "id": "10000000-0000-4000-8000-00000000000a",
+    "name": "Terminal Noir",
+    "description": "UNIX meets late-night hacker den — pure black, acid green, monospace everything. Structured like data, reads like a story.",
+    "category": "developer",
+    "thumbnailUrl": null,
+    "isReact": false,
+    "defaultConfig": {
+      "theme": {
+        "colors": {
+          "accent": "#39d353",
+          "background": "#000000",
+          "text": "#c9d1d9",
+          "muted": "#7d8590",
+          "surface": "#0d1117",
+          "border": "#30363d"
+        },
+        "font": "mono",
+        "spacing": "compact",
+        "layout": "terminal",
+        "headingFont": "mono",
+        "demo": true
+      },
+      "sections": [
+        {
+          "type": "hero",
+          "content": {
+            "heading": "alex_chen — security engineer",
+            "description": "> Based in Singapore. 9 years breaking things so production doesn't have to.\n> Currently: staff security engineer at Irongate Systems.\n> Side project: building open-source static analysis tooling.",
+            "eyebrow": "~/portfolio $ whoami",
+            "subtitle": "> Specialisation: application security, threat modelling, secure SDLC",
+            "buttonLabel": "./contact ↗",
+            "buttonUrl": "mailto:alex@example.com",
+            "tags": [
+              "Rust",
+              "Python",
+              "Go",
+              "OWASP"
+            ],
+            "metrics": [
+              {
+                "value": "200+",
+                "label": "CVEs triaged and remediated"
+              },
+              {
+                "value": "14",
+                "label": "Penetration tests conducted"
+              },
+              {
+                "value": "9 yrs",
+                "label": "Application security experience"
+              }
+            ]
+          },
+          "visible": true
+        },
+        {
+          "type": "projects",
+          "content": {
+            "heading": "ls ~/repositories",
+            "description": "# open-source security tooling",
+            "items": [
+              {
+                "title": "taint — dataflow analysis for Node.js apps",
+                "subtitle": "a9f3d12 · 2026-04",
+                "description": "Static analysis tool that traces user-controlled data through Express middleware to identify injection sinks before code review.",
+                "url": "https://example.com/taint",
+                "visual": "code",
+                "tags": [
+                  "Rust",
+                  "AST analysis",
+                  "Node.js"
+                ]
+              },
+              {
+                "title": "boundary — a secrets rotation daemon",
+                "subtitle": "c7e1b8a · 2025-11",
+                "description": "Automatically rotates API keys and database credentials on a configurable schedule with zero-downtime hot-reload support.",
+                "url": "https://example.com/boundary",
+                "visual": "code",
+                "tags": [
+                  "Go",
+                  "Vault",
+                  "Kubernetes"
+                ]
+              },
+              {
+                "title": "redline — supply chain audit CLI",
+                "subtitle": "f2d4096 · 2025-06",
+                "description": "Scans npm and PyPI dependency trees for known-vulnerable transitive dependencies and generates a prioritised remediation report.",
+                "url": "https://example.com/redline",
+                "visual": "code",
+                "tags": [
+                  "Python",
+                  "SBOM",
+                  "CVE"
+                ]
+              }
+            ]
+          },
+          "visible": true
+        },
+        {
+          "type": "experience",
+          "content": {
+            "heading": "git log --experience --oneline",
+            "description": "",
+            "items": [
+              {
+                "title": "Staff Security Engineer · Irongate Systems",
+                "subtitle": "2022 → HEAD",
+                "description": "Own application security across a 40-service microservices platform. Run quarterly threat model reviews and lead the secure-by-default engineering initiative."
+              },
+              {
+                "title": "Security Engineer · Cipher Foundry",
+                "subtitle": "2018 → 2022",
+                "description": "Embedded security engineer in product squads. Introduced automated SAST into CI, reducing critical findings at code review by 70 %."
+              }
+            ]
+          },
+          "visible": true
+        },
+        {
+          "type": "skills",
+          "content": {
+            "heading": "cat toolchain.toml",
+            "description": "",
+            "items": [
+              {
+                "title": "[languages]",
+                "description": "Rust · Python · Go · Bash · SQL"
+              },
+              {
+                "title": "[appsec]",
+                "description": "SAST · DAST · Penetration testing · Threat modelling · SBOM · CVE triage"
+              },
+              {
+                "title": "[platform]",
+                "description": "Kubernetes · AWS · Vault · GitHub Actions · Docker · Terraform"
+              }
+            ],
+            "tags": [
+              "Rust",
+              "Python",
+              "Go",
+              "Burp Suite",
+              "OWASP",
+              "Kubernetes",
+              "AWS",
+              "Threat Modelling"
+            ]
+          },
+          "visible": true
+        },
+        {
+          "type": "contact",
+          "content": {
+            "heading": "./connect --open",
+            "description": "Working on a hard security problem, an open-source tool, or a team that takes the SDLC seriously? Send a message. The shell below supports help, email, links, and clear.",
+            "subtitle": "No ceremony required.",
+            "buttonLabel": "alex@example.com",
+            "buttonUrl": "mailto:alex@example.com"
+          },
+          "visible": true
+        }
+      ]
+    }
   }
 ]

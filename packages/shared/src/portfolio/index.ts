@@ -18,6 +18,7 @@ import { cyberHudTemplate } from './cyber-hud.js';
 import { neonEditorialTemplate } from './neon-editorial.js';
 import { glassmorphicBentoTemplate } from './glassmorphic-bento.js';
 import { darkExecutiveTemplate } from './dark-executive.js';
+import { terminalNoirTemplate } from './terminal-noir.js';
 
 export const BUILTIN_TEMPLATES: Template[] = [
   minimalTemplate, terminalTemplate, editorialTemplate, bentoTemplate, executiveTemplate,
@@ -26,6 +27,7 @@ export const BUILTIN_TEMPLATES: Template[] = [
   neonEditorialTemplate,
   glassmorphicBentoTemplate,
   darkExecutiveTemplate,
+  terminalNoirTemplate,
 ];
 export const PORTFOLIO_CSS = PORTFOLIO_BASE_CSS + MINIMAL_CSS + TERMINAL_CSS + EDITORIAL_CSS + BENTO_CSS + EXECUTIVE_CSS;
 export function buildPortfolioTree(document: PortfolioDocument): PortfolioElement {

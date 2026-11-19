@@ -1,6 +1,6 @@
 # GitFolio portfolio templates
 
-9 presets across five original design families for different kinds of technical work. Choose one in **New project**; the picker, editor, static output, and React output share a semantic renderer and styles. Variants reuse their family's composition with their own palette, type pairing, content, and density.
+10 presets across five original design families for different kinds of technical work. Choose one in **New project**; the picker, editor, static output, and React output share a semantic renderer and styles. Variants reuse their family's composition with their own palette, type pairing, content, and density.
 
 - [The Modern Minimalist](templates/minimal.md) — A precise, spacious portfolio that puts product impact, thoughtful engineering, and shipped work first.
 - [The Terminal / Cyberpunk](templates/terminal.md) — A compact, phosphor-lit command-line portfolio for engineers who make complex systems dependable.
@@ -11,6 +11,7 @@
 - [Neon Editorial](templates/neon-editorial.md) — A luxury developer-magazine aesthetic — deep navy, lavender-purple accents, and editorial serif headings for engineers who also write.
 - [Glassmorphic Bento](templates/glassmorphic-bento.md) — Dark glass tiles on a deep mesh-gradient canvas — the modular identity grid of a creative technologist.
 - [Dark Executive](templates/dark-executive.md) — Enterprise power meets midnight UI — amber-gold accents on near-black for technical leaders who ship at scale.
+- [Terminal Noir](templates/terminal-noir.md) — UNIX meets late-night hacker den — pure black, acid green, monospace everything. Structured like data, reads like a story.
 
 The linked specifications contain exact tokens, measured palette contrast, section order, and every default heading, description, entry, link, metric, and CTA. [Machine-readable specifications](portfolio-templates.json) mirror the canonical definitions in packages/shared/src/portfolio. After editing a preset, build the shared workspace and run **node scripts/template-specs.mjs** to refresh the documents.
 
