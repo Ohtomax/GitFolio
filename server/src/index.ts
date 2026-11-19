@@ -34,6 +34,8 @@ async function bootstrap() {
 bootstrap().catch((error: unknown) => {
   if (error instanceof EnvironmentError) {
     logger.fatal({ fields: error.fields }, error.message);
+  } else if (error instanceof Error && 'code' in error && error.code === 'EADDRINUSE') {
+    logger.fatal('GitFolio API port is already in use. Stop the existing API process before restarting.');
   } else {
     logger.fatal({ errorType: error instanceof Error ? error.name : 'UnknownError' }, 'GitFolio API startup failed');
   }

@@ -98,6 +98,7 @@ On November 18, 2026, this procedure was exercised with PostgreSQL 16 in an isol
 | Symptom | Investigation and recovery |
 | --- | --- |
 | API never listens | Check required environment variable names, PostgreSQL/Redis connectivity, migration status, and port binding; do not paste secret values into logs |
+| Redis stream error during startup, or API port already in use | Check the configured HTTP port with `Get-NetTCPConnection -State Listen -LocalPort 3001`. Close the older GitFolio terminal or stop its verified stale API process before restarting `npm run dev`. An occupied port could previously interrupt queue initialization and mask `EADDRINUSE` with an unhandled Redis error. API startup now waits for queue initialization and reports the port conflict explicitly. Redis data does not need to be reset. |
 | Readiness 503 | Recover the failed database/Redis dependency, then retry; liveness alone is insufficient |
 | Sign-in unavailable | Check OAuth/secrets with `npm run oauth:check`; confirm exact frontend origin and callback in GitHub; repeat real consent separately |
 | Reused/expired OAuth state | Start sign-in again; do not replay a callback code or recreate old OAuth state |

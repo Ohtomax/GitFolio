@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict';
 import { createServer } from 'node:net';
 import { once } from 'node:events';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
+import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import pino from 'pino';
 import { EnvironmentSchema } from '../dist/config/env.schema.js';
@@ -50,4 +53,13 @@ test('server starts with real dependencies and closes idempotently', {
   assert.deepEqual(await response.json(), { success: true, data: { status: 'ok' } });
   await Promise.all([runtime.close(), runtime.close()]);
   assert.equal(runtime.server.listening, false);
+});
+
+test('an occupied HTTP port fails cleanly during queue startup without an unhandled Redis error', {
+  skip: databaseUrl && redisUrl ? false : 'Set disposable database and Redis integration URLs', timeout: 15000,
+}, async () => {
+  const { stdout, stderr } = await promisify(execFile)(process.execPath, [fileURLToPath(new URL('./helpers/server-port-conflict.mjs', import.meta.url))],
+    { env: process.env, timeout: 12000, windowsHide: true });
+  assert.equal(stderr, '');
+  assert.match(stdout, /preserved EADDRINUSE/);
 });

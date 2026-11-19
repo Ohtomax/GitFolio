@@ -36,6 +36,9 @@ export async function startServer(environment: Environment, logger: Logger) {
     await seedTemplates(database);
     const guard = createFeatureGuard(environment, redis);
     deployments = createDeploymentQueue(environment.REDIS_URL, logger);
+    // Finish queue initialization before binding HTTP so a bind failure can
+    // close BullMQ safely instead of masking EADDRINUSE with a Redis error.
+    await deployments.queue.waitUntilReady();
     const app = createApp(environment, {
       logger,
       authRouter: createAuthModule(environment, database, redis),
