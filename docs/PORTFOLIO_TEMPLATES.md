@@ -1,6 +1,6 @@
 # GitFolio portfolio templates
 
-6 presets across five original design families for different kinds of technical work. Choose one in **New project**; the picker, editor, static output, and React output share a semantic renderer and styles. Variants reuse their family's composition with their own palette, type pairing, content, and density.
+7 presets across five original design families for different kinds of technical work. Choose one in **New project**; the picker, editor, static output, and React output share a semantic renderer and styles. Variants reuse their family's composition with their own palette, type pairing, content, and density.
 
 - [The Modern Minimalist](templates/minimal.md) — A precise, spacious portfolio that puts product impact, thoughtful engineering, and shipped work first.
 - [The Terminal / Cyberpunk](templates/terminal.md) — A compact, phosphor-lit command-line portfolio for engineers who make complex systems dependable.
@@ -8,6 +8,7 @@
 - [The Bento / Creative Technologist](templates/bento.md) — An expressive, asymmetric collection of work, experiments, and small personal details for people who design in code.
 - [The Enterprise / Executive](templates/executive.md) — A disciplined, evidence-focused portfolio for technical leaders connecting architecture decisions to business outcomes.
 - [The Cyber HUD](templates/cyber-hud.md) — A sci-fi command-centre portfolio for engineers who build systems at scale — pitch-black with electric-cyan HUD accents.
+- [Neon Editorial](templates/neon-editorial.md) — A luxury developer-magazine aesthetic — deep navy, lavender-purple accents, and editorial serif headings for engineers who also write.
 
 The linked specifications contain exact tokens, measured palette contrast, section order, and every default heading, description, entry, link, metric, and CTA. [Machine-readable specifications](portfolio-templates.json) mirror the canonical definitions in packages/shared/src/portfolio. After editing a preset, build the shared workspace and run **node scripts/template-specs.mjs** to refresh the documents.
 

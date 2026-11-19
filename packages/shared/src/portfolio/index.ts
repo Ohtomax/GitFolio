@@ -15,11 +15,13 @@ import { qualityTemplate } from './roles/quality.js';
 import { frontendTemplate } from './roles/frontend.js';
 import { fullstackTemplate } from './roles/fullstack.js';
 import { cyberHudTemplate } from './cyber-hud.js';
+import { neonEditorialTemplate } from './neon-editorial.js';
 
 export const BUILTIN_TEMPLATES: Template[] = [
   minimalTemplate, terminalTemplate, editorialTemplate, bentoTemplate, executiveTemplate,
   backendTemplate, securityTemplate, qualityTemplate, frontendTemplate, fullstackTemplate,
   cyberHudTemplate,
+  neonEditorialTemplate,
 ];
 export const PORTFOLIO_CSS = PORTFOLIO_BASE_CSS + MINIMAL_CSS + TERMINAL_CSS + EDITORIAL_CSS + BENTO_CSS + EXECUTIVE_CSS;
 export function buildPortfolioTree(document: PortfolioDocument): PortfolioElement {
