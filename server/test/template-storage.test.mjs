@@ -9,7 +9,7 @@ import { createProjectService } from '../dist/modules/project/project.service.js
 import { createTemplateRepository } from '../dist/modules/template/template.repository.js';
 
 const url = process.env.GITFOLIO_TEST_TEMPLATE_DATABASE_URL;
-test('real PostgreSQL upgrades only untouched legacy presets, preserves drafts, and round-trips all five rich designs', {
+test('real PostgreSQL upgrades only untouched legacy presets, preserves drafts, and round-trips every catalog preset', {
   skip: url ? false : 'Set a separate migrated GITFOLIO_TEST_TEMPLATE_DATABASE_URL',
 }, async () => {
   assert.match(new URL(url).pathname.slice(1), /^gitfolio_phase1_test_templates_[a-z0-9_]+$/);
@@ -36,7 +36,8 @@ test('real PostgreSQL upgrades only untouched legacy presets, preserves drafts, 
     assert.equal(legacy.themeConfig.layout, undefined);
     assert.equal((await database.template.findUnique({ where: { id: legacyTemplateSeedData[1].id } })).name, 'A custom catalog edit');
     for (const [index, template] of BUILTIN_TEMPLATES.entries()) {
-      const available = await database.template.findFirst({ where: { defaultConfig: { path: ['theme', 'layout'], equals: template.defaultConfig.theme.layout } }, select: { id: true } });
+      const available = await database.template.findFirst({ where: { id: { in: [template.id, templateFallbackId(template.id)] },
+        defaultConfig: { path: ['theme', 'layout'], equals: template.defaultConfig.theme.layout } }, select: { id: true } });
       assert.ok(available, 'Every design stays available alongside custom legacy edits');
       const project = await service.create(userId, { name: `Design ${index}`, slug: `design-${index}`, templateId: available.id });
       assert.deepEqual(project.themeConfig, template.defaultConfig.theme);
@@ -50,7 +51,7 @@ test('real PostgreSQL upgrades only untouched legacy presets, preserves drafts, 
       assert.deepEqual(saved.sections[0].content.metrics, input.sections[0].content.metrics);
       assert.deepEqual(saved.sections.map(({ sortOrder, ...section }) => section), input.sections);
     }
-    const listed = await service.list(userId, { page: 1, pageSize: 12, sort: 'updated' });
+    const listed = await service.list(userId, { page: 1, pageSize: 50, sort: 'updated' });
     assert.equal(listed.items.length, BUILTIN_TEMPLATES.length + 1);
     for (const item of listed.items) assert.ok(item.preview);
   } finally {

@@ -10,7 +10,11 @@ const palettes: Record<TemplateCategory, { surface: string; text: string; accent
 };
 export default function TemplateArtwork({ template, theme }: { template: TemplateSummary; theme?: ThemeConfig }) {
   const preview = theme ?? template.preview;
-  const design = preview?.layout && preview.layout !== 'classic' ? BUILTIN_TEMPLATES.find((preset) => preset.defaultConfig.theme.layout === preview.layout) : undefined;
+  const presetId = template.id.replace(/^20000000-/, '10000000-').replace(/^40000000-/, '30000000-');
+  const design = preview?.layout && preview.layout !== 'classic'
+    ? BUILTIN_TEMPLATES.find((preset) => preset.id === presetId && preset.defaultConfig.theme.layout === preview.layout)
+      ?? BUILTIN_TEMPLATES.find((preset) => preset.defaultConfig.theme.layout === preview.layout)
+    : undefined;
   if (design && preview) {
     const document = { themeConfig: preview, sections: design.defaultConfig.sections.map((section, index) => ({ ...section, id: `preview-${index}` })) };
     return <div aria-hidden="true" className="pf-thumbnail">{isRoleLayout(preview.layout) ? <div className="pf-thumbnail-content"><RoleTemplatePreview document={document} thumbnail /></div> : <DesignedPortfolio document={document} thumbnail />}</div>;

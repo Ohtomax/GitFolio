@@ -12,6 +12,12 @@ const intents = {
   executive: ['Technical leaders, enterprise consultants, and fractional CTOs', 'A persistent identity/navigation rail, decisive value proposition, semantic architecture table, career timeline, advisory capabilities, and a consultation CTA.'],
 };
 const names = { hero: 'Hero', about: 'About', projects: 'Projects', experience: 'Experience', skills: 'Skills', contact: 'Contact', writing: 'Writing', now: 'Now', education: 'Education' };
+const specFilename = (template) => {
+  const layout = template.defaultConfig.theme.layout;
+  const original = BUILTIN_TEMPLATES.find((preset) => preset.defaultConfig.theme.layout === layout);
+  const slug = template.id === original.id ? layout : template.name.replace(/^The\s+/i, '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+  return `${slug}.md`;
+};
 for (const template of BUILTIN_TEMPLATES) {
   const { theme, sections } = template.defaultConfig;
   const [persona, composition] = intents[theme.layout];
@@ -37,14 +43,14 @@ for (const template of BUILTIN_TEMPLATES) {
     if(c.items?.length) lines.push('');
     if(c.buttonLabel) lines.push(`CTA: [${c.buttonLabel}](${c.buttonUrl})`, '');
   });
-  writeFileSync(new URL(`${theme.layout}.md`, root), lines.join('\n').trimEnd()+'\n');
+  writeFileSync(new URL(specFilename(template), root), lines.join('\n').trimEnd()+'\n');
 }
 writeFileSync(new URL('../docs/portfolio-templates.json', import.meta.url), JSON.stringify(ALL_TEMPLATES, null, 2)+'\n');
 const index = `# GitFolio portfolio templates
 
-Five original design families for different kinds of technical work. Choose one in **New project**; the picker, editor, static output, and React output share a semantic renderer and styles. Each preset has a distinct composition, type pairing, content order, density, and contact treatment.
+${BUILTIN_TEMPLATES.length} presets across five original design families for different kinds of technical work. Choose one in **New project**; the picker, editor, static output, and React output share a semantic renderer and styles. Variants reuse their family's composition with their own palette, type pairing, content, and density.
 
-${BUILTIN_TEMPLATES.map((t) => `- [${t.name}](templates/${t.defaultConfig.theme.layout}.md) — ${t.description}`).join('\n')}
+${BUILTIN_TEMPLATES.map((t) => `- [${t.name}](templates/${specFilename(t)}) — ${t.description}`).join('\n')}
 
 The linked specifications contain exact tokens, measured palette contrast, section order, and every default heading, description, entry, link, metric, and CTA. [Machine-readable specifications](portfolio-templates.json) mirror the canonical definitions in packages/shared/src/portfolio. After editing a preset, build the shared workspace and run **node scripts/template-specs.mjs** to refresh the documents.
 
@@ -68,6 +74,8 @@ These designs support a clear path from introduction to work evidence and contac
 
 ## Validation
 
-Verified locally on 2026-11-18: all workspace builds and type checks; 70 backend tests with disposable PostgreSQL/Redis services; 28 client unit tests; and 50 browser tests. Coverage includes all five creation flows, editor save/reload, rich fields, keyboard controls, legacy draft preservation, edited catalog rows, safe URLs, hidden-content omission, palette contrast, and reflow from 320px to 1440px. Each generated React project also built independently and matched its static counterpart in a browser at desktop/mobile widths, including edits made directly to portfolio.json. GitHub publishing was not invoked for this design task.
+The original five designs were verified locally on 2026-11-18: all workspace builds and type checks; 70 backend tests with disposable PostgreSQL/Redis services; 28 client unit tests; and 50 browser tests. Coverage included their creation flows, editor save/reload, rich fields, keyboard controls, legacy draft preservation, edited catalog rows, safe URLs, hidden-content omission, palette contrast, and reflow from 320px to 1440px. Each original generated React project also built independently and matched its static counterpart in a browser at desktop/mobile widths, including edits made directly to portfolio.json. GitHub publishing was not invoked for that design task.
+
+When adding presets, rerun workspace builds and type checks, the catalog and export tests, and client/test/browser/templates.test.mjs. The tests iterate over every non-role preset, including variants that share a renderer, and check their own preview content, saved defaults, exports, controls, and narrow-screen reflow. Regenerating this document alone does not verify a new preset.
 `;
 writeFileSync(new URL('../docs/PORTFOLIO_TEMPLATES.md', import.meta.url),index);

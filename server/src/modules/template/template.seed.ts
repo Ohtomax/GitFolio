@@ -58,11 +58,12 @@ export async function seedTemplates(database: Pick<PrismaClient, 'template'>) {
   }
   const reservedIds = BUILTIN_TEMPLATES.flatMap((preset) => [preset.id, templateFallbackId(preset.id)]);
   const stored = await database.template.findMany({ where: { id: { in: reservedIds } }, select: { id: true, defaultConfig: true } });
-  const layouts = new Set(stored.flatMap((row) => {
+  const layoutsById = new Map(stored.flatMap((row) => {
     const config = TemplateConfigSchema.safeParse(row.defaultConfig);
-    return config.success && config.data.theme.layout ? [config.data.theme.layout] : [];
+    return config.success && config.data.theme.layout ? [[row.id, config.data.theme.layout] as const] : [];
   }));
-  const missingDesigns = BUILTIN_TEMPLATES.filter((preset) => !layouts.has(preset.defaultConfig.theme.layout!));
+  const missingDesigns = BUILTIN_TEMPLATES.filter((preset) =>
+    ![preset.id, templateFallbackId(preset.id)].some((id) => layoutsById.get(id) === preset.defaultConfig.theme.layout));
   // An edited legacy row keeps its ID and content. Add the new design under a
   // second reserved ID instead of making that archetype unavailable.
   const additional = missingDesigns.length ? await database.template.createMany({ skipDuplicates: true,

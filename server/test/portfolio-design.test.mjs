@@ -9,7 +9,7 @@ import { generatorProject } from './helpers/portfolio.mjs';
 for (const template of BUILTIN_TEMPLATES.filter((item) => !isRoleLayout(item.defaultConfig.theme.layout))) test(`${template.name}: accessible preset, complete editable content, and identical export composition`, () => {
   const project = { ...generatorProject(), templateId: template.id, template, themeConfig: template.defaultConfig.theme,
     sections: template.defaultConfig.sections.map((section, sortOrder) => ({ ...structuredClone(section), sortOrder, id: randomUUID() })) };
-  for (const type of ['hero','about','projects','experience','skills','contact']) assert.ok(project.sections.some((s) => s.type === type));
+  for (const type of ['hero','projects','contact']) assert.ok(project.sections.some((s) => s.type === type));
   const colors = project.themeConfig.colors;
   for (const foreground of ['text','muted','accent']) for (const background of ['background','surface']) assert.ok(contrastRatio(colors[foreground],colors[background]) >= 4.5, `${foreground}/${background}`);
   const staticFiles = Object.fromEntries(generateStaticSite(project).map((f) => [f.path,f.content]));

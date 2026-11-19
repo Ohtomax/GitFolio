@@ -58,7 +58,7 @@ for (const template of BUILTIN_TEMPLATES) test(`${template.name} publishes respo
     assert.equal(await page.locator('h1').count(), 1);
     if (process.env.GITFOLIO_TEMPLATE_SCREENSHOTS && [1440,375].includes(width)) {
       mkdirSync(process.env.GITFOLIO_TEMPLATE_SCREENSHOTS, { recursive: true });
-      await page.screenshot({ path: join(process.env.GITFOLIO_TEMPLATE_SCREENSHOTS, `${template.defaultConfig.theme.layout}-${width}.png`), fullPage: true });
+      await page.screenshot({ path: join(process.env.GITFOLIO_TEMPLATE_SCREENSHOTS, `${template.id}-${width}.png`), fullPage: true });
     }
   }
   await page.keyboard.press('Tab');
@@ -81,22 +81,27 @@ for (const template of BUILTIN_TEMPLATES) test(`${template.name} publishes respo
   assert.deepEqual(errors, []);
 });
 
-test('all five catalog designs can be selected and created with their own saved defaults', async (t) => {
+test('every catalog design previews its own content and can be created with its saved defaults', async (t) => {
   const f = await projectsFixture(t, browser, { templates: BUILTIN_TEMPLATES.map((preset) => ({ ...preset, preview: preset.defaultConfig.theme })) });
   await f.goto('/projects/new');
   await f.page.getByRole('radio').first().waitFor();
-  assert.equal(await f.page.getByRole('radio').count(), 5);
-  const thumbnails = f.page.locator('.pf-thumbnail');
-  assert.equal(await thumbnails.count(), 5);
-  for (let index = 0; index < 5; index++) {
-    const box = await thumbnails.nth(index).locator('.pf-page').boundingBox();
-    const frame = await thumbnails.nth(index).boundingBox();
-    assert.ok(box.width <= frame.width + 1 && box.width > frame.width - 2, 'thumbnail scales to its card');
-  }
+  const pageSize = await f.page.getByRole('radio').count();
   if (process.env.GITFOLIO_TEMPLATE_SCREENSHOTS) await f.page.screenshot({ path: join(process.env.GITFOLIO_TEMPLATE_SCREENSHOTS, 'catalog.png'), fullPage: true });
   for (const [index, template] of BUILTIN_TEMPLATES.entries()) {
     if (index > 0) await f.goto('/projects/new');
+    await f.page.getByRole('radio').first().waitFor();
+    for (let page = 0; page < Math.floor(index / pageSize); page++) {
+      const previousId = await f.page.getByRole('radio').first().getAttribute('value');
+      await f.page.getByRole('button', { name: 'Next templates', exact: true }).click();
+      await f.page.waitForFunction((id) => document.querySelector('input[name="template"]')?.value !== id, previousId);
+    }
     const radio = f.page.getByRole('radio', { name: template.name, exact: true });
+    await radio.waitFor({ state: 'attached' });
+    const thumbnail = radio.locator('..').locator('.pf-thumbnail');
+    assert.equal(await thumbnail.locator('h1').textContent(), template.defaultConfig.sections.find((section) => section.type === 'hero').content.heading);
+    const box = await thumbnail.locator('.pf-page').boundingBox();
+    const frame = await thumbnail.boundingBox();
+    assert.ok(box.width <= frame.width + 1 && box.width > frame.width - 2, 'thumbnail scales to its card');
     await radio.focus(); await radio.press('Space');
     await f.page.getByRole('button', { name: 'Continue', exact: true }).click();
     await f.page.getByLabel('Project name', { exact: true }).fill(`Design example ${index + 1}`);
@@ -106,7 +111,7 @@ test('all five catalog designs can be selected and created with their own saved 
     assert.deepEqual(created.themeConfig, template.defaultConfig.theme);
     assert.deepEqual(created.sections.map(({ id, sortOrder, ...section }) => section), template.defaultConfig.sections);
   }
-  assert.equal(f.state.creates, 5);
+  assert.equal(f.state.creates, BUILTIN_TEMPLATES.length);
 });
 
 test('new metric, cover, contact links, and paired type controls persist through the editor', async (t) => {
