@@ -12,7 +12,7 @@ For a local installation, use the exact `http://localhost:5173` address after fo
 
 ## 2. Choose a starting point
 
-Open **Templates** to browse all seventeen built-in designs, filter by category, and select **Preview** for a full view. Use the desktop, tablet, and mobile controls to check the layout. Scroll inside the preview to see every section; Sentinel uses sidebar links or the mobile **Sections +** menu to switch sections. **Next templates** opens the rest of the catalog; returning from a preview keeps your category and page. Browsing does not create a project.
+Open **Templates** to browse all eighteen built-in designs, filter by category, and select **Preview** for a full view. The **Premium** filter groups motion-focused designs, starting with **Kinetic / Animated Portfolio**. Use the desktop, tablet, and mobile controls to check the layout. Scroll inside the preview to see every section; Sentinel uses sidebar links or the mobile **Sections +** menu to switch sections. **Next templates** opens the rest of the catalog; returning from a preview keeps your category and page. Browsing does not create a project.
 
 Choose **Use template** from a card or its preview to open project details with that design selected. You can also select **New project**, choose a style, and select **Continue**.
 
@@ -35,8 +35,9 @@ Choose **Use template** from a card or its preview to open project details with 
 | Terminal Noir | A monochrome terminal structure with green security-engineering accents |
 | Monochrome / Online CV | A personal CV with a portrait frame, project cards, and a scrolling toolkit |
 | Sentinel / Cybersecurity Dossier | A green terminal dashboard for investigations, defensive skills, credentials, and research |
+| Kinetic / Animated Portfolio · Premium | Expressive typography, large project scenes, and accessible animation for designers and creative developers |
 
-The five role styles use React output; output format follows the chosen template. The picker labels each style **Static** or **React**. See the [original design specifications](PORTFOLIO_TEMPLATES.md) and [role specifications](ROLE_PORTFOLIO_TEMPLATES.md) for full sample content.
+The five role styles use React output; output format follows the chosen template. The picker labels each style **Static** or **React**. Kinetic's animations work in its default static output and in generated React projects. In its preview, use **Pause motion** to stop movement; system reduced-motion preferences take effect automatically. The editing canvas and gallery thumbnails stay still. See the [original design specifications](PORTFOLIO_TEMPLATES.md) and [role specifications](ROLE_PORTFOLIO_TEMPLATES.md) for full sample content.
 
 Enter a project name, a unique lowercase slug, and an optional repository name. Suggestions follow your project name until you edit them. Use **Change template** to return to the picker if needed. A slug belongs to your account, so someone else's matching slug does not block yours. **Create project** saves a draft and returns to the dashboard. It does not publish anything or create a GitHub repository.
 

@@ -42,6 +42,12 @@ In **Monochrome / Online CV**, select the hero to edit **Portrait image URL** an
 
 Both static and React exports use the same navigation. Without JavaScript, the links work as ordinary anchors and every visible section stays readable. The green scanline texture is static. Default identities, employers, case studies, learning records, articles, and links are fictional examples; replace them with your own authorized work before publishing.
 
+## Premium animated portfolio
+
+**Kinetic / Animated Portfolio** belongs to **Premium**, available in both template filters. Its canvas and thumbnails stay still while you edit. **Preview** and exported sites add staggered introductory type, scroll reveals, floating CSS artwork, a moving toolkit strip, and gentle depth on devices with a mouse. The hero's **Pause motion** control stops animation; **Resume motion** restores it. System reduced-motion preferences override animation and take effect immediately, including changes made while the page is open. Continuous artwork and toolkit animation pause outside the visible viewport and when the page is hidden. Native mobile navigation and all portfolio content remain available without JavaScript.
+
+Select the hero to edit the optional **Portrait image URL** and **Portrait description**; an empty image shows initials. The eyebrow contains the name and role separated by `/`, and headings support line breaks. Project cover styles, tags, metrics, biography, experience, writing, and contact links use the existing editor controls. Static and React exports share the renderer, bundled fonts, motion behavior, and editable data. The default artwork and fictional sample content are original.
+
 ## Verification
 
 Unit/HTTP suites cover strict schemas, ownership, rollback, archived documents, undo/redo, acknowledgement races, owner-partitioned interrupted drafts, and serialized saves. Browser tests use synthetic API responses to verify the rendered controls, persistence across reload, safe preview, narrow screens, debounce, in-flight edits, retry/conflict recovery, and navigation protection. The optional `editor-storage.test.mjs` uses a migrated disposable PostgreSQL database to exercise real transactions, concurrent tabs, section creation timestamps, removal/restore, and foreign-ID rollback. See README for service/browser prerequisites. A passing isolated database test does not migrate the configured development database or verify live GitHub consent.

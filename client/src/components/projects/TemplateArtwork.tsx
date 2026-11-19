@@ -7,6 +7,7 @@ const palettes: Record<TemplateCategory, { surface: string; text: string; accent
   developer: { surface: 'bg-stone-900', text: 'text-stone-100', accent: 'bg-lime-400', card: 'bg-stone-700', font: 'font-mono' },
   professional: { surface: 'bg-amber-50', text: 'text-stone-800', accent: 'bg-amber-700', card: 'bg-amber-200/70', font: 'font-serif' },
   creative: { surface: 'bg-violet-50', text: 'text-violet-950', accent: 'bg-violet-500', card: 'bg-violet-200/70', font: 'font-sans' },
+  premium: { surface: 'bg-zinc-50', text: 'text-zinc-950', accent: 'bg-indigo-600', card: 'bg-indigo-100', font: 'font-sans' },
 };
 export default function TemplateArtwork({ template, theme }: { template: TemplateSummary; theme?: ThemeConfig }) {
   const preview = theme ?? template.preview;

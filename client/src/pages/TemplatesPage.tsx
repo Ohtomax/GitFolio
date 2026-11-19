@@ -10,7 +10,7 @@ import { errorMessage } from '../utils/errorParser.ts';
 const categories = [
   { label: 'All styles', value: undefined }, { label: 'Minimal', value: 'minimal' },
   { label: 'Developer', value: 'developer' }, { label: 'Professional', value: 'professional' },
-  { label: 'Creative', value: 'creative' },
+  { label: 'Creative', value: 'creative' }, { label: 'Premium', value: 'premium' },
 ] as const;
 
 export default function TemplatesPage() {

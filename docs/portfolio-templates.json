@@ -3253,5 +3253,230 @@
         }
       ]
     }
+  },
+  {
+    "id": "10000000-0000-4000-8000-00000000000d",
+    "name": "Kinetic / Animated Portfolio",
+    "description": "An expressive designer-developer portfolio with oversized type, immersive project scenes, scroll reveals, a moving toolkit, and gentle pointer-driven depth. Includes motion controls and original fictional content.",
+    "category": "premium",
+    "thumbnailUrl": null,
+    "isReact": false,
+    "defaultConfig": {
+      "theme": {
+        "colors": {
+          "accent": "#4938dc",
+          "background": "#fafafa",
+          "text": "#17171c",
+          "muted": "#60606b",
+          "surface": "#f0f0f4",
+          "border": "#ceced8"
+        },
+        "font": "sans",
+        "spacing": "spacious",
+        "layout": "kinetic",
+        "headingFont": "sans",
+        "demo": true
+      },
+      "sections": [
+        {
+          "type": "hero",
+          "content": {
+            "heading": "A little curiosity.\nA lot of possibility.",
+            "description": "I shape useful ideas into expressive digital experiences. From the first question to the last interaction, I connect thoughtful design with the craft of building for the web.",
+            "eyebrow": "Riley Vale / Designer & creative developer",
+            "subtitle": "Independent design & creative development",
+            "buttonLabel": "Let’s make something",
+            "buttonUrl": "mailto:riley@example.com",
+            "tags": [
+              "Considered interfaces",
+              "Playful details",
+              "Useful products",
+              "Design through code"
+            ],
+            "metrics": [
+              {
+                "value": "Design + code",
+                "label": "My practice"
+              },
+              {
+                "value": "Independent",
+                "label": "How I work"
+              },
+              {
+                "value": "Collaborative",
+                "label": "By nature"
+              }
+            ],
+            "portraitUrl": "",
+            "portraitAlt": "Riley Vale"
+          },
+          "visible": true
+        },
+        {
+          "type": "projects",
+          "content": {
+            "heading": "Ideas, made tangible.",
+            "description": "A few fictional concept projects, each exploring a different way to make the everyday feel more considered.",
+            "subtitle": "Selected work",
+            "items": [
+              {
+                "title": "Luma",
+                "subtitle": "A calmer place to read",
+                "description": "A reading workspace that helps curious people collect, connect, and return to the things that matter. I explored the product direction, shaped the design system, and built an accessible interface prototype.",
+                "url": "https://example.com/riley/luma",
+                "visual": "dashboard",
+                "tags": [
+                  "Product design",
+                  "Design systems",
+                  "React"
+                ]
+              },
+              {
+                "title": "Formspace",
+                "subtitle": "Room for the next idea",
+                "description": "A visual identity and flexible web experience for an imagined creative workshop. Expressive typography meets a clear structure that gives every project room to tell its own story.",
+                "url": "https://example.com/riley/formspace",
+                "visual": "typography",
+                "tags": [
+                  "Art direction",
+                  "Brand identity",
+                  "Web development"
+                ]
+              },
+              {
+                "title": "Daylight",
+                "subtitle": "Small plans. Better days.",
+                "description": "A lightweight planning concept built around focus and breathing room. I worked through the interaction model, tested responsive layouts, and translated the design into reusable components.",
+                "url": "https://example.com/riley/daylight",
+                "visual": "mobile",
+                "tags": [
+                  "Interaction design",
+                  "Prototyping",
+                  "TypeScript"
+                ]
+              }
+            ]
+          },
+          "visible": true
+        },
+        {
+          "type": "about",
+          "content": {
+            "heading": "Good work starts\nwith good questions.",
+            "description": "I’m Riley, a designer who likes to build and a developer who cares about the details. My favorite projects begin with a real question and leave room for a surprising answer.\n\nI work across strategy, visual systems, and frontend development. The thread through all of it is simple: understand the people, make the important things clear, and leave the experience better than I found it.",
+            "subtitle": "A bit about me",
+            "tags": [
+              "Curious by default",
+              "Open to collaboration",
+              "Always learning"
+            ]
+          },
+          "visible": true
+        },
+        {
+          "type": "skills",
+          "content": {
+            "heading": "From a rough idea\nto a thoughtful experience.",
+            "description": "A flexible toolkit, grounded in clear thinking, careful execution, and a willingness to try something different.",
+            "subtitle": "What I bring",
+            "items": [
+              {
+                "title": "Find the shape",
+                "description": "Ask useful questions, map the problem, and turn a loose idea into a clear direction."
+              },
+              {
+                "title": "Make it feel right",
+                "description": "Build visual and interaction systems that balance expression, clarity, and accessibility."
+              },
+              {
+                "title": "Bring it to life",
+                "description": "Translate the design into responsive components, purposeful motion, and a dependable web experience."
+              }
+            ],
+            "tags": [
+              "Product strategy",
+              "UI & interaction",
+              "Design systems",
+              "Prototyping",
+              "Figma",
+              "React",
+              "TypeScript",
+              "CSS",
+              "Accessibility"
+            ]
+          },
+          "visible": true
+        },
+        {
+          "type": "experience",
+          "content": {
+            "heading": "A practice built\nby making.",
+            "description": "Illustrative roles and organizations. Replace these examples with your own story.",
+            "subtitle": "Experience",
+            "items": [
+              {
+                "title": "Independent Designer & Developer",
+                "subtitle": "2024 — Present · Fictional example",
+                "description": "Partner with small teams to shape product concepts, create visual systems, and build thoughtful interfaces from first sketch to working prototype."
+              },
+              {
+                "title": "Product Designer · Foldline Studio",
+                "subtitle": "2021 — 2024 · Fictional example",
+                "description": "Worked across research, interface design, and frontend delivery for an imagined multidisciplinary design studio."
+              }
+            ]
+          },
+          "visible": true
+        },
+        {
+          "type": "writing",
+          "content": {
+            "heading": "A few things\nI’m thinking about.",
+            "description": "Fictional article placeholders for ideas that connect design, code, and the everyday.",
+            "subtitle": "Notes & experiments",
+            "items": [
+              {
+                "title": "When a small interaction makes a big difference",
+                "subtitle": "Design notes · 2025",
+                "description": "A practical look at feedback, rhythm, and the details that help an interface feel understood.",
+                "url": "https://example.com/riley/notes/small-interactions"
+              },
+              {
+                "title": "Making room for the first rough version",
+                "subtitle": "Process notes · 2025",
+                "description": "Why a small, working prototype can ask better questions than a polished presentation.",
+                "url": "https://example.com/riley/notes/rough-versions"
+              }
+            ]
+          },
+          "visible": true
+        },
+        {
+          "type": "contact",
+          "content": {
+            "heading": "Something in mind?\nLet’s give it shape.",
+            "description": "A new product, a fresh perspective, or a detail worth getting right. Tell me what you’re thinking and let’s see where it could go.",
+            "subtitle": "Next, together",
+            "buttonLabel": "Say hello",
+            "buttonUrl": "mailto:riley@example.com",
+            "items": [
+              {
+                "title": "Email",
+                "url": "mailto:riley@example.com"
+              },
+              {
+                "title": "Selected experiments",
+                "url": "https://example.com/riley/experiments"
+              },
+              {
+                "title": "Professional profile",
+                "url": "https://example.com/riley/profile"
+              }
+            ]
+          },
+          "visible": true
+        }
+      ]
+    }
   }
 ]

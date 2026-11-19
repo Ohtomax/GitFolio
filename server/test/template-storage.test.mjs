@@ -45,7 +45,7 @@ test('real PostgreSQL upgrades only untouched legacy presets, preserves drafts, 
       const input = SaveEditorSchema.parse({ baseRevision: project.editorRevision, themeConfig: { ...project.themeConfig, headingFont: 'serif', demo: false },
         sections: project.sections.map(({ sortOrder, ...section }) => section) });
       input.sections[0].content.metrics = [{ value: '42', label: 'A user-supplied metric' }];
-      if (template.defaultConfig.theme.layout === 'monochrome') {
+      if (['monochrome', 'kinetic'].includes(template.defaultConfig.theme.layout)) {
         input.sections[0].content.portraitUrl = 'https://example.com/custom-portrait.png';
         input.sections[0].content.portraitAlt = 'A custom portrait saved with the draft';
       }

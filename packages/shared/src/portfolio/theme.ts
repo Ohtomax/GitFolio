@@ -14,7 +14,7 @@ export function portfolioVariables(theme: ThemeConfig): Record<string, string> {
   const sans = theme.layout === 'executive' ? "'Source Sans 3', ui-sans-serif, system-ui, sans-serif" : "'Geist', ui-sans-serif, system-ui, sans-serif";
   const fonts = { sans, serif: "'Newsreader', ui-serif, Georgia, serif", mono: "'Geist Mono', ui-monospace, monospace" };
   const geometricHeading = theme.layout === 'bento' && (theme.headingFont ?? 'sans') === 'sans'
-    || theme.layout === 'monochrome' && (theme.headingFont ?? theme.font) === 'sans';
+    || ['monochrome', 'kinetic'].includes(theme.layout ?? '') && (theme.headingFont ?? theme.font) === 'sans';
   const headingFont = geometricHeading ? "'Manrope', ui-sans-serif, system-ui, sans-serif" : fonts[theme.headingFont ?? theme.font];
   return { '--pf-bg': theme.colors.background, '--pf-text': theme.colors.text,
     '--pf-accent': theme.colors.accent, '--pf-on-accent': accentText(theme.colors.accent),

@@ -2,6 +2,86 @@
 // Self-contained so exported portfolios can include the same behavior.
 export function mountPortfolioInteractions(root: ParentNode): () => void {
   const cleanups: Array<() => void> = [];
+  root.querySelectorAll<HTMLElement>('[data-kinetic-page]').forEach((page) => {
+    const preference = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const pointer = window.matchMedia('(hover: hover) and (pointer: fine)');
+    const reveals = Array.from(page.querySelectorAll<HTMLElement>('[data-kinetic-reveal]'));
+    const animated = Array.from(page.querySelectorAll<HTMLElement>('[data-kinetic-animate]'));
+    const words = Array.from(page.querySelectorAll<HTMLElement>('[data-kinetic-word]'));
+    const button = page.querySelector<HTMLButtonElement>('[data-kinetic-motion]');
+    const tilts = Array.from(page.querySelectorAll<HTMLElement>('[data-kinetic-tilt]'));
+    const frames = new Map<HTMLElement, number>();
+    let paused = false;
+    const resetTilt = () => {
+      frames.forEach((frame) => cancelAnimationFrame(frame)); frames.clear();
+      tilts.forEach((element) => { element.style.removeProperty('--pf-tilt-x'); element.style.removeProperty('--pf-tilt-y'); });
+    };
+    const refresh = () => {
+      const stopped = preference.matches || paused || document.hidden;
+      page.toggleAttribute('data-kinetic-reduced', preference.matches);
+      page.toggleAttribute('data-kinetic-paused', paused);
+      page.toggleAttribute('data-kinetic-running', !stopped);
+      if (stopped || !pointer.matches) resetTilt();
+      if (preference.matches || paused) reveals.forEach((element) => element.setAttribute('data-kinetic-in-view', ''));
+      if (button) {
+        button.textContent = preference.matches ? 'Reduced motion' : paused ? 'Resume motion' : 'Pause motion';
+        button.setAttribute('aria-pressed', String(preference.matches || paused));
+        button.setAttribute('aria-disabled', String(preference.matches));
+      }
+    };
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(({ target, isIntersecting }) => {
+        if (target.hasAttribute('data-kinetic-reveal') && isIntersecting) target.setAttribute('data-kinetic-in-view', '');
+        if (target.hasAttribute('data-kinetic-animate')) target.toggleAttribute('data-kinetic-active', isIntersecting);
+      });
+    }, { threshold: .08 });
+    new Set([...reveals, ...animated]).forEach((element) => observer.observe(element));
+    words.forEach((word, index) => word.style.setProperty('--pf-word-index', String(Math.min(index, 24))));
+    tilts.forEach((element) => {
+      const canMove = () => !preference.matches && !paused && !document.hidden && pointer.matches
+        && !!element.closest('[data-kinetic-active]');
+      let x = 0, y = 0;
+      const move = (event: PointerEvent) => {
+        if (event.pointerType !== 'mouse' || !canMove()) return;
+        x = event.clientX; y = event.clientY;
+        if (frames.has(element)) return;
+        frames.set(element, requestAnimationFrame(() => {
+          frames.delete(element); if (!canMove()) return;
+          const rect = element.getBoundingClientRect();
+          const horizontal = Math.max(-.5, Math.min(.5, (x - rect.left) / Math.max(rect.width, 1) - .5));
+          const vertical = Math.max(-.5, Math.min(.5, (y - rect.top) / Math.max(rect.height, 1) - .5));
+          element.style.setProperty('--pf-tilt-x', (-vertical * 10).toFixed(2) + 'deg');
+          element.style.setProperty('--pf-tilt-y', (horizontal * 10).toFixed(2) + 'deg');
+        }));
+      };
+      const leave = () => {
+        const frame = frames.get(element); if (frame !== undefined) cancelAnimationFrame(frame);
+        frames.delete(element); element.style.removeProperty('--pf-tilt-x'); element.style.removeProperty('--pf-tilt-y');
+      };
+      element.addEventListener('pointermove', move); element.addEventListener('pointerleave', leave);
+      cleanups.push(() => { element.removeEventListener('pointermove', move); element.removeEventListener('pointerleave', leave); });
+    });
+    const toggle = () => { if (!preference.matches) { paused = !paused; refresh(); } };
+    const close = (event: Event) => {
+      const menu = (event.target as Element).closest<HTMLDetailsElement>('[data-kinetic-menu]');
+      if (menu && (event.target as Element).closest('a')) menu.open = false;
+    };
+    button?.addEventListener('click', toggle); page.addEventListener('click', close);
+    preference.addEventListener('change', refresh); pointer.addEventListener('change', refresh);
+    document.addEventListener('visibilitychange', refresh);
+    page.setAttribute('data-kinetic-enhanced', ''); refresh();
+    cleanups.push(() => {
+      observer.disconnect(); resetTilt(); button?.removeEventListener('click', toggle); page.removeEventListener('click', close);
+      preference.removeEventListener('change', refresh); pointer.removeEventListener('change', refresh);
+      document.removeEventListener('visibilitychange', refresh);
+      ['data-kinetic-enhanced', 'data-kinetic-reduced', 'data-kinetic-paused', 'data-kinetic-running'].forEach((attribute) => page.removeAttribute(attribute));
+      reveals.forEach((element) => element.removeAttribute('data-kinetic-in-view'));
+      animated.forEach((element) => element.removeAttribute('data-kinetic-active'));
+      words.forEach((word) => word.style.removeProperty('--pf-word-index'));
+      page.querySelectorAll<HTMLDetailsElement>('[data-kinetic-menu]').forEach((menu) => { menu.open = false; });
+      if (button) { button.textContent = 'Pause motion'; button.setAttribute('aria-pressed', 'false'); button.removeAttribute('aria-disabled'); }
+    });
+  });
   root.querySelectorAll<HTMLElement>('[data-dossier-shell]').forEach((shell) => {
     const panels = Array.from(shell.querySelectorAll<HTMLElement>('.pf-dossier-panel'));
     const links = Array.from(shell.querySelectorAll<HTMLAnchorElement>('[data-dossier-link]'));

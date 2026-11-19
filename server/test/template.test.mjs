@@ -60,6 +60,8 @@ test('template endpoints require a real session, validate queries, and return bo
     assert.equal((await f.request('/templates?' + query)).status, 400);
   }
   assert.equal(calls, 1);
+  assert.equal((await f.request('/templates?category=premium')).status, 200);
+  assert.deepEqual(received, { page: 1, pageSize: 12, category: 'premium' });
   const detail = await f.request('/templates/' + templateSeedData[0].id);
   assert.equal(detail.status, 200);
   TemplateConfigSchema.parse((await detail.json()).data.defaultConfig);
