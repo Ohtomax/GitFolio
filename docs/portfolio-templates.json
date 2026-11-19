@@ -2985,5 +2985,273 @@
         }
       ]
     }
+  },
+  {
+    "id": "10000000-0000-4000-8000-00000000000c",
+    "name": "Sentinel / Cybersecurity Dossier",
+    "description": "A cybersecurity portfolio with a neon-green terminal aesthetic, sidebar section navigation, investigation cards, capabilities, credentials, and research notes. All sample content is original and fictional.",
+    "category": "developer",
+    "thumbnailUrl": null,
+    "isReact": false,
+    "defaultConfig": {
+      "theme": {
+        "colors": {
+          "accent": "#7dff63",
+          "background": "#060906",
+          "text": "#e3f0e0",
+          "muted": "#a2b59f",
+          "surface": "#0d140e",
+          "border": "#2b422b"
+        },
+        "font": "mono",
+        "spacing": "comfortable",
+        "layout": "dossier",
+        "headingFont": "mono",
+        "demo": true
+      },
+      "sections": [
+        {
+          "type": "hero",
+          "content": {
+            "heading": "Evidence first.\nDefense always.",
+            "description": "I turn noisy security signals into clear investigations and practical defenses. My work connects log analysis, repeatable response playbooks, and the small configuration changes that reduce real exposure.",
+            "eyebrow": "Nadia Serrano / Cybersecurity Analyst",
+            "subtitle": "Detection engineering · Incident response · Cloud security",
+            "buttonLabel": "Start a conversation",
+            "buttonUrl": "mailto:nadia@example.com",
+            "tags": [
+              "Threat detection",
+              "Digital forensics",
+              "Security automation"
+            ],
+            "metrics": [
+              {
+                "value": "Blue team",
+                "label": "Primary focus"
+              },
+              {
+                "value": "Lab-based",
+                "label": "Case-study evidence"
+              },
+              {
+                "value": "Open",
+                "label": "Collaboration"
+              }
+            ]
+          },
+          "visible": true
+        },
+        {
+          "type": "about",
+          "content": {
+            "heading": "The analyst behind the alerts.",
+            "description": "I’m Nadia, a security analyst who enjoys asking what happened, how we know, and what should change next. I build small, well-documented labs to understand attacker behavior and test defensive ideas.\n\nMy approach is evidence-led: define the question, preserve the relevant artifacts, record the limits of the investigation, and leave the next analyst a clear trail. Every assessment in this portfolio uses a sandbox or an explicitly authorized environment.",
+            "subtitle": "Profile / 01",
+            "tags": [
+              "Curiosity",
+              "Clear documentation",
+              "Responsible research"
+            ]
+          },
+          "visible": true
+        },
+        {
+          "type": "projects",
+          "content": {
+            "heading": "Investigations with a paper trail.",
+            "description": "Three fictional lab investigations, with the question, evidence, and defensive outcome kept together. Replace these examples with your own authorized work.",
+            "subtitle": "Selected case studies",
+            "items": [
+              {
+                "title": "Lantern / Identity anomaly triage",
+                "subtitle": "CASE 001 · DETECTION ENGINEERING",
+                "description": "Built a sandbox sign-in dataset and a detection pipeline that links unusual session patterns with identity changes. Documented false-positive checks and a repeatable analyst triage worksheet.",
+                "url": "https://example.com/nadia/lantern",
+                "visual": "code",
+                "tags": [
+                  "Sigma",
+                  "Python",
+                  "Identity logs"
+                ],
+                "metrics": [
+                  {
+                    "value": "Detect",
+                    "label": "Investigation focus"
+                  }
+                ]
+              },
+              {
+                "title": "Breakwater / Cloud exposure review",
+                "subtitle": "CASE 002 · CLOUD SECURITY",
+                "description": "Reviewed an intentionally misconfigured cloud lab for public storage, broad permissions, and missing audit events. Produced a prioritized remediation record and checks that verify each change.",
+                "url": "https://example.com/nadia/breakwater",
+                "visual": "architecture",
+                "tags": [
+                  "IAM",
+                  "Terraform",
+                  "CloudTrail"
+                ],
+                "metrics": [
+                  {
+                    "value": "Harden",
+                    "label": "Investigation focus"
+                  }
+                ]
+              },
+              {
+                "title": "Tracebook / Endpoint evidence workflow",
+                "subtitle": "CASE 003 · INCIDENT RESPONSE",
+                "description": "Reconstructed a simulated endpoint incident from synthetic event logs and disk artifacts. Built a timeline, preserved evidence hashes, and wrote a handoff guide separating observations from assumptions.",
+                "url": "https://example.com/nadia/tracebook",
+                "visual": "dashboard",
+                "tags": [
+                  "Sysmon",
+                  "Velociraptor",
+                  "Timeline analysis"
+                ],
+                "metrics": [
+                  {
+                    "value": "Respond",
+                    "label": "Investigation focus"
+                  }
+                ]
+              }
+            ]
+          },
+          "visible": true
+        },
+        {
+          "type": "skills",
+          "content": {
+            "heading": "A practical defensive toolkit.",
+            "description": "Tools support the investigation. Knowing what the data can and cannot show comes first.",
+            "subtitle": "Capabilities",
+            "items": [
+              {
+                "title": "Detection & triage",
+                "description": "Log normalization, behavioral detections, alert enrichment, and evidence-based prioritization."
+              },
+              {
+                "title": "Incident investigation",
+                "description": "Endpoint timelines, network artifact review, evidence handling, and readable response playbooks."
+              },
+              {
+                "title": "Cloud & automation",
+                "description": "Identity reviews, configuration baselines, infrastructure checks, and small scripts that remove repetitive work."
+              }
+            ],
+            "tags": [
+              "Python",
+              "Sigma",
+              "YARA",
+              "Wireshark",
+              "Sysmon",
+              "Linux",
+              "SQL",
+              "Git",
+              "Terraform"
+            ]
+          },
+          "visible": true
+        },
+        {
+          "type": "experience",
+          "content": {
+            "heading": "Practice, collaboration, progress.",
+            "description": "Illustrative roles and organizations. Use this space for your own responsibilities and contributions.",
+            "subtitle": "Experience",
+            "items": [
+              {
+                "title": "Security Analyst · Alderwatch Labs",
+                "subtitle": "2025 — Present · Fictional example",
+                "description": "Develop investigation notes, tune lab detections, and pair with engineers on configuration reviews. Turn recurring findings into documented checks and response steps."
+              },
+              {
+                "title": "Security Research Intern · Harborlight Collective",
+                "subtitle": "2024 — 2025 · Fictional example",
+                "description": "Maintained a sandbox telemetry environment and wrote short research briefs on identity and endpoint detection opportunities."
+              }
+            ]
+          },
+          "visible": true
+        },
+        {
+          "type": "education",
+          "content": {
+            "heading": "Learning that leaves evidence.",
+            "description": "Example learning records, not claims of professional certification. Add your own qualifications and verification links.",
+            "subtitle": "Credentials & learning",
+            "items": [
+              {
+                "title": "Defensive Operations Lab",
+                "subtitle": "Example practical course · 2025",
+                "description": "Investigation notebooks, detection exercises, and response handoffs.",
+                "url": "https://example.com/nadia/learning/defensive-operations"
+              },
+              {
+                "title": "Cloud Identity Workshop",
+                "subtitle": "Example workshop · 2025",
+                "description": "Least-privilege reviews and audit-log coverage in a disposable environment.",
+                "url": "https://example.com/nadia/learning/cloud-identity"
+              },
+              {
+                "title": "BSc Information Systems · Pinehaven Institute",
+                "subtitle": "Fictional education example · 2020 — 2024",
+                "description": "Networks, operating systems, and secure application fundamentals."
+              }
+            ]
+          },
+          "visible": true
+        },
+        {
+          "type": "writing",
+          "content": {
+            "heading": "Notes from the investigation desk.",
+            "description": "Short, reproducible explanations for other defenders. These are fictional article placeholders.",
+            "subtitle": "Research notes",
+            "items": [
+              {
+                "title": "An alert is a question, not a verdict",
+                "subtitle": "DETECTION NOTES · 2025",
+                "description": "A checklist for testing a detection hypothesis before escalating an event.",
+                "url": "https://example.com/nadia/notes/detection-hypotheses"
+              },
+              {
+                "title": "Writing an incident timeline someone else can use",
+                "subtitle": "RESPONSE NOTES · 2025",
+                "description": "How to keep sources, timestamps, and uncertainty visible in an investigation handoff.",
+                "url": "https://example.com/nadia/notes/incident-timelines"
+              }
+            ]
+          },
+          "visible": true
+        },
+        {
+          "type": "contact",
+          "content": {
+            "heading": "Let’s strengthen the next line of defense.",
+            "description": "Have a defensive security role, a research collaboration, or an authorized assessment in mind? Share the context and the problem you want to solve.",
+            "subtitle": "Contact",
+            "buttonLabel": "Email Nadia",
+            "buttonUrl": "mailto:nadia@example.com",
+            "items": [
+              {
+                "title": "Email",
+                "url": "mailto:nadia@example.com"
+              },
+              {
+                "title": "Code & lab notes",
+                "url": "https://example.com/nadia/code"
+              },
+              {
+                "title": "Professional profile",
+                "url": "https://example.com/nadia/profile"
+              }
+            ]
+          },
+          "visible": true
+        }
+      ]
+    }
   }
 ]

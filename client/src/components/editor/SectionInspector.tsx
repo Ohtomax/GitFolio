@@ -36,7 +36,7 @@ export function SectionInspector({ disabled }: { disabled: boolean }) {
       const state = store.getState(); state.setDocument({ ...state.document, sections: state.document.sections.map((section) => section.id === selectedId ? { ...section, type: SectionTypeSchema.parse(event.target.value) } : section) });
     }}>{SectionTypeSchema.options.map((type) => <option key={type} value={type}>{sectionNames[type]}</option>)}</select></label>
     <label className="flex items-center gap-2 text-xs text-stone-600"><input type="checkbox" checked={selected.visible} disabled={disabled} onChange={(event) => { const state = store.getState(); state.setDocument({ ...state.document, sections: state.document.sections.map((section) => section.id === selectedId ? { ...section, visible: event.target.checked } : section) }); }} />Visible in portfolio</label>
-    {field('heading', 'Section heading', 120, document.themeConfig.layout === 'monochrome')}{field('description', 'Section description', 5000, true)}
+    {field('heading', 'Section heading', 120, ['monochrome', 'dossier'].includes(document.themeConfig.layout ?? ''))}{field('description', 'Section description', 5000, true)}
     {field('subtitle', 'Subtitle / role', 180)}{selected.type === 'hero' && field('eyebrow', 'Eyebrow', 100)}
     {selected.type === 'hero' && document.themeConfig.layout === 'monochrome' && <fieldset className="space-y-3 rounded-xl border border-stone-200 p-3"><legend className="px-1 text-xs font-semibold text-stone-600">Profile portrait</legend>
       {field('portraitUrl', 'Portrait image URL', 2048)}{field('portraitAlt', 'Portrait description', 160)}

@@ -4,7 +4,7 @@ Phase 3 adds a template catalog and owner-scoped portfolio projects. Authenticat
 
 ## Templates
 
-The API seeds sixteen designs at startup: the five original design families, five role-specific React templates, Cyber HUD, Neon Editorial, Glassmorphic Bento, Dark Executive, Terminal Noir, and Monochrome / Online CV. See [Portfolio templates](PORTFOLIO_TEMPLATES.md) and [Role templates](ROLE_PORTFOLIO_TEMPLATES.md) for exact tokens, full sample content, and accessibility/design decisions. Every template has a validated theme and ordered starter sections. No GitHub repository or published site is created by selecting a template.
+The API seeds seventeen designs at startup: the five original design families, five role-specific React templates, Cyber HUD, Neon Editorial, Glassmorphic Bento, Dark Executive, Terminal Noir, Monochrome / Online CV, and Sentinel / Cybersecurity Dossier. See [Portfolio templates](PORTFOLIO_TEMPLATES.md) and [Role templates](ROLE_PORTFOLIO_TEMPLATES.md) for exact tokens, full sample content, and accessibility/design decisions. Every template has a validated theme and ordered starter sections. No GitHub repository or published site is created by selecting a template.
 
 Stable template IDs, `skipDuplicates`, and conditional legacy-fingerprint updates make seeding repeatable. Untouched old catalog rows are upgraded; custom catalog edits and existing project theme/content snapshots are preserved. To seed without running the API, use `npm run db:seed` after applying migrations. The seed command needs PostgreSQL and does not require Redis to connect.
 

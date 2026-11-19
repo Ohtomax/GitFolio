@@ -36,6 +36,12 @@ Canvas and Preview use the same document renderer for the original seven section
 
 In **Monochrome / Online CV**, select the hero to edit **Portrait image URL** and **Portrait description**. Only HTTP(S) URLs without embedded credentials are accepted; an empty URL shows initials derived from the editable hero eyebrow. The image uses a circular monochrome crop. Portrait URLs and descriptions save with the document and remain editable in generated React portfolios; external images stay at the supplied URL rather than being downloaded into the export. Headings support explicit line breaks. The mobile menu uses native details controls, and decorative particle/ticker motion respects reduced-motion preferences, including changes made while the page is open.
 
+## Cybersecurity dossier navigation
+
+**Sentinel / Cybersecurity Dossier** keeps every visible section on the editing canvas so you can select and edit it. In **Preview**, use the sidebar links, the hero's **View case studies** link, or the mobile **Sections +** menu to switch sections. Selecting a section moves keyboard focus to its content. Returning to **Canvas** restores all sections. Headings support explicit line breaks. The hero eyebrow provides the editable name and role, separated by `/`.
+
+Both static and React exports use the same navigation. Without JavaScript, the links work as ordinary anchors and every visible section stays readable. The green scanline texture is static. Default identities, employers, case studies, learning records, articles, and links are fictional examples; replace them with your own authorized work before publishing.
+
 ## Verification
 
 Unit/HTTP suites cover strict schemas, ownership, rollback, archived documents, undo/redo, acknowledgement races, owner-partitioned interrupted drafts, and serialized saves. Browser tests use synthetic API responses to verify the rendered controls, persistence across reload, safe preview, narrow screens, debounce, in-flight edits, retry/conflict recovery, and navigation protection. The optional `editor-storage.test.mjs` uses a migrated disposable PostgreSQL database to exercise real transactions, concurrent tabs, section creation timestamps, removal/restore, and foreign-ID rollback. See README for service/browser prerequisites. A passing isolated database test does not migrate the configured development database or verify live GitHub consent.

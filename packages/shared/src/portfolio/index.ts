@@ -21,6 +21,7 @@ import { glassmorphicBentoTemplate } from './glassmorphic-bento.js';
 import { darkExecutiveTemplate } from './dark-executive.js';
 import { terminalNoirTemplate } from './terminal-noir.js';
 import { monochromeTemplate, renderMonochrome, MONOCHROME_CSS } from './monochrome.js';
+import { dossierTemplate, renderDossier, DOSSIER_CSS } from './dossier.js';
 
 export const BUILTIN_TEMPLATES: Template[] = [
   minimalTemplate, terminalTemplate, editorialTemplate, bentoTemplate, executiveTemplate,
@@ -31,8 +32,9 @@ export const BUILTIN_TEMPLATES: Template[] = [
   darkExecutiveTemplate,
   terminalNoirTemplate,
   monochromeTemplate,
+  dossierTemplate,
 ];
-export const PORTFOLIO_CSS = PORTFOLIO_BASE_CSS + MINIMAL_CSS + TERMINAL_CSS + EDITORIAL_CSS + BENTO_CSS + EXECUTIVE_CSS + MONOCHROME_CSS;
+export const PORTFOLIO_CSS = PORTFOLIO_BASE_CSS + MINIMAL_CSS + TERMINAL_CSS + EDITORIAL_CSS + BENTO_CSS + EXECUTIVE_CSS + MONOCHROME_CSS + DOSSIER_CSS;
 export function buildPortfolioTree(document: PortfolioDocument): PortfolioElement {
   if (document.themeConfig.layout === 'minimal') return renderMinimal(document);
   if (document.themeConfig.layout === 'terminal') return renderTerminal(document);
@@ -40,11 +42,12 @@ export function buildPortfolioTree(document: PortfolioDocument): PortfolioElemen
   if (document.themeConfig.layout === 'bento') return renderBento(document);
   if (document.themeConfig.layout === 'executive') return renderExecutive(document);
   if (document.themeConfig.layout === 'monochrome') return renderMonochrome(document);
+  if (document.themeConfig.layout === 'dossier') return renderDossier(document);
   const sections = document.sections.filter((section) => section.visible);
   return pageFrame(document, main(sections.map((section) => sectionShell(section, sectionHeading(section)))));
 }
 export function portfolioRendererSource(layout: PortfolioDocument['themeConfig']['layout']): string {
-  const renderers = { minimal: renderMinimal, terminal: renderTerminal, editorial: renderEditorial, bento: renderBento, executive: renderExecutive, monochrome: renderMonochrome };
+  const renderers = { minimal: renderMinimal, terminal: renderTerminal, editorial: renderEditorial, bento: renderBento, executive: renderExecutive, monochrome: renderMonochrome, dossier: renderDossier };
   if (!layout || layout === 'classic' || isRoleLayout(layout)) throw new Error('A design layout is required');
   // These are application-owned functions compiled by TypeScript, never user code.
   // Keeping the actual renderer in the export makes portfolio.json editable and

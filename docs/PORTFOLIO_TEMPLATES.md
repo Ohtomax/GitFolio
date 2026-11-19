@@ -1,6 +1,6 @@
 # GitFolio portfolio templates
 
-11 presets across 6 design families for different kinds of technical work. Choose one in **New project**; the picker, editor, static output, and React output share a semantic renderer and styles. Variants reuse their family's composition with their own palette, type pairing, content, and density.
+12 presets across 7 design families for different kinds of technical work. Choose one in **New project**; the picker, editor, static output, and React output share a semantic renderer and styles. Variants reuse their family's composition with their own palette, type pairing, content, and density.
 
 - [The Modern Minimalist](templates/minimal.md) — A precise, spacious portfolio that puts product impact, thoughtful engineering, and shipped work first.
 - [The Terminal / Cyberpunk](templates/terminal.md) — A compact, phosphor-lit command-line portfolio for engineers who make complex systems dependable.
@@ -13,6 +13,7 @@
 - [Dark Executive](templates/dark-executive.md) — Enterprise power meets midnight UI — amber-gold accents on near-black for technical leaders who ship at scale.
 - [Terminal Noir](templates/terminal-noir.md) — UNIX meets late-night hacker den — pure black, acid green, monospace everything. Structured like data, reads like a story.
 - [Monochrome / Online CV](templates/monochrome.md) — Inspired by the OnlineCv portfolio: bold black-and-white typography, a glass portrait frame, constellation details, a moving toolkit strip, and spacious project stories.
+- [Sentinel / Cybersecurity Dossier](templates/dossier.md) — A cybersecurity portfolio with a neon-green terminal aesthetic, sidebar section navigation, investigation cards, capabilities, credentials, and research notes. All sample content is original and fictional.
 
 The linked specifications contain exact tokens, measured palette contrast, section order, and every default heading, description, entry, link, metric, and CTA. [Machine-readable specifications](portfolio-templates.json) mirror the canonical definitions in packages/shared/src/portfolio. After editing a preset, build the shared workspace and run **node scripts/template-specs.mjs** to refresh the documents.
 
@@ -23,6 +24,7 @@ The linked specifications contain exact tokens, measured palette contrast, secti
 - [Brittany Chiang’s portfolio](https://brittanychiang.com/) demonstrates the value of dated experience and work evidence with technology context. These templates use original biographies and sample work.
 - ReadCV and Bento.me are historical style references supplied in the brief. Their current pages were inaccessible during research; no live review or copied layout is claimed.
 - [The owner's OnlineCv portfolio](https://ohtomax.github.io/OnlineCv/) is the requested reference for Monochrome / Online CV. The reusable preset follows its monochrome composition with editable illustrative content, an optional portrait URL, and locally bundled Geist, Manrope, and Geist Mono fonts. Particle movement pauses outside the viewport and when reduced motion is enabled; content and mobile navigation remain available without JavaScript.
+- [The supplied terminal portfolio](https://trusttheguardian.github.io/portfolio_of_jason/) informed Sentinel / Cybersecurity Dossier's dark dashboard, green accents, and sidebar navigation. Its identity, biography, projects, photographs, contact details, and credentials are not reused. Nadia Serrano, the organizations, lab investigations, and learning records are original fictional examples. The mobile menu uses native details controls; section switching is a progressive enhancement, so all content remains readable without JavaScript. The scanline texture is static.
 - [WCAG contrast guidance](https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html) defines the 4.5:1 normal-text threshold used in the automated palette checks.
 
 Layouts collapse in source order at narrow container widths. They use semantic headings, navigation and skip links, visible keyboard focus, safe external links, and reduced-motion support. Fonts are bundled locally with their SIL Open Font Licenses; uncovered scripts use system fallbacks. Project cover graphics are decorative original CSS compositions, not invented product screenshots. Contact links are usable without JavaScript. Terminal commands are local help/email/links/clear utilities; the Bento focus widgets use native details controls and do not pretend to stream live music.

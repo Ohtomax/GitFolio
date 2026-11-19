@@ -1,7 +1,43 @@
-// A fixed local command allowlist. Nothing is executed or sent over a network.
+// Application-owned, local interactions; user content is never executed.
 // Self-contained so exported portfolios can include the same behavior.
 export function mountPortfolioInteractions(root: ParentNode): () => void {
   const cleanups: Array<() => void> = [];
+  root.querySelectorAll<HTMLElement>('[data-dossier-shell]').forEach((shell) => {
+    const panels = Array.from(shell.querySelectorAll<HTMLElement>('.pf-dossier-panel'));
+    const links = Array.from(shell.querySelectorAll<HTMLAnchorElement>('[data-dossier-link]'));
+    if (!panels.length) return;
+    const select = (panel: HTMLElement, focus = false) => {
+      panels.forEach((candidate) => { candidate.hidden = candidate !== panel; });
+      links.forEach((link) => {
+        if (link.getAttribute('href') === '#' + panel.id) link.setAttribute('aria-current', 'location');
+        else link.removeAttribute('aria-current');
+      });
+      shell.querySelectorAll<HTMLDetailsElement>('[data-dossier-menu]').forEach((menu) => { menu.open = false; });
+      if (focus) { panel.focus({ preventScroll: true }); panel.scrollIntoView({ block: 'start' }); }
+    };
+    const click = (event: Event) => {
+      const mouse = event as MouseEvent;
+      if (event.defaultPrevented || mouse.button > 0 || mouse.ctrlKey || mouse.metaKey || mouse.shiftKey || mouse.altKey) return;
+      const link = (event.target as Element).closest<HTMLAnchorElement>('a[href^="#portfolio-"]');
+      if (!link || !shell.contains(link)) return;
+      const panel = panels.find((candidate) => '#' + candidate.id === link.getAttribute('href'));
+      if (!panel) return;
+      event.preventDefault(); select(panel, true);
+    };
+    const hashChange = () => {
+      const panel = panels.find((candidate) => '#' + candidate.id === window.location.hash);
+      if (panel) select(panel);
+    };
+    select(panels.find((panel) => '#' + panel.id === window.location.hash) || panels[0]);
+    shell.addEventListener('click', click);
+    window.addEventListener('hashchange', hashChange);
+    cleanups.push(() => {
+      shell.removeEventListener('click', click); window.removeEventListener('hashchange', hashChange);
+      panels.forEach((panel) => { panel.hidden = false; });
+      links.forEach((link) => link.removeAttribute('aria-current'));
+      shell.querySelectorAll<HTMLDetailsElement>('[data-dossier-menu]').forEach((menu) => { menu.open = false; });
+    });
+  });
   root.querySelectorAll<HTMLDetailsElement>('[data-monochrome-menu]').forEach((menu) => {
     const close = (event: Event) => { if ((event.target as Element).closest('a')) menu.open = false; };
     menu.addEventListener('click', close);
