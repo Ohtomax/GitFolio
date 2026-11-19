@@ -4,7 +4,7 @@ Category: `premium` · Audience: Designers, creative developers, and independent
 
 An expressive designer-developer portfolio with oversized type, immersive project scenes, scroll reveals, a moving toolkit, and gentle pointer-driven depth. Includes motion controls and original fictional content.
 
-A Premium portfolio with oversized geometric type, an original CSS orbital sculpture, large project scenes, biography, capabilities, career entries, notes, and contact. Interactive previews and both exports add staggered introductory text, scroll reveals, a moving toolkit, floating artwork, and subtle pointer depth. A Pause motion control and live reduced-motion support keep the content accessible. Editing canvases, thumbnails, and no-JavaScript output remain still and readable.
+A Premium portfolio with oversized geometric type, an original CSS orbital sculpture, full project scenes, biography, capabilities, career entries, notes, and contact. Scrolling moves oversized project lettering horizontally while artwork and floating badges travel at different speeds. Interactive previews and both exports also add staggered introductory text, scroll reveals, a moving toolkit, floating artwork, and pointer depth. A sticky header keeps Pause motion reachable; live reduced-motion support disables movement. The effects follow both the nested preview scroll area and normal page scrolling. Editing canvases, thumbnails, and no-JavaScript output remain still and readable.
 
 ## Design tokens
 

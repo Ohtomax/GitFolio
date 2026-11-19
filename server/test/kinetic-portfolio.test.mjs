@@ -56,3 +56,15 @@ test('kinetic static and standalone React exports retain editable content, bundl
     assert.ok(!artifact.includes('Riley Vale'));
   }
 });
+
+test('kinetic project scenes use validated links and escape oversized project lettering', () => {
+  const data = project();
+  const item = data.sections[1].content.items[0];
+  item.title = '<img src=x onerror=alert(1)>';
+  item.url = 'javascript:alert(1)';
+  const html = serializePortfolioTree(buildPortfolioTree(data));
+  assert.ok(!html.includes('href="javascript:'));
+  assert.ok(!html.includes('<img src=x'));
+  assert.match(html, /&lt;img src=x onerror=alert\(1\)&gt;/);
+  assert.match(html, /data-kinetic-scroll/);
+});

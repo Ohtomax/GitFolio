@@ -10,8 +10,40 @@ export function mountPortfolioInteractions(root: ParentNode): () => void {
     const words = Array.from(page.querySelectorAll<HTMLElement>('[data-kinetic-word]'));
     const button = page.querySelector<HTMLButtonElement>('[data-kinetic-motion]');
     const tilts = Array.from(page.querySelectorAll<HTMLElement>('[data-kinetic-tilt]'));
+    const scenes = Array.from(page.querySelectorAll<HTMLElement>('[data-kinetic-scroll]'));
     const frames = new Map<HTMLElement, number>();
     let paused = false;
+    let scrollFrame = 0;
+    let scrollPort = page.parentElement;
+    while (scrollPort && !['auto', 'scroll'].includes(getComputedStyle(scrollPort).overflowY)) scrollPort = scrollPort.parentElement;
+    if (scrollPort === document.body || scrollPort === document.documentElement) scrollPort = null;
+    const scrollProperties = ['--pf-scroll-depth', '--pf-scroll-counter', '--pf-scroll-offset', '--pf-scroll-turn', '--pf-scroll-scale'];
+    const resetScroll = () => {
+      cancelAnimationFrame(scrollFrame); scrollFrame = 0;
+      scenes.forEach((scene) => scrollProperties.forEach((property) => scene.style.removeProperty(property)));
+    };
+    const drawScroll = () => {
+      scrollFrame = 0;
+      if (preference.matches || paused || document.hidden) return;
+      const port = scrollPort?.getBoundingClientRect();
+      const top = Math.max(0, port?.top ?? 0), bottom = Math.min(window.innerHeight, port?.bottom ?? window.innerHeight);
+      const height = bottom - top;
+      if (height <= 0) return;
+      const compact = page.clientWidth < 650;
+      scenes.forEach((scene) => {
+        const rect = scene.getBoundingClientRect();
+        if (rect.bottom < top || rect.top > bottom) return;
+        const progress = Math.max(-1, Math.min(1, (top + height / 2 - rect.top - rect.height / 2) / ((height + rect.height) / 2)));
+        scene.style.setProperty('--pf-scroll-depth', (progress * (compact ? 28 : 95)).toFixed(2) + 'px');
+        scene.style.setProperty('--pf-scroll-counter', (-progress * (compact ? 18 : 72)).toFixed(2) + 'px');
+        scene.style.setProperty('--pf-scroll-offset', (-progress * (compact ? 70 : 220)).toFixed(2) + 'px');
+        scene.style.setProperty('--pf-scroll-turn', (progress * 8).toFixed(2) + 'deg');
+        scene.style.setProperty('--pf-scroll-scale', (1 + (1 - Math.abs(progress)) * .08).toFixed(3));
+      });
+    };
+    const scheduleScroll = () => {
+      if (scenes.length && !scrollFrame && !preference.matches && !paused && !document.hidden) scrollFrame = requestAnimationFrame(drawScroll);
+    };
     const resetTilt = () => {
       frames.forEach((frame) => cancelAnimationFrame(frame)); frames.clear();
       tilts.forEach((element) => { element.style.removeProperty('--pf-tilt-x'); element.style.removeProperty('--pf-tilt-y'); });
@@ -22,6 +54,7 @@ export function mountPortfolioInteractions(root: ParentNode): () => void {
       page.toggleAttribute('data-kinetic-paused', paused);
       page.toggleAttribute('data-kinetic-running', !stopped);
       if (stopped || !pointer.matches) resetTilt();
+      if (stopped) resetScroll(); else scheduleScroll();
       if (preference.matches || paused) reveals.forEach((element) => element.setAttribute('data-kinetic-in-view', ''));
       if (button) {
         button.textContent = preference.matches ? 'Reduced motion' : paused ? 'Resume motion' : 'Pause motion';
@@ -34,6 +67,7 @@ export function mountPortfolioInteractions(root: ParentNode): () => void {
         if (target.hasAttribute('data-kinetic-reveal') && isIntersecting) target.setAttribute('data-kinetic-in-view', '');
         if (target.hasAttribute('data-kinetic-animate')) target.toggleAttribute('data-kinetic-active', isIntersecting);
       });
+      scheduleScroll();
     }, { threshold: .08 });
     new Set([...reveals, ...animated]).forEach((element) => observer.observe(element));
     words.forEach((word, index) => word.style.setProperty('--pf-word-index', String(Math.min(index, 24))));
@@ -69,11 +103,16 @@ export function mountPortfolioInteractions(root: ParentNode): () => void {
     button?.addEventListener('click', toggle); page.addEventListener('click', close);
     preference.addEventListener('change', refresh); pointer.addEventListener('change', refresh);
     document.addEventListener('visibilitychange', refresh);
+    window.addEventListener('scroll', scheduleScroll, { capture: true, passive: true });
+    window.addEventListener('resize', scheduleScroll, { passive: true });
+    const layout = new ResizeObserver(scheduleScroll); layout.observe(page);
+    if (scrollPort) layout.observe(scrollPort);
     page.setAttribute('data-kinetic-enhanced', ''); refresh();
     cleanups.push(() => {
-      observer.disconnect(); resetTilt(); button?.removeEventListener('click', toggle); page.removeEventListener('click', close);
+      observer.disconnect(); layout.disconnect(); resetTilt(); resetScroll(); button?.removeEventListener('click', toggle); page.removeEventListener('click', close);
       preference.removeEventListener('change', refresh); pointer.removeEventListener('change', refresh);
       document.removeEventListener('visibilitychange', refresh);
+      window.removeEventListener('scroll', scheduleScroll, true); window.removeEventListener('resize', scheduleScroll);
       ['data-kinetic-enhanced', 'data-kinetic-reduced', 'data-kinetic-paused', 'data-kinetic-running'].forEach((attribute) => page.removeAttribute(attribute));
       reveals.forEach((element) => element.removeAttribute('data-kinetic-in-view'));
       animated.forEach((element) => element.removeAttribute('data-kinetic-active'));

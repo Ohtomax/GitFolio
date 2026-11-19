@@ -35,7 +35,7 @@ test('Premium filters the gallery and project picker, preserves preview context,
   await f.page.getByRole('button', { name: 'Premium', exact: true }).click();
   const choice = f.page.getByRole('radio', { name: template.name, exact: true });
   await choice.waitFor({ state: 'attached' });
-  assert.equal(await f.page.getByRole('radio').count(), 1);
+  assert.equal(await f.page.getByRole('radio').count(), catalog.filter((item) => item.category === 'premium').length);
   await choice.focus(); await choice.press('Space');
   await f.page.getByRole('button', { name: 'Continue', exact: true }).click();
   await f.page.getByLabel('Project name', { exact: true }).fill('My animated portfolio');
@@ -102,7 +102,74 @@ test('kinetic canvas stays still, saves a custom identity and portrait, and clea
   await f.page.waitForFunction(() => !document.querySelector('.pf-kinetic').hasAttribute('data-kinetic-enhanced'));
   assert.equal(await preview.locator('[data-kinetic-in-view]').count(), 0);
   assert.equal(await preview.locator('.pf-kinetic-sculpture').evaluate((node) => node.style.cssText), '');
+  assert.ok(await preview.locator('[data-kinetic-scroll]').evaluateAll((nodes) => nodes.every((node) => node.style.cssText === '')));
   assert.ok(await preview.locator('[data-kinetic-reveal]').evaluateAll((nodes) => nodes.every((node) => getComputedStyle(node).opacity === '1')));
+});
+
+test('kinetic slides project lettering and layers artwork while its nested preview scrolls, with a persistent pause control', async (t) => {
+  const f = await projectsFixture(t, browser, { templates: catalog });
+  await f.page.emulateMedia({ reducedMotion: 'no-preference' });
+  await f.goto(`/templates/${template.id}`);
+  const page = f.page.locator('.pf-kinetic');
+  const viewport = f.page.getByTestId('template-preview-viewport');
+  await page.locator('[data-kinetic-scroll]').first().waitFor();
+  const position = await viewport.evaluate((node) => node.scrollTop + node.querySelector('.pf-kinetic-project').getBoundingClientRect().top - node.getBoundingClientRect().top);
+  await viewport.evaluate((node, top) => { node.scrollTop = top; }, position - 100);
+  const project = page.locator('.pf-kinetic-project').first();
+  await f.page.waitForFunction(() => document.querySelector('.pf-kinetic-project').style.getPropertyValue('--pf-scroll-offset') !== '');
+  const first = await project.evaluate((node) => ({ offset: node.style.getPropertyValue('--pf-scroll-offset'),
+    layer: getComputedStyle(node.querySelector('.pf-kinetic-project-layer')).transform,
+    lettering: getComputedStyle(node.querySelector('.pf-kinetic-project-type')).transform,
+    token: getComputedStyle(node.querySelector('.pf-kinetic-project-token')).transform }));
+  await viewport.evaluate((node) => { node.scrollTop += 180; });
+  await f.page.waitForFunction((before) => document.querySelector('.pf-kinetic-project').style.getPropertyValue('--pf-scroll-offset') !== before, first.offset);
+  const second = await project.evaluate((node) => ({ layer: getComputedStyle(node.querySelector('.pf-kinetic-project-layer')).transform,
+    lettering: getComputedStyle(node.querySelector('.pf-kinetic-project-type')).transform,
+    token: getComputedStyle(node.querySelector('.pf-kinetic-project-token')).transform }));
+  assert.notEqual(second.layer, first.layer); assert.notEqual(second.lettering, first.lettering); assert.notEqual(second.token, first.token);
+  assert.equal(await project.getByRole('link', { name: 'View Luma project', exact: true }).getAttribute('href'), 'https://example.com/riley/luma');
+  const beforePause = await viewport.evaluate((node) => node.scrollTop);
+  await page.getByRole('button', { name: 'Pause motion', exact: true }).click();
+  assert.ok(Math.abs(await viewport.evaluate((node) => node.scrollTop) - beforePause) < 2, 'Motion controls stay reachable while viewing projects.');
+  await viewport.evaluate((node) => { node.scrollTop += 100; });
+  assert.equal(await project.evaluate((node) => node.style.getPropertyValue('--pf-scroll-offset')), '');
+  await page.getByRole('button', { name: 'Resume motion', exact: true }).click();
+  await f.page.waitForFunction(() => document.querySelector('.pf-kinetic-project').style.getPropertyValue('--pf-scroll-offset') !== '');
+  await f.page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.getByRole('button', { name: 'Reduced motion', exact: true }).waitFor();
+  assert.ok(await page.locator('[data-kinetic-scroll]').evaluateAll((nodes) => nodes.every((node) => node.style.cssText === '')));
+});
+
+test('kinetic exported parallax follows window scroll, adapts to mobile, and stays readable when motion is reduced', async (t) => {
+  const files = Object.fromEntries(generateStaticSite(project()).map((file) => [file.path, file.content]));
+  const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, reducedMotion: 'no-preference' });
+  t.after(() => context.close());
+  const page = await context.newPage();
+  const errors = []; page.on('pageerror', (error) => errors.push(error.message));
+  await page.route('**/__kinetic-parallax/**', (route) => {
+    const path = new URL(route.request().url()).pathname.split('/').at(-1) || 'index.html';
+    return route.fulfill({ contentType: path.endsWith('.css') ? 'text/css' : path.endsWith('.js') ? 'text/javascript' : 'text/html', body: files[path] ?? '' });
+  });
+  await page.goto('http://127.0.0.1:4173/__kinetic-parallax/');
+  await page.locator('.pf-kinetic-project').first().scrollIntoViewIfNeeded();
+  await page.waitForFunction(() => document.querySelector('.pf-kinetic-project').style.getPropertyValue('--pf-scroll-offset') !== '');
+  const before = await page.locator('.pf-kinetic-project-type').first().evaluate((node) => getComputedStyle(node).transform);
+  await page.evaluate(() => window.scrollBy(0, 180));
+  await page.waitForFunction((previous) => getComputedStyle(document.querySelector('.pf-kinetic-project-type')).transform !== previous, before);
+  for (const width of [375, 320]) {
+    await page.setViewportSize({ width, height: 1000 });
+    for (const time of [0, 4000, 8000, 12000]) {
+      await page.evaluate(async (time) => {
+        document.querySelectorAll('.pf-kinetic-orbit').forEach((node) => node.getAnimations().forEach((animation) => { animation.currentTime = time; }));
+        await new Promise(requestAnimationFrame);
+      }, time);
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), `animated export overflow at ${width}, ${time}ms`);
+    }
+  }
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.getByRole('button', { name: 'Reduced motion', exact: true }).waitFor();
+  assert.ok(await page.locator('[data-kinetic-scroll]').evaluateAll((nodes) => nodes.every((node) => node.style.cssText === '')));
+  assert.deepEqual(errors, []);
 });
 
 test('kinetic static export remains readable without JavaScript and has native keyboard mobile navigation', async (t) => {
