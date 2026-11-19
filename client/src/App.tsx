@@ -11,6 +11,8 @@ const DashboardPage = lazy(() => import('./pages/DashboardPage.tsx'));
 const NewProjectPage = lazy(() => import('./pages/NewProjectPage.tsx'));
 const EditorPage = lazy(() => import('./pages/EditorPage.tsx'));
 const DeploymentsPage = lazy(() => import('./pages/DeploymentsPage.tsx'));
+const TemplatesPage = lazy(() => import('./pages/TemplatesPage.tsx'));
+const TemplateDetailPage = lazy(() => import('./pages/TemplateDetailPage.tsx'));
 
 export default function App() {
   const location = useLocation();
@@ -18,7 +20,15 @@ export default function App() {
     <Route path="/" element={<LoginPage />} />
     <Route path="/login" element={<LoginPage />} />
     <Route path="/auth/callback" element={<OAuthCallbackPage />} />
-    <Route element={<AuthGuard />}><Route path="/account" element={<AccountPage />} /><Route path="/dashboard" element={<DashboardPage />} /><Route path="/projects/new" element={<NewProjectPage />} /><Route path="/projects/:id/edit" element={<EditorPage />} /><Route path="/projects/:id/deployments" element={<DeploymentsPage />} /></Route>
+    <Route element={<AuthGuard />}>
+      <Route path="/account" element={<AccountPage />} />
+      <Route path="/dashboard" element={<DashboardPage />} />
+      <Route path="/templates" element={<TemplatesPage />} />
+      <Route path="/templates/:id" element={<TemplateDetailPage />} />
+      <Route path="/projects/new" element={<NewProjectPage />} />
+      <Route path="/projects/:id/edit" element={<EditorPage />} />
+      <Route path="/projects/:id/deployments" element={<DeploymentsPage />} />
+    </Route>
     <Route path="*" element={<main className="mx-auto max-w-xl px-6 py-24"><h1 className="text-3xl font-semibold">Page not found.</h1><Link className="mt-6 inline-block underline" to="/">Back to GitFolio</Link></main>} />
   </Routes></Suspense></ChunkErrorBoundary>;
 }

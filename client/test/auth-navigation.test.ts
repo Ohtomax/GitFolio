@@ -16,7 +16,9 @@ test('OAuth callback parses one code/state pair and handles denial without trust
 test('post-login navigation accepts only internal protected routes', () => {
   assert.equal(safeReturnTo('/account'), '/account');
   assert.equal(safeReturnTo('/projects/fixture/edit?tab=theme'), '/projects/fixture/edit?tab=theme');
-  for (const value of [null, {}, 'https://evil.example', '//evil.example', '/\\evil.example', '/auth/callback?code=x', '/login', '/projects/../../login', '/account\n']) {
+  assert.equal(safeReturnTo('/templates?category=developer&page=2'), '/templates?category=developer&page=2');
+  assert.equal(safeReturnTo('/templates/10000000-0000-4000-8000-00000000000b'), '/templates/10000000-0000-4000-8000-00000000000b');
+  for (const value of [null, {}, 'https://evil.example', '//evil.example', '/\\evil.example', '/auth/callback?code=x', '/login', '/projects/../../login', '/templates/../../login', '/templates-forged', '/account\n']) {
     assert.equal(safeReturnTo(value), '/dashboard');
   }
 });

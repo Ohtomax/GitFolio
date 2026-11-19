@@ -22,7 +22,8 @@ async function gzipSize(keys) {
 }
 const entry = dependencies('index.html'), login = dependencies('src/pages/LoginPage.tsx');
 for (const key of login) assert.ok(!/TemplateArtwork|DesignedPortfolio|EditorPage/.test(key), 'Portfolio rendering must remain deferred on sign-in');
-for (const name of ['Login', 'OAuthCallback', 'Account', 'Dashboard', 'NewProject', 'Editor', 'Deployments']) {
+const lazyRoutes = ['Login', 'OAuthCallback', 'Account', 'Dashboard', 'NewProject', 'Editor', 'Deployments', 'Templates', 'TemplateDetail'];
+for (const name of lazyRoutes) {
   assert.equal(manifest[`src/pages/${name}Page.tsx`]?.isDynamicEntry, true, `${name} must remain a lazy route`);
 }
 const entryGzip = await gzipSize(entry), loginGzip = await gzipSize(login);
@@ -31,4 +32,4 @@ assert.ok(loginGzip <= 135 * 1024, `Sign-in JavaScript exceeds 135 KiB gzip: ${l
 let brandBytes = 0;
 for (const name of ['brand-mark.jpg', 'brand-wordmark.jpg']) brandBytes += (await readFile(new URL(`../src/assets/${name}`, root))).length;
 assert.ok(brandBytes <= 25000, 'Brand images exceed the 25 kB combined budget');
-console.log(JSON.stringify({ entryGzipBytes: entryGzip, signInGzipBytes: loginGzip, brandBytes, lazyRoutes: 7 }, null, 2));
+console.log(JSON.stringify({ entryGzipBytes: entryGzip, signInGzipBytes: loginGzip, brandBytes, lazyRoutes: lazyRoutes.length }, null, 2));

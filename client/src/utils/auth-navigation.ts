@@ -5,7 +5,7 @@ export function safeReturnTo(value: unknown): string {
   if (typeof value !== 'string' || value.length > 2048 || !value.startsWith('/') ||
     value.startsWith('//') || /[\\\r\n]/.test(value)) return '/dashboard';
   const url = new URL(value, 'https://gitfolio.invalid');
-  if (url.origin !== 'https://gitfolio.invalid' || !/^\/(account|dashboard|projects)(\/|$)/.test(url.pathname)) return '/dashboard';
+  if (url.origin !== 'https://gitfolio.invalid' || !/^\/(account|dashboard|projects|templates)(\/|$)/.test(url.pathname)) return '/dashboard';
   return `${url.pathname}${url.search}`;
 }
 

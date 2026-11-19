@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { ArrowLeft, ArrowRight, Check, CheckCircle2, LayoutTemplate } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
-import { CreateProjectSchema, type TemplateCategory } from '@gitfolio/shared';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { CreateProjectSchema, IdParamsSchema, type TemplateCategory } from '@gitfolio/shared';
 import { WorkspaceShell } from '../components/common/WorkspaceShell.tsx';
 import { ProjectFields, type ProjectFieldErrors, type ProjectFieldValues } from '../components/projects/ProjectFields.tsx';
 import { TemplatePreview } from '../components/projects/TemplatePreview.tsx';
@@ -12,10 +12,13 @@ import { errorMessage } from '../utils/errorParser.ts';
 import { projectSlug } from '../utils/project-slug.ts';
 
 export default function NewProjectPage() {
-  const [step, setStep] = useState<1 | 2>(1);
+  const [params] = useSearchParams();
+  const requestedTemplate = IdParamsSchema.safeParse({ id: params.getAll('templateId').length === 1 ? params.get('templateId') : undefined });
+  const initialTemplateId = requestedTemplate.success ? requestedTemplate.data.id : '';
+  const [step, setStep] = useState<1 | 2>(initialTemplateId ? 2 : 1);
   const [category, setCategory] = useState<TemplateCategory>();
   const [page, setPage] = useState(1);
-  const [selectedId, setSelectedId] = useState('');
+  const [selectedId, setSelectedId] = useState(initialTemplateId);
   const [values, setValues] = useState<ProjectFieldValues>({ name: '', slug: '', repoName: '' });
   const [slugTouched, setSlugTouched] = useState(false);
   const [repoTouched, setRepoTouched] = useState(false);

@@ -4,7 +4,7 @@ Phase 3 adds a template catalog and owner-scoped portfolio projects. Authenticat
 
 ## Templates
 
-The API seeds ten designs at startup: Modern Minimalist (minimal), Terminal (developer/React), Editorial (professional), Bento (creative), Executive (professional/React), and five role-specific React templates for Backend, Cybersecurity, UI/UX & QA, Frontend, and Full-Stack work. See [Portfolio templates](PORTFOLIO_TEMPLATES.md) and [Role templates](ROLE_PORTFOLIO_TEMPLATES.md) for exact tokens, full sample content, and accessibility/design decisions. Every template has a validated theme and ordered starter sections. No GitHub repository or published site is created by selecting a template.
+The API seeds sixteen designs at startup: the five original design families, five role-specific React templates, Cyber HUD, Neon Editorial, Glassmorphic Bento, Dark Executive, Terminal Noir, and Monochrome / Online CV. See [Portfolio templates](PORTFOLIO_TEMPLATES.md) and [Role templates](ROLE_PORTFOLIO_TEMPLATES.md) for exact tokens, full sample content, and accessibility/design decisions. Every template has a validated theme and ordered starter sections. No GitHub repository or published site is created by selecting a template.
 
 Stable template IDs, `skipDuplicates`, and conditional legacy-fingerprint updates make seeding repeatable. Untouched old catalog rows are upgraded; custom catalog edits and existing project theme/content snapshots are preserved. To seed without running the API, use `npm run db:seed` after applying migrations. The seed command needs PostgreSQL and does not require Redis to connect.
 
@@ -35,6 +35,10 @@ Lists use the same pagination envelope as templates, with a maximum page size of
 Successful sign-in defaults to `/dashboard`; explicit protected return destinations are preserved. The dashboard lists six projects per page, searches by name, filters by status, and sorts by update time/name using the API. Empty, loading, error/retry, and mobile states are provided. **Edit** opens the editor, **Publish** opens deployment history and publishing controls, and **Manage** opens metadata settings. Archive/restore retain content; delete requires confirmation. GitHub repositories/sites are kept when a GitFolio project is archived or deleted. `/account` remains available from workspace navigation.
 
 ## Creating a project
+
+The protected **Templates** tab opens `/templates`, a server-paginated gallery with category filters, lazy-loaded thumbnails, loading/retry/empty states, and links to `/templates/:id`. Each detail view validates its ID before requesting data and uses the same renderer as the editor for a full preview with desktop/tablet/mobile widths, including legacy presets and role demos. Gallery category/page filters remain in the URL when returning from a preview. Previewing is read-only; it never creates or updates a project.
+
+**Use template** links to `/projects/new?templateId=<uuid>` and starts at project details with the requested defaults. The client rejects malformed or duplicate template IDs before preselection, requires the selected detail request to succeed before creation, and retains **Change template** for choosing another design. Auth redirects preserve gallery and preview destinations.
 
 `/projects/new` is protected by AuthGuard. Choose a catalog template, then enter a name, unique slug, and optional future repository name. Slug/repository suggestions follow the name until manually edited. The client and API validate the same shared schemas; duplicate slugs display a recoverable error and preserve the form. Creation returns to the dashboard and invalidates its list. Template loading/failure/empty states are handled, and creating is disabled while selected defaults are unavailable. The endpoint creates a local draft with copied sections/theme; it does not create a GitHub repository or publish a site.
 

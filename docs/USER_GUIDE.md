@@ -6,13 +6,15 @@ GitFolio turns a saved portfolio draft into a public GitHub Pages site. Your dra
 
 Open GitFolio and select **Continue with GitHub**. Approve access to your profile and email. Use the GitHub account that should own your portfolio repository. GitFolio does not receive your GitHub password.
 
-You arrive at **Your projects**. The account icon shows your connected GitHub profile; the sign-out icon ends your GitFolio session. If sign-in is cancelled or expires, return to the sign-in page and start a new attempt. Avoid reusing an old callback link.
+You arrive at **Your projects**. Workspace navigation provides **Projects**, **Templates**, and **Account**. The account icon shows your connected GitHub profile; the sign-out icon ends your GitFolio session. If sign-in is cancelled or expires, return to the sign-in page and start a new attempt. Avoid reusing an old callback link.
 
 For a local installation, use the exact `http://localhost:5173` address after following [local setup](../README.md#local-setup). The operator must configure the OAuth App first; a successful configuration check does not prove a live sign-in.
 
 ## 2. Choose a starting point
 
-Select **New project**. There are ten built-in styles, across four category filters. Use **Next templates** if a style is on another page.
+Open **Templates** to browse all sixteen built-in designs, filter by category, and select **Preview** for a full view. Use the desktop, tablet, and mobile controls to check the layout, and scroll inside the preview to see every section. **Next templates** opens the rest of the catalog; returning from a preview keeps your category and page. Browsing does not create a project.
+
+Choose **Use template** from a card or its preview to open project details with that design selected. You can also select **New project**, choose a style, and select **Continue**.
 
 | Style | Best starting point for |
 | --- | --- |
@@ -26,10 +28,16 @@ Select **New project**. There are ten built-in styles, across four category filt
 | UI/UX & QA / Design Systems and Quality | Before/after work, design tokens, and quality evidence |
 | Frontend Developer / Interface Craft | Interface work and an interactive component-state demo |
 | Full-Stack Developer / SaaS & Product | Product outcomes and a UI-to-API-to-query walkthrough |
+| Cyber HUD | Cyan command-centre styling and full-stack engineering work |
+| Neon Editorial | A dark editorial portfolio with writing and case studies |
+| Glassmorphic Bento | Dark modular tiles for creative technology and design engineering |
+| Dark Executive | An amber-accented CV for technical leaders and advisors |
+| Terminal Noir | A monochrome terminal structure with green security-engineering accents |
+| Monochrome / Online CV | A personal CV with a portrait frame, project cards, and a scrolling toolkit |
 
 The five role styles use React output; output format follows the chosen template. The picker labels each style **Static** or **React**. See the [original design specifications](PORTFOLIO_TEMPLATES.md) and [role specifications](ROLE_PORTFOLIO_TEMPLATES.md) for full sample content.
 
-Select a style and **Continue**. Enter a project name, a unique lowercase slug, and an optional repository name. Suggestions follow your project name until you edit them. A slug belongs to your account, so someone else's matching slug does not block yours. **Create project** saves a draft and returns to the dashboard. It does not publish anything or create a GitHub repository.
+Enter a project name, a unique lowercase slug, and an optional repository name. Suggestions follow your project name until you edit them. Use **Change template** to return to the picker if needed. A slug belongs to your account, so someone else's matching slug does not block yours. **Create project** saves a draft and returns to the dashboard. It does not publish anything or create a GitHub repository.
 
 ## 3. Make the content yours
 
