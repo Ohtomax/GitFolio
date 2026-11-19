@@ -139,3 +139,63 @@ test('new metric, cover, contact links, and paired type controls persist through
   await f.page.getByRole('button', { name: 'Preview', exact: true }).click();
   assert.equal(await preview.getByRole('link', { name: 'Code & experiments ↗', exact: true }).getAttribute('href'), 'https://example.com/my-work');
 });
+
+test('monochrome portrait fields validate, save, and survive an editor reload', async (t) => {
+  const template = BUILTIN_TEMPLATES.find((preset) => preset.defaultConfig.theme.layout === 'monochrome');
+  const project = { ...projectFixtureData('Monochrome portrait'), templateId: template.id, template, themeConfig: structuredClone(template.defaultConfig.theme),
+    sections: template.defaultConfig.sections.map((section, sortOrder) => ({ ...structuredClone(section), id: randomUUID(), sortOrder })) };
+  const f = await projectsFixture(t, browser, { projects: [project], templates: BUILTIN_TEMPLATES });
+  await f.page.route('https://example.com/portrait-test.svg', (route) => route.fulfill({ contentType: 'image/svg+xml', body: '<svg xmlns="http://www.w3.org/2000/svg" width="360" height="360"><rect width="360" height="360" fill="#555"/></svg>' }));
+  await f.goto(`/projects/${project.id}/edit`);
+  const portrait = f.page.getByLabel('Portrait image URL', { exact: true });
+  await portrait.fill('javascript:alert(1)');
+  assert.equal(await portrait.getAttribute('aria-invalid'), 'true');
+  await portrait.fill('https://example.com/portrait-test.svg');
+  await f.page.getByLabel('Portrait description', { exact: true }).fill('A custom profile portrait');
+  await f.page.getByRole('button', { name: 'Save changes', exact: true }).click();
+  await f.page.getByText('All changes saved', { exact: true }).waitFor();
+  await f.page.reload();
+  const image = f.page.getByRole('img', { name: 'A custom profile portrait', exact: true });
+  await image.waitFor();
+  assert.equal(await image.getAttribute('src'), 'https://example.com/portrait-test.svg');
+  assert.equal(await image.getAttribute('referrerpolicy'), 'no-referrer');
+  assert.equal(await portrait.inputValue(), 'https://example.com/portrait-test.svg');
+});
+
+test('monochrome mobile navigation works without JavaScript and live reduced motion pauses its effects', async (t) => {
+  const template = BUILTIN_TEMPLATES.find((preset) => preset.defaultConfig.theme.layout === 'monochrome');
+  const project = { ...projectFixtureData('Monochrome controls'), templateId: template.id, template, themeConfig: template.defaultConfig.theme,
+    sections: template.defaultConfig.sections.map((section, sortOrder) => ({ ...section, id: randomUUID(), sortOrder })) };
+  const files = Object.fromEntries(generateStaticSite(project).map((file) => [file.path, file.content]));
+  for (const javaScriptEnabled of [false, true]) {
+    const context = await browser.newContext({ javaScriptEnabled, viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' });
+    t.after(() => context.close());
+    const page = await context.newPage();
+    const errors = []; page.on('pageerror', (error) => errors.push(error.message));
+    await page.route('**/__monochrome-controls/**', (route) => {
+      const path = new URL(route.request().url()).pathname.split('/').at(-1) || 'index.html';
+      return route.fulfill({ contentType: path.endsWith('.css') ? 'text/css' : path.endsWith('.js') ? 'text/javascript' : 'text/html', body: files[path] ?? '' });
+    });
+    await page.goto('http://127.0.0.1:4173/__monochrome-controls/');
+    assert.equal(await page.locator('h1').isVisible(), true);
+    const menu = page.locator('.pf-monochrome-menu');
+    await menu.locator('summary').focus(); await page.keyboard.press('Enter');
+    assert.equal(await menu.evaluate((node) => node.open), true);
+    assert.equal(await menu.getByRole('link', { name: 'Projects', exact: true }).isVisible(), true);
+    assert.equal(await page.locator('.pf-monochrome-ticker-track').evaluate((node) => getComputedStyle(node).animationName), 'none');
+    if (javaScriptEnabled) {
+      const canvas = page.locator('[data-monochrome-particles]');
+      await page.waitForFunction(() => document.querySelector('[data-monochrome-particles]').width > 300);
+      const still = await canvas.evaluate((node) => node.toDataURL());
+      await page.waitForTimeout(120);
+      assert.equal(await canvas.evaluate((node) => node.toDataURL()), still);
+      await page.emulateMedia({ reducedMotion: 'no-preference' });
+      await page.waitForTimeout(180);
+      assert.notEqual(await canvas.evaluate((node) => node.toDataURL()), still);
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+      await menu.getByRole('link', { name: 'Projects', exact: true }).click();
+      assert.equal(await menu.evaluate((node) => node.open), false);
+    }
+    assert.deepEqual(errors, []);
+  }
+});

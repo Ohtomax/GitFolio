@@ -4,7 +4,7 @@ import type { ThemeConfig } from '../validation/template.schema.js';
 
 // A small semantic tree keeps React previews and both export formats identical.
 // Only application code chooses tags/attributes; user content is always a text node.
-export type PortfolioTag = 'div' | 'header' | 'nav' | 'main' | 'section' | 'article' | 'aside' | 'footer' | 'h1' | 'h2' | 'h3' | 'p' | 'span' | 'a' | 'ul' | 'ol' | 'li' | 'dl' | 'dt' | 'dd' | 'details' | 'summary' | 'form' | 'label' | 'input' | 'button' | 'table' | 'caption' | 'thead' | 'tbody' | 'tr' | 'th' | 'td' | 'code' | 'strong';
+export type PortfolioTag = 'div' | 'header' | 'nav' | 'main' | 'section' | 'article' | 'aside' | 'footer' | 'h1' | 'h2' | 'h3' | 'p' | 'span' | 'a' | 'ul' | 'ol' | 'li' | 'dl' | 'dt' | 'dd' | 'details' | 'summary' | 'form' | 'label' | 'input' | 'button' | 'table' | 'caption' | 'thead' | 'tbody' | 'tr' | 'th' | 'td' | 'code' | 'strong' | 'em' | 'img' | 'canvas';
 export interface PortfolioElement { tag: PortfolioTag; attrs: Record<string, string>; children: PortfolioNode[] }
 export type PortfolioNode = PortfolioElement | string;
 export interface PortfolioDocument { themeConfig: ThemeConfig; sections: Array<EditorSection & { sortOrder?: number }> }
@@ -60,5 +60,5 @@ export function serializePortfolioTree(node: PortfolioNode): string {
   const escape = (value: string) => value.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
   if (typeof node === 'string') return escape(node);
   const attrs = Object.entries(node.attrs).map(([key, value]) => ` ${key}="${escape(value)}"`).join('');
-  return `<${node.tag}${attrs}>${node.tag === 'input' ? '' : node.children.map(serializePortfolioTree).join('') + `</${node.tag}>`}`;
+  return `<${node.tag}${attrs}>${['input', 'img'].includes(node.tag) ? '' : node.children.map(serializePortfolioTree).join('') + `</${node.tag}>`}`;
 }

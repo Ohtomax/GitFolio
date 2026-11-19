@@ -10,6 +10,7 @@ const intents = {
   editorial: ['Engineering managers, writers, researchers, and architects', 'A narrow reading column with a serif narrative, numbered case-study essays, dated publications, an understated CV, and a letter-like contact close.'],
   bento: ['Design engineers, creative developers, and interactive designers', 'An asymmetric 12-column composition: large identity tile, focus/music widgets, visual project gallery, stack tile, career tile, and a vivid connect tile.'],
   executive: ['Technical leaders, enterprise consultants, and fractional CTOs', 'A persistent identity/navigation rail, decisive value proposition, semantic architecture table, career timeline, advisory capabilities, and a consultation CTA.'],
+  monochrome: ['Developers and students building a personal online CV', 'Inspired by the owner-supplied OnlineCv reference: black-and-white typography, a two-column hero, an editable portrait with initials fallback, a constellation background, a scrolling toolkit strip, glass project cards, biography, skills, career entries, certificates, and a direct-contact close.'],
 };
 const names = { hero: 'Hero', about: 'About', projects: 'Projects', experience: 'Experience', skills: 'Skills', contact: 'Contact', writing: 'Writing', now: 'Now', education: 'Education' };
 const specFilename = (template) => {
@@ -34,6 +35,8 @@ for (const template of BUILTIN_TEMPLATES) {
     lines.push(`### ${index+1}. ${names[section.type]} — ${c.heading}`, '');
     if(c.eyebrow) lines.push(`Eyebrow: ${c.eyebrow}`, '');
     if(c.subtitle) lines.push(`Subtitle: ${c.subtitle}`, '');
+    if(c.portraitUrl) lines.push(`Portrait: ${c.portraitUrl}`, '');
+    if(c.portraitAlt) lines.push(`Portrait description: ${c.portraitAlt}`, '');
     if(c.description) lines.push(c.description, '');
     if(c.tags?.length) lines.push(`Tags: ${c.tags.join(' · ')}`, '');
     if(c.metrics?.length) lines.push(...c.metrics.map((m) => `- **${m.value}** — ${m.label}`), '');
@@ -48,7 +51,7 @@ for (const template of BUILTIN_TEMPLATES) {
 writeFileSync(new URL('../docs/portfolio-templates.json', import.meta.url), JSON.stringify(ALL_TEMPLATES, null, 2)+'\n');
 const index = `# GitFolio portfolio templates
 
-${BUILTIN_TEMPLATES.length} presets across five original design families for different kinds of technical work. Choose one in **New project**; the picker, editor, static output, and React output share a semantic renderer and styles. Variants reuse their family's composition with their own palette, type pairing, content, and density.
+${BUILTIN_TEMPLATES.length} presets across ${new Set(BUILTIN_TEMPLATES.map((template) => template.defaultConfig.theme.layout)).size} design families for different kinds of technical work. Choose one in **New project**; the picker, editor, static output, and React output share a semantic renderer and styles. Variants reuse their family's composition with their own palette, type pairing, content, and density.
 
 ${BUILTIN_TEMPLATES.map((t) => `- [${t.name}](templates/${specFilename(t)}) — ${t.description}`).join('\n')}
 
@@ -60,6 +63,7 @@ The linked specifications contain exact tokens, measured palette contrast, secti
 - [Linear’s UI redesign](https://linear.app/now/how-we-redesigned-the-linear-ui) describes reducing visual noise while strengthening hierarchy and alignment. Those principles inform the executive information structure and controlled density.
 - [Brittany Chiang’s portfolio](https://brittanychiang.com/) demonstrates the value of dated experience and work evidence with technology context. These templates use original biographies and sample work.
 - ReadCV and Bento.me are historical style references supplied in the brief. Their current pages were inaccessible during research; no live review or copied layout is claimed.
+- [The owner's OnlineCv portfolio](https://ohtomax.github.io/OnlineCv/) is the requested reference for Monochrome / Online CV. The reusable preset follows its monochrome composition with editable illustrative content, an optional portrait URL, and locally bundled Geist, Manrope, and Geist Mono fonts. Particle movement pauses outside the viewport and when reduced motion is enabled; content and mobile navigation remain available without JavaScript.
 - [WCAG contrast guidance](https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html) defines the 4.5:1 normal-text threshold used in the automated palette checks.
 
 Layouts collapse in source order at narrow container widths. They use semantic headings, navigation and skip links, visible keyboard focus, safe external links, and reduced-motion support. Fonts are bundled locally with their SIL Open Font Licenses; uncovered scripts use system fallbacks. Project cover graphics are decorative original CSS compositions, not invented product screenshots. Contact links are usable without JavaScript. Terminal commands are local help/email/links/clear utilities; the Bento focus widgets use native details controls and do not pretend to stream live music.

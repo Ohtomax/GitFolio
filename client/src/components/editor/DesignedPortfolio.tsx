@@ -19,7 +19,7 @@ export function DesignedPortfolio({ document, selectedId, onSelect, interactive 
     if (typeof node === 'string') return node;
     const { class: className = '', tabindex, ...attrs } = node.attrs;
     const reactAttrs: Record<string, string> = {};
-    const aliases: Record<string, string> = { for: 'htmlFor', maxlength: 'maxLength', autocomplete: 'autoComplete', spellcheck: 'spellCheck' };
+    const aliases: Record<string, string> = { for: 'htmlFor', maxlength: 'maxLength', autocomplete: 'autoComplete', spellcheck: 'spellCheck', referrerpolicy: 'referrerPolicy' };
     const sectionId = attrs['data-section-id'];
     const children = node.children.map((child, i) => render(child, i));
     if (sectionId && onSelect) children.unshift(<button key="edit" className="pf-edit" type="button" aria-pressed={selectedId === sectionId}

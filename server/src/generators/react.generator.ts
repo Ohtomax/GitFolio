@@ -32,7 +32,7 @@ const mount = ${mountPortfolioInteractions.toString()};
 function Node({node}) {
   if(typeof node==='string') return node;
   const {class:className,tabindex,...attrs}=node.attrs;
-  const aliases={for:'htmlFor',maxlength:'maxLength',autocomplete:'autoComplete',spellcheck:'spellCheck'};
+  const aliases={for:'htmlFor',maxlength:'maxLength',autocomplete:'autoComplete',spellcheck:'spellCheck',referrerpolicy:'referrerPolicy'};
   const reactAttrs=Object.fromEntries(Object.entries(attrs).map(([key,value])=>[aliases[key]||key,value]));
   return createElement(node.tag,{...reactAttrs,className,...(tabindex?{tabIndex:Number(tabindex)}:{})},
     ...(node.tag==='input'?[]:node.children.map((child,index)=><Node key={index} node={child}/>)));
@@ -68,7 +68,7 @@ export function generateReactProject(input: Project): GeneratedFile[] {
       ...(['projects', 'skills', 'experience', 'education', 'writing', 'now'].includes(section.type) ? { items: section.content.items } : {}),
       ...(designed ? { subtitle: section.content.subtitle, tags: section.content.tags,
         ...(section.type === 'contact' ? { items: section.content.items } : {}),
-        ...(section.type === 'hero' ? { metrics: section.content.metrics } : {}) } : {}) },
+        ...(section.type === 'hero' ? { metrics: section.content.metrics, portraitUrl: section.content.portraitUrl, portraitAlt: section.content.portraitAlt } : {}) } : {}) },
   }));
   return validateArtifact([
     { path: 'package.json', content: JSON.stringify(packageJson, null, 2) + '\n' },

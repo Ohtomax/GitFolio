@@ -1,4 +1,4 @@
-import { PortfolioUrlSchema, SectionTypeSchema, isRoleLayout, type EditorItem, type SectionContent } from '@gitfolio/shared';
+import { PortfolioUrlSchema, PortfolioImageUrlSchema, SectionTypeSchema, isRoleLayout, type EditorItem, type SectionContent } from '@gitfolio/shared';
 import { useEditor, useEditorApi } from './EditorProvider.tsx';
 import { RichSectionFields, EntryPresentationFields } from './RichSectionFields.tsx';
 import { WidgetDataEditor } from './WidgetDataEditor.tsx';
@@ -17,12 +17,14 @@ export function SectionInspector({ disabled }: { disabled: boolean }) {
     state.setDocument({ ...state.document, sections: state.document.sections.map((section) => section.id === selectedId
       ? { ...section, content: { ...section.content, ...update } } : section) }, group);
   }
-  function field(key: 'heading' | 'description' | 'eyebrow' | 'subtitle' | 'buttonLabel' | 'buttonUrl', label: string, maxLength: number, multiline = false) {
+  function field(key: 'heading' | 'description' | 'eyebrow' | 'subtitle' | 'buttonLabel' | 'buttonUrl' | 'portraitUrl' | 'portraitAlt', label: string, maxLength: number, multiline = false) {
     const value = selected?.content[key] ?? '';
-    const invalid = key === 'buttonUrl' && !PortfolioUrlSchema.safeParse(value).success;
+    const invalid = key === 'buttonUrl' ? !PortfolioUrlSchema.safeParse(value).success
+      : key === 'portraitUrl' && !PortfolioImageUrlSchema.safeParse(value).success;
+    const errorId = `section-${selectedId}-${key}-error`;
     return <label className="block text-xs font-medium text-stone-600" key={key}>{label}{multiline
-      ? <textarea value={value} rows={5} maxLength={maxLength} disabled={disabled} className={inputClass} onChange={(event) => content({ [key]: event.target.value }, `${selectedId}:${key}`)} onBlur={() => store.getState().endGroup()} />
-      : <input value={value} maxLength={maxLength} disabled={disabled} aria-invalid={invalid} className={inputClass} onChange={(event) => content({ [key]: event.target.value }, `${selectedId}:${key}`)} onBlur={() => store.getState().endGroup()} />}{invalid && <span className="mt-1 block text-red-700">Use an http://, https://, or mailto: link.</span>}</label>;
+      ? <textarea aria-label={label} value={value} rows={key === 'heading' ? 2 : 5} maxLength={maxLength} disabled={disabled} className={inputClass} onChange={(event) => content({ [key]: event.target.value }, `${selectedId}:${key}`)} onBlur={() => store.getState().endGroup()} />
+      : <input aria-label={label} value={value} maxLength={maxLength} disabled={disabled} aria-invalid={invalid} aria-describedby={invalid ? errorId : undefined} className={inputClass} onChange={(event) => content({ [key]: event.target.value }, `${selectedId}:${key}`)} onBlur={() => store.getState().endGroup()} />}{invalid && <span id={errorId} className="mt-1 block text-red-700">{key === 'portraitUrl' ? 'Use an http:// or https:// image link.' : 'Use an http://, https://, or mailto: link.'}</span>}</label>;
   }
   const listSection = ['projects', 'skills', 'experience', 'education', 'writing', 'now', 'contact'].includes(selected.type);
   const items = selected.content.items ?? [];
@@ -34,8 +36,12 @@ export function SectionInspector({ disabled }: { disabled: boolean }) {
       const state = store.getState(); state.setDocument({ ...state.document, sections: state.document.sections.map((section) => section.id === selectedId ? { ...section, type: SectionTypeSchema.parse(event.target.value) } : section) });
     }}>{SectionTypeSchema.options.map((type) => <option key={type} value={type}>{sectionNames[type]}</option>)}</select></label>
     <label className="flex items-center gap-2 text-xs text-stone-600"><input type="checkbox" checked={selected.visible} disabled={disabled} onChange={(event) => { const state = store.getState(); state.setDocument({ ...state.document, sections: state.document.sections.map((section) => section.id === selectedId ? { ...section, visible: event.target.checked } : section) }); }} />Visible in portfolio</label>
-    {field('heading', 'Section heading', 120)}{field('description', 'Section description', 5000, true)}
+    {field('heading', 'Section heading', 120, document.themeConfig.layout === 'monochrome')}{field('description', 'Section description', 5000, true)}
     {field('subtitle', 'Subtitle / role', 180)}{selected.type === 'hero' && field('eyebrow', 'Eyebrow', 100)}
+    {selected.type === 'hero' && document.themeConfig.layout === 'monochrome' && <fieldset className="space-y-3 rounded-xl border border-stone-200 p-3"><legend className="px-1 text-xs font-semibold text-stone-600">Profile portrait</legend>
+      {field('portraitUrl', 'Portrait image URL', 2048)}{field('portraitAlt', 'Portrait description', 160)}
+      <p className="text-xs leading-5 text-stone-500">Use a publicly accessible image link. Leave it empty to show your initials.</p>
+    </fieldset>}
     <RichSectionFields section={selected} disabled={disabled} onChange={content} />
     {selected.type === 'interactive' && <WidgetDataEditor key={`${selected.id}:${JSON.stringify(selected.content.widget)}`} value={selected.content.widget} layout={document.themeConfig.layout} disabled={disabled} onChange={(widget) => content({ widget })} />}
     {['hero', 'contact'].includes(selected.type) && <>{field('buttonLabel', 'Button label', 80)}{field('buttonUrl', 'Button link', 2048)}</>}

@@ -2776,5 +2776,214 @@
         }
       ]
     }
+  },
+  {
+    "id": "10000000-0000-4000-8000-00000000000b",
+    "name": "Monochrome / Online CV",
+    "description": "Inspired by the OnlineCv portfolio: bold black-and-white typography, a glass portrait frame, constellation details, a moving toolkit strip, and spacious project stories.",
+    "category": "developer",
+    "thumbnailUrl": null,
+    "isReact": false,
+    "defaultConfig": {
+      "theme": {
+        "colors": {
+          "accent": "#ffffff",
+          "background": "#050505",
+          "text": "#fafafa",
+          "muted": "#a1a1aa",
+          "surface": "#101012",
+          "border": "#303034"
+        },
+        "font": "sans",
+        "spacing": "spacious",
+        "layout": "monochrome",
+        "headingFont": "sans",
+        "demo": true
+      },
+      "sections": [
+        {
+          "type": "hero",
+          "content": {
+            "heading": "Thoughtful\ndigital experiences.",
+            "description": "Hey, I’m Jordan. A developer who brings ideas to life with considered interfaces, dependable APIs, and the curiosity to keep learning. I enjoy making the complicated feel simple.",
+            "eyebrow": "Jordan Avery / Full-Stack Developer",
+            "subtitle": "React & TypeScript interfaces. Node.js APIs. Cloud delivery.",
+            "buttonLabel": "Let’s talk",
+            "buttonUrl": "mailto:jordan@example.com",
+            "tags": [
+              "React & TypeScript",
+              "Node.js · Express · Prisma",
+              "PostgreSQL",
+              "Cloud infrastructure",
+              "Accessible interfaces"
+            ],
+            "metrics": [
+              {
+                "value": "Remote",
+                "label": "Based in"
+              },
+              {
+                "value": "Full-stack",
+                "label": "Focus"
+              },
+              {
+                "value": "Open",
+                "label": "Collaborations"
+              }
+            ],
+            "portraitUrl": "",
+            "portraitAlt": "Jordan Avery"
+          },
+          "visible": true
+        },
+        {
+          "type": "projects",
+          "content": {
+            "heading": "A few things\nI’ve built.",
+            "description": "From the first sketch to the last deployment, I like building things that make an idea tangible.",
+            "subtitle": "Selected work",
+            "items": [
+              {
+                "title": "Wayfinder",
+                "subtitle": "WEB APPLICATION",
+                "description": "A shared planning space that turns scattered ideas into clear next steps. I designed the interface and built the API, authentication, and collaborative workspace.",
+                "url": "https://example.com/wayfinder",
+                "visual": "dashboard",
+                "tags": [
+                  "React",
+                  "TypeScript",
+                  "Node.js",
+                  "PostgreSQL"
+                ]
+              },
+              {
+                "title": "Form & Field",
+                "subtitle": "FRONTEND DEVELOPMENT",
+                "description": "A responsive storefront for an independent studio, with a considered product gallery, accessible navigation, and a lightweight checkout flow.",
+                "url": "https://example.com/form-and-field",
+                "visual": "typography",
+                "tags": [
+                  "React",
+                  "CSS",
+                  "Accessibility",
+                  "Vite"
+                ]
+              }
+            ]
+          },
+          "visible": true
+        },
+        {
+          "type": "about",
+          "content": {
+            "heading": "Curious by nature.\nDeveloper by choice.",
+            "description": "I’m a developer who cares about the people on the other side of the screen. I enjoy understanding how a system fits together, then making each part easier to use and maintain.\n\nMy process is practical: ask good questions, build something small, learn from real feedback, and keep improving it. Away from the keyboard, I’m usually exploring a new place or adding another idea to my sketchbook.",
+            "subtitle": "The person behind the code"
+          },
+          "visible": true
+        },
+        {
+          "type": "skills",
+          "content": {
+            "heading": "The toolkit.",
+            "description": "Tools I reach for, backed by the fundamentals that make them useful.",
+            "subtitle": "What I build with",
+            "items": [
+              {
+                "title": "From interface to infrastructure",
+                "description": "Component architecture, API design, relational data, automated checks, and the care needed to ship and maintain a useful product."
+              }
+            ],
+            "tags": [
+              "React",
+              "TypeScript",
+              "Node.js",
+              "Express",
+              "PostgreSQL",
+              "Prisma",
+              "HTML & CSS",
+              "Git",
+              "Docker",
+              "AWS",
+              "Testing",
+              "Accessibility"
+            ]
+          },
+          "visible": true
+        },
+        {
+          "type": "experience",
+          "content": {
+            "heading": "Learning through\ndoing.",
+            "description": "Every project adds another perspective to how I solve problems and work with people.",
+            "subtitle": "Education & experience",
+            "items": [
+              {
+                "title": "Full-Stack Developer · Northline Studio",
+                "subtitle": "2024 — Present",
+                "description": "Build and maintain web applications across the interface, API, and database. Work closely with design and product to turn a clear problem into a dependable feature."
+              },
+              {
+                "title": "BSc Computer Science · Westbridge College",
+                "subtitle": "2020 — 2024",
+                "description": "Studied software engineering, databases, and human-computer interaction, with a focus on applying the fundamentals in collaborative projects."
+              }
+            ]
+          },
+          "visible": true
+        },
+        {
+          "type": "education",
+          "content": {
+            "heading": "Always a student.",
+            "description": "A few milestones in an ongoing learning habit.",
+            "subtitle": "Certifications & continuing learning",
+            "items": [
+              {
+                "title": "Web Accessibility Foundations",
+                "subtitle": "Example certification · 2025",
+                "url": "https://example.com/certificates/accessibility"
+              },
+              {
+                "title": "Cloud Architecture Fundamentals",
+                "subtitle": "Example certification · 2025",
+                "url": "https://example.com/certificates/cloud"
+              },
+              {
+                "title": "Secure Software Development",
+                "subtitle": "Example certification · 2024",
+                "url": "https://example.com/certificates/security"
+              }
+            ]
+          },
+          "visible": true
+        },
+        {
+          "type": "contact",
+          "content": {
+            "heading": "Let’s make\nsomething good.",
+            "description": "Have a project in mind, an interesting problem, or just a good reason to connect? I’d love to hear from you.",
+            "subtitle": "Have an idea?",
+            "buttonLabel": "Get in touch",
+            "buttonUrl": "mailto:jordan@example.com",
+            "items": [
+              {
+                "title": "Email",
+                "url": "mailto:jordan@example.com"
+              },
+              {
+                "title": "GitHub",
+                "url": "https://example.com/jordan/code"
+              },
+              {
+                "title": "LinkedIn",
+                "url": "https://example.com/jordan/profile"
+              }
+            ]
+          },
+          "visible": true
+        }
+      ]
+    }
   }
 ]
