@@ -2,14 +2,17 @@
 // Self-contained so exported portfolios can include the same behavior.
 export function mountPortfolioInteractions(root: ParentNode): () => void {
   const cleanups: Array<() => void> = [];
-  root.querySelectorAll<HTMLElement>('[data-kinetic-page]').forEach((page) => {
+  root.querySelectorAll<HTMLElement>('[data-kinetic-page], [data-obsidian-page]').forEach((page) => {
+    const family = page.hasAttribute('data-obsidian-page') ? 'obsidian' : 'kinetic';
+    const attribute = (name: string) => `data-${family}-${name}`;
+    const indexProperty = family === 'obsidian' ? '--pf-intro-index' : '--pf-word-index';
     const preference = window.matchMedia('(prefers-reduced-motion: reduce)');
     const pointer = window.matchMedia('(hover: hover) and (pointer: fine)');
-    const reveals = Array.from(page.querySelectorAll<HTMLElement>('[data-kinetic-reveal]'));
-    const animated = Array.from(page.querySelectorAll<HTMLElement>('[data-kinetic-animate]'));
-    const words = Array.from(page.querySelectorAll<HTMLElement>('[data-kinetic-word]'));
-    const button = page.querySelector<HTMLButtonElement>('[data-kinetic-motion]');
-    const tilts = Array.from(page.querySelectorAll<HTMLElement>('[data-kinetic-tilt]'));
+    const reveals = Array.from(page.querySelectorAll<HTMLElement>(`[${attribute('reveal')}]`));
+    const animated = Array.from(page.querySelectorAll<HTMLElement>(`[${attribute('animate')}]`));
+    const introductions = Array.from(page.querySelectorAll<HTMLElement>(`[${attribute(family === 'obsidian' ? 'intro' : 'word')}]`));
+    const button = page.querySelector<HTMLButtonElement>(`[${attribute('motion')}]`);
+    const tilts = Array.from(page.querySelectorAll<HTMLElement>(`[${attribute('tilt')}]`));
     const scenes = Array.from(page.querySelectorAll<HTMLElement>('[data-kinetic-scroll]'));
     const frames = new Map<HTMLElement, number>();
     let paused = false;
@@ -50,12 +53,12 @@ export function mountPortfolioInteractions(root: ParentNode): () => void {
     };
     const refresh = () => {
       const stopped = preference.matches || paused || document.hidden;
-      page.toggleAttribute('data-kinetic-reduced', preference.matches);
-      page.toggleAttribute('data-kinetic-paused', paused);
-      page.toggleAttribute('data-kinetic-running', !stopped);
+      page.toggleAttribute(attribute('reduced'), preference.matches);
+      page.toggleAttribute(attribute('paused'), paused);
+      page.toggleAttribute(attribute('running'), !stopped);
       if (stopped || !pointer.matches) resetTilt();
       if (stopped) resetScroll(); else scheduleScroll();
-      if (preference.matches || paused) reveals.forEach((element) => element.setAttribute('data-kinetic-in-view', ''));
+      if (preference.matches || paused) reveals.forEach((element) => element.setAttribute(attribute('in-view'), ''));
       if (button) {
         button.textContent = preference.matches ? 'Reduced motion' : paused ? 'Resume motion' : 'Pause motion';
         button.setAttribute('aria-pressed', String(preference.matches || paused));
@@ -64,16 +67,16 @@ export function mountPortfolioInteractions(root: ParentNode): () => void {
     };
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(({ target, isIntersecting }) => {
-        if (target.hasAttribute('data-kinetic-reveal') && isIntersecting) target.setAttribute('data-kinetic-in-view', '');
-        if (target.hasAttribute('data-kinetic-animate')) target.toggleAttribute('data-kinetic-active', isIntersecting);
+        if (target.hasAttribute(attribute('reveal')) && isIntersecting) target.setAttribute(attribute('in-view'), '');
+        if (target.hasAttribute(attribute('animate'))) target.toggleAttribute(attribute('active'), isIntersecting);
       });
       scheduleScroll();
     }, { threshold: .08 });
     new Set([...reveals, ...animated]).forEach((element) => observer.observe(element));
-    words.forEach((word, index) => word.style.setProperty('--pf-word-index', String(Math.min(index, 24))));
+    introductions.forEach((element, index) => element.style.setProperty(indexProperty, String(Math.min(index, 24))));
     tilts.forEach((element) => {
       const canMove = () => !preference.matches && !paused && !document.hidden && pointer.matches
-        && !!element.closest('[data-kinetic-active]');
+        && !!element.closest(`[${attribute('active')}]`);
       let x = 0, y = 0;
       const move = (event: PointerEvent) => {
         if (event.pointerType !== 'mouse' || !canMove()) return;
@@ -97,7 +100,7 @@ export function mountPortfolioInteractions(root: ParentNode): () => void {
     });
     const toggle = () => { if (!preference.matches) { paused = !paused; refresh(); } };
     const close = (event: Event) => {
-      const menu = (event.target as Element).closest<HTMLDetailsElement>('[data-kinetic-menu]');
+      const menu = (event.target as Element).closest<HTMLDetailsElement>(`[${attribute('menu')}]`);
       if (menu && (event.target as Element).closest('a')) menu.open = false;
     };
     button?.addEventListener('click', toggle); page.addEventListener('click', close);
@@ -107,17 +110,17 @@ export function mountPortfolioInteractions(root: ParentNode): () => void {
     window.addEventListener('resize', scheduleScroll, { passive: true });
     const layout = new ResizeObserver(scheduleScroll); layout.observe(page);
     if (scrollPort) layout.observe(scrollPort);
-    page.setAttribute('data-kinetic-enhanced', ''); refresh();
+    page.setAttribute(attribute('enhanced'), ''); refresh();
     cleanups.push(() => {
       observer.disconnect(); layout.disconnect(); resetTilt(); resetScroll(); button?.removeEventListener('click', toggle); page.removeEventListener('click', close);
       preference.removeEventListener('change', refresh); pointer.removeEventListener('change', refresh);
       document.removeEventListener('visibilitychange', refresh);
       window.removeEventListener('scroll', scheduleScroll, true); window.removeEventListener('resize', scheduleScroll);
-      ['data-kinetic-enhanced', 'data-kinetic-reduced', 'data-kinetic-paused', 'data-kinetic-running'].forEach((attribute) => page.removeAttribute(attribute));
-      reveals.forEach((element) => element.removeAttribute('data-kinetic-in-view'));
-      animated.forEach((element) => element.removeAttribute('data-kinetic-active'));
-      words.forEach((word) => word.style.removeProperty('--pf-word-index'));
-      page.querySelectorAll<HTMLDetailsElement>('[data-kinetic-menu]').forEach((menu) => { menu.open = false; });
+      ['enhanced', 'reduced', 'paused', 'running'].forEach((name) => page.removeAttribute(attribute(name)));
+      reveals.forEach((element) => element.removeAttribute(attribute('in-view')));
+      animated.forEach((element) => element.removeAttribute(attribute('active')));
+      introductions.forEach((element) => element.style.removeProperty(indexProperty));
+      page.querySelectorAll<HTMLDetailsElement>(`[${attribute('menu')}]`).forEach((menu) => { menu.open = false; });
       if (button) { button.textContent = 'Pause motion'; button.setAttribute('aria-pressed', 'false'); button.removeAttribute('aria-disabled'); }
     });
   });

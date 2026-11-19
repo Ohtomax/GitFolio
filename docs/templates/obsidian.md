@@ -4,7 +4,7 @@ Category: `premium` · Audience: Full-stack developers, independent builders, an
 
 A dark developer portfolio inspired by kroszborg.co, with a sticky personal profile, floating navigation, expandable experience, visual project cards, and a technical journal.
 
-A Premium developer journal inspired by kroszborg.co: a floating navigation dock, sticky profile with an optional portrait and initials fallback, native expandable experience entries, two-column project and writing cards, biography, tools, personal links, and contact. The profile stacks above the content on mobile. All sample identities and work are original fictional examples; project art and the subtle contour background use CSS. Navigation and disclosures work without JavaScript.
+A Premium developer journal inspired by kroszborg.co: a floating navigation dock, sticky profile with an optional portrait and initials fallback, native expandable experience entries, two-column project and writing cards, biography, tools, personal links, and contact. Interactive previews and both exports add drifting contour and glow layers, staggered profile entrances, a glowing portrait, a blinking role caret, scroll reveals, and mouse-driven artwork depth. Pause motion and live reduced-motion support control the effects; continuous animation pauses off screen and when the tab is hidden. The editing canvas and thumbnails stay still. The profile stacks above the content on mobile. All sample identities and work are original fictional examples; project art and the background use CSS. Navigation and disclosures work without JavaScript.
 
 ## Design tokens
 

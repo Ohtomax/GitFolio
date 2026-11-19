@@ -8,11 +8,15 @@ export function DesignedPortfolio({ document, selectedId, onSelect, interactive 
 }) {
   const ref = useRef<HTMLDivElement>(null);
   useInsertionEffect(() => {
-    if (window.document.getElementById('gitfolio-portfolio-designs')) return;
+    const existing = window.document.getElementById('gitfolio-portfolio-designs');
+    if (existing instanceof HTMLStyleElement) {
+      if (existing.textContent !== PORTFOLIO_CSS) existing.textContent = PORTFOLIO_CSS;
+      return;
+    }
     const style = window.document.createElement('style');
     style.id = 'gitfolio-portfolio-designs'; style.textContent = PORTFOLIO_CSS;
     window.document.head.append(style);
-  }, []);
+  }, [PORTFOLIO_CSS]);
   const tree = useMemo(() => buildPortfolioTree(document), [document]);
   useEffect(() => { if (interactive && ref.current) return mountPortfolioInteractions(ref.current); }, [tree, interactive]);
   function render(node: PortfolioNode, key: number | string): ReactNode {

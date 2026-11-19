@@ -43,13 +43,19 @@ test('Obsidian preserves edits and shares its renderer with static and standalon
   assert.match(html, /custom-portrait\.png/);
   assert.match(html, /referrerpolicy="no-referrer"/);
   assert.match(html, /My edited project/);
+  assert.match(html, /data-obsidian-page/);
+  assert.match(html, /data-obsidian-reveal/);
+  assert.match(html, /Pause motion/);
   const files = Object.fromEntries(generateStaticSite(data).map((file) => [file.path, file.content]));
   assert.ok(files['index.html'].includes(html));
+  assert.match(files['script.js'], /data-obsidian-page/);
   const reactFiles = Object.fromEntries(generateReactProject(data).map((file) => [file.path, file.content]));
   const exported = JSON.parse(reactFiles['src/portfolio.json']);
   const standalone = runInNewContext(portfolioRendererSource('obsidian') + '; renderTemplate(portfolio)', { portfolio: exported, URL });
   assert.equal(JSON.stringify(standalone), JSON.stringify(tree));
   assert.match(reactFiles['src/style.css'], /font-family:'Manrope'/);
+  assert.match(reactFiles['src/App.jsx'], /data-obsidian-page/);
+  assert.match(reactFiles['src/style.css'], /@keyframes pf-obsidian-drift/);
 });
 
 test('Obsidian escapes user content and rejects unsafe links and portraits in its renderer', () => {

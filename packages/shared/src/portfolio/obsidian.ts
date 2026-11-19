@@ -104,6 +104,7 @@ export function renderObsidian(document: PortfolioDocument): PortfolioElement {
       el('a', 'pf-obsidian-brand', [el('span', 'pf-obsidian-monogram', [initials], { 'aria-hidden': 'true' }),
         el('span', 'pf-obsidian-brand-name', [name.trim().split(/\s+/)[0]])], { href: '#portfolio-content', 'aria-label': `${name} home` }),
       navigation(navSections.length ? navSections : sections.filter((section) => section.type !== 'hero').slice(0, 3)),
+      el('button', 'pf-obsidian-motion', ['Pause motion'], { type: 'button', 'data-obsidian-motion': '', 'aria-pressed': 'false' }),
     ]),
   ]);
   const renderSection = (section: PortfolioDocument['sections'][number]): PortfolioElement => {
@@ -138,7 +139,7 @@ export function renderObsidian(document: PortfolioDocument): PortfolioElement {
     if (section.type === 'projects' || section.type === 'writing') return sectionShell(section, [...sectionHeading(section),
       el('div', 'pf-obsidian-cards', itemsFor(section).map((item) =>
         el('article', `pf-entry pf-obsidian-card pf-obsidian-${section.type === 'writing' ? 'post' : 'project'}`, [
-          art(item.visual || (section.type === 'writing' ? 'code' : 'dashboard')),
+          el('div', 'pf-obsidian-artwork', [art(item.visual || (section.type === 'writing' ? 'code' : 'dashboard'))], { 'data-obsidian-tilt': '' }),
           el('div', 'pf-obsidian-card-body', [
             item.subtitle && el('p', 'pf-meta', [item.subtitle]), el('h3', '', [link(item.url, item.title || 'Untitled entry')]),
             item.description && el('p', 'pf-description', [item.description]), tags(item.tags),
@@ -157,15 +158,51 @@ export function renderObsidian(document: PortfolioDocument): PortfolioElement {
       ...(itemsFor(section).length ? [el('div', 'pf-obsidian-list', itemsFor(section).map((item) => entry(item)))] : []),
     ]);
   };
-  return pageFrame(document, main([
+  const frame = pageFrame(document, main([
     ...(hero ? [renderSection(hero)] : []),
     el('div', 'pf-obsidian-content', sections.filter((section) => section !== hero).map(renderSection)),
   ], `pf-obsidian-grid${hero ? '' : ' pf-obsidian-no-profile'}`), '', header);
+  frame.attrs['data-obsidian-page'] = '';
+  frame.children.splice(1, 0, el('div', 'pf-obsidian-ambient', [
+    el('span', 'pf-obsidian-contours', []), el('span', 'pf-obsidian-aura', []),
+  ], { 'aria-hidden': 'true', 'data-obsidian-animate': '' }));
+  const decorate = (node: PortfolioElement) => {
+    const classes = (node.attrs.class || '').split(' ');
+    if (classes.includes('pf-obsidian-profile')) {
+      node.attrs['data-obsidian-animate'] = '';
+      node.children.forEach((child) => {
+        if (typeof child !== 'string' && child.attrs.class !== 'pf-obsidian-portrait') child.attrs['data-obsidian-intro'] = '';
+      });
+      return;
+    }
+    if (classes.includes('pf-obsidian-card')) node.attrs['data-obsidian-animate'] = '';
+    if (classes.some((name) => ['pf-obsidian-card', 'pf-obsidian-experience', 'pf-entry', 'pf-obsidian-contact-panel', 'pf-section-label', 'pf-description', 'pf-footer'].includes(name))) {
+      node.attrs['data-obsidian-reveal'] = '';
+      return;
+    }
+    node.children.forEach((child) => { if (typeof child !== 'string') decorate(child); });
+  };
+  decorate(frame);
+  return frame;
 }
 
 export const OBSIDIAN_CSS = `
 .pf-obsidian{position:relative;min-height:100vh;background:var(--pf-bg)}
-.pf-obsidian::before{content:'';position:absolute;inset:0 0 auto;height:800px;z-index:-1;pointer-events:none;background:repeating-radial-gradient(ellipse at 8% 22%,transparent 0 23px,color-mix(in srgb,var(--pf-muted) 5%,transparent) 24px 25px,transparent 27px 41px),repeating-radial-gradient(ellipse at 92% 18%,transparent 0 37px,color-mix(in srgb,var(--pf-accent) 4%,transparent) 38px 39px,transparent 41px 60px);mask-image:linear-gradient(#000,transparent)}
+.pf-obsidian-ambient{position:absolute;inset:0 0 auto;height:1000px;overflow:hidden;z-index:-1;pointer-events:none;mask-image:linear-gradient(#000 15%,transparent)}
+.pf-obsidian-contours{position:absolute;inset:-6%;background:repeating-radial-gradient(ellipse at 8% 22%,transparent 0 23px,color-mix(in srgb,var(--pf-muted) 6%,transparent) 24px 25px,transparent 27px 41px),repeating-radial-gradient(ellipse at 92% 18%,transparent 0 37px,color-mix(in srgb,var(--pf-accent) 6%,transparent) 38px 39px,transparent 41px 60px);animation:pf-obsidian-drift 24s ease-in-out infinite alternate;animation-play-state:paused}
+.pf-obsidian-aura{position:absolute;width:min(700px,90%);height:700px;left:10%;top:0;border-radius:50%;background:radial-gradient(ellipse,color-mix(in srgb,var(--pf-accent) 13%,transparent),transparent 65%);animation:pf-obsidian-aura 14s ease-in-out infinite alternate;animation-play-state:paused}
+.pf-obsidian .pf-nav{margin-left:auto}.pf-obsidian-motion{display:none;align-items:center;justify-content:center;flex-shrink:0;min-height:44px;padding:.5rem .8rem;border:1px solid var(--pf-border);border-radius:9px;background:var(--pf-surface);color:var(--pf-text);font-size:.875rem;white-space:nowrap}.pf-obsidian[data-obsidian-enhanced] .pf-obsidian-motion{display:inline-flex}.pf-obsidian-motion:hover{border-color:var(--pf-accent)}.pf-obsidian-motion[aria-disabled=true]{color:var(--pf-muted);cursor:default}
+.pf-obsidian-artwork{overflow:hidden;transform:perspective(700px) rotateX(var(--pf-tilt-x,0deg)) rotateY(var(--pf-tilt-y,0deg));transition:transform .35s ease;transform-origin:center}
+.pf-obsidian-portrait{animation:pf-obsidian-glow 5s ease-in-out infinite;animation-play-state:paused}.pf-obsidian-role::after{content:'';display:inline-block;vertical-align:-.1em;width:2px;height:1em;margin-left:.5rem;background:var(--pf-accent);opacity:0;animation:pf-obsidian-caret 1.4s steps(2,jump-none) infinite;animation-play-state:paused}
+.pf-obsidian[data-obsidian-enhanced]:not([data-obsidian-reduced]):not([data-obsidian-paused]) [data-obsidian-intro]{animation:pf-obsidian-enter .7s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(var(--pf-intro-index,0) * 75ms)}
+.pf-obsidian[data-obsidian-enhanced]:not([data-obsidian-reduced]):not([data-obsidian-paused]) [data-obsidian-reveal]{opacity:0;translate:0 20px;transition:opacity .6s ease,translate .6s cubic-bezier(.2,.7,.2,1)}
+.pf-obsidian[data-obsidian-enhanced]:not([data-obsidian-reduced]):not([data-obsidian-paused]) :is([data-obsidian-in-view],[data-obsidian-reveal]:focus-within){opacity:1;translate:0 0}
+.pf-obsidian[data-obsidian-running] [data-obsidian-active] :is(.pf-obsidian-contours,.pf-obsidian-aura,.pf-obsidian-portrait),.pf-obsidian[data-obsidian-running] .pf-obsidian-profile[data-obsidian-active] .pf-obsidian-role::after{animation-play-state:running}
+.pf-obsidian[data-obsidian-enhanced]:not([data-obsidian-reduced]):not([data-obsidian-paused]) .pf-obsidian-experience[open] .pf-obsidian-experience-body{animation:pf-obsidian-enter .28s ease-out both}
+.pf-obsidian[data-obsidian-paused] *,.pf-obsidian[data-obsidian-paused] *::after{animation-play-state:paused!important;transition:none!important}.pf-obsidian[data-obsidian-paused] [data-obsidian-intro]{animation:none!important}.pf-obsidian[data-obsidian-reduced] *,.pf-obsidian[data-obsidian-reduced] *::after{animation:none!important;transition:none!important}
+@keyframes pf-obsidian-enter{from{opacity:0;translate:0 16px}to{opacity:1;translate:0 0}}@keyframes pf-obsidian-drift{from{transform:translate(-1%,-1%) rotate(-1deg)}to{transform:translate(2%,2%) rotate(1deg)}}@keyframes pf-obsidian-aura{from{transform:translate(-12%,-6%) scale(.9);opacity:.65}to{transform:translate(45%,22%) scale(1.15);opacity:1}}@keyframes pf-obsidian-glow{0%,100%{box-shadow:0 0 0 3px color-mix(in srgb,var(--pf-accent) 6%,transparent),0 0 18px color-mix(in srgb,var(--pf-accent) 7%,transparent)}50%{box-shadow:0 0 0 7px color-mix(in srgb,var(--pf-accent) 12%,transparent),0 0 35px color-mix(in srgb,var(--pf-accent) 14%,transparent)}}@keyframes pf-obsidian-caret{from{opacity:0}to{opacity:1}}
+@container(max-width:650px){.pf-obsidian[data-obsidian-enhanced] .pf-obsidian-dock{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:0 .75rem}.pf-obsidian[data-obsidian-enhanced] .pf-nav{grid-column:1/-1;grid-row:2;justify-content:space-between;margin-left:0}.pf-obsidian[data-obsidian-enhanced] .pf-obsidian-motion{grid-column:2;grid-row:1}.pf-obsidian[data-obsidian-enhanced] .pf-section{scroll-margin-top:10rem}}
+@media(prefers-reduced-motion:reduce){.pf-obsidian *,.pf-obsidian *::before,.pf-obsidian *::after{animation:none!important;transition:none!important}.pf-obsidian [data-obsidian-reveal]{opacity:1!important;translate:none!important}}
 .pf-obsidian-header{position:sticky;top:0;z-index:20;max-width:1120px;margin:auto;padding:1.25rem 2rem;pointer-events:none}
 .pf-obsidian-dock{display:flex;align-items:center;justify-content:space-between;gap:1.25rem;max-width:920px;margin:auto;padding:.5rem 1.25rem;border:1px solid var(--pf-border);border-radius:1.25rem;background:color-mix(in srgb,var(--pf-bg) 92%,transparent);backdrop-filter:blur(18px);box-shadow:0 8px 30px #00000024;pointer-events:auto}
 .pf-obsidian-brand{display:inline-flex;align-items:center;gap:.65rem;min-height:44px;font-size:1rem;font-weight:650}
