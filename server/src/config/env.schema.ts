@@ -25,7 +25,10 @@ const optionalSecret = <Schema extends z.ZodType<string>>(schema: Schema) => z.p
 export const EnvironmentSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   SERVER_HOST: z.string().trim().min(1).default('127.0.0.1'),
-  SERVER_PORT: z.coerce.number().int().min(1).max(65535).default(3001),
+  SERVER_PORT: z.preprocess(
+    (value) => (value !== undefined && value !== '' ? value : process.env.PORT),
+    z.coerce.number().int().min(1).max(65535).default(3001),
+  ),
   CLIENT_URL: serviceUrl(['http:', 'https:']).refine((value) => {
     try {
       const url = new URL(value);
@@ -49,6 +52,8 @@ export const EnvironmentSchema = z.object({
   ENCRYPTION_KEY: optionalSecret(z.string().refine((value) => /^[a-fA-F0-9]{64}$/.test(value) || Buffer.byteLength(value, 'utf8') === 32, {
     message: 'Expected 64 hexadecimal characters or exactly 32 UTF-8 bytes',
   })),
+  ALLOWED_ORIGINS: optionalString,
+  COOKIE_SAME_SITE: z.enum(['lax', 'none', 'strict']).default('lax'),
 }).superRefine((environment, context) => {
   const hasClientId = environment.GITHUB_CLIENT_ID !== undefined;
   const hasClientSecret = environment.GITHUB_CLIENT_SECRET !== undefined;

@@ -99,6 +99,21 @@ test('CORS permits the configured client and rejects other origins', async (t) =
   assert.equal((await denied.json()).error.code, 'ORIGIN_NOT_ALLOWED');
 });
 
+test('CORS permits additional origins and wildcards configured via ALLOWED_ORIGINS', async (t) => {
+  const { url } = await fixture(t, {
+    ALLOWED_ORIGINS: 'https://custom-domain.com, https://*.vercel.app',
+  });
+
+  const customAllowed = await fetch(`${url}/api/health`, { headers: { Origin: 'https://custom-domain.com' } });
+  assert.equal(customAllowed.headers.get('access-control-allow-origin'), 'https://custom-domain.com');
+
+  const vercelAllowed = await fetch(`${url}/api/health`, { headers: { Origin: 'https://gitfolio-preview-123.vercel.app' } });
+  assert.equal(vercelAllowed.headers.get('access-control-allow-origin'), 'https://gitfolio-preview-123.vercel.app');
+
+  const stillDenied = await fetch(`${url}/api/health`, { headers: { Origin: 'https://malicious.example' } });
+  assert.equal(stillDenied.status, 403);
+});
+
 test('unknown endpoints, malformed JSON, and oversized bodies use safe JSON errors', async (t) => {
   const { url } = await fixture(t);
   const missing = await fetch(`${url}/api/unknown-sensitive-path`);

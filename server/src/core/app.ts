@@ -8,6 +8,7 @@ import { errorHandler, notFound } from '../middleware/error-handler.js';
 import { apiLimiter } from '../middleware/rate-limiter.js';
 import { requestLogger } from '../middleware/request-logger.js';
 import { ServiceError } from '../utils/service-error.js';
+import { isAllowedOrigin } from '../utils/origin.js';
 
 export interface AppDependencies {
   logger: Logger;
@@ -26,7 +27,7 @@ export function createApp(environment: Environment, dependencies: AppDependencie
   app.use(helmet());
   app.use(cors({
     origin: (origin, callback) => {
-      if (origin === undefined || origin === environment.CLIENT_URL) {
+      if (origin === undefined || isAllowedOrigin(origin, environment)) {
         callback(null, true);
       } else {
         callback(new ServiceError(403, 'ORIGIN_NOT_ALLOWED', 'This origin is not allowed.'));

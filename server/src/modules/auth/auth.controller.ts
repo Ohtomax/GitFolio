@@ -3,6 +3,7 @@ import type { RequestHandler } from 'express';
 import { z } from 'zod';
 import type { Environment } from '../../config/env.schema.js';
 import { cookieOptions, OAUTH_COOKIE, readCookie, SESSION_COOKIE } from '../../utils/cookies.js';
+import { isAllowedOrigin } from '../../utils/origin.js';
 import { ServiceError } from '../../utils/service-error.js';
 import type { AuthService } from './auth.service.js';
 import type { SessionService } from './session.service.js';
@@ -29,7 +30,7 @@ export function createAuthController(environment: Environment, auth: AuthService
   const callback: RequestHandler = (request, response, next) => {
     response.clearCookie(OAUTH_COOKIE, oauthOptions);
     try {
-      if (request.get('Origin') !== environment.CLIENT_URL) {
+      if (!isAllowedOrigin(request.get('Origin'), environment)) {
         throw new ServiceError(403, 'ORIGIN_NOT_ALLOWED', 'This origin is not allowed.');
       }
       const input = OAuthCallbackSchema.parse(request.body);

@@ -1,0 +1,28 @@
+# Dependencies
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Git & Local tooling
+.git
+.github
+.local
+.vscode
+.idea
+
+# Build outputs
+client/dist
+server/dist
+dist
+coverage
+
+# Environment & local credentials (never bake into images)
+.env
+.env.*
+!.env.example
+
+# Temporary and log files
+*.log
+tmp
+temp

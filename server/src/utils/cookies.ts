@@ -5,8 +5,10 @@ export const SESSION_COOKIE = 'gitfolio_session';
 export const OAUTH_COOKIE = 'gitfolio_oauth';
 
 export function cookieOptions(environment: Environment): CookieOptions {
-  return { httpOnly: true, secure: environment.NODE_ENV === 'production' ||
-    new URL(environment.CLIENT_URL).protocol === 'https:', sameSite: 'lax', path: '/api' };
+  const sameSite = environment.COOKIE_SAME_SITE ?? 'lax';
+  const secure = sameSite === 'none' || environment.NODE_ENV === 'production' ||
+    new URL(environment.CLIENT_URL).protocol === 'https:';
+  return { httpOnly: true, secure, sameSite, path: '/api' };
 }
 
 export function readCookie(request: Request, name: string): string | undefined {

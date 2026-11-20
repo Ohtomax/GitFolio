@@ -18,6 +18,18 @@ test('foundation configuration works without future OAuth credentials', () => {
   assert.equal(environment.ENCRYPTION_KEY, undefined);
 });
 
+test('uses PORT from platform environment when SERVER_PORT is omitted', () => {
+  const originalPort = process.env.PORT;
+  try {
+    process.env.PORT = '10000';
+    const environment = EnvironmentSchema.parse({ ...valid });
+    assert.equal(environment.SERVER_PORT, 10000);
+  } finally {
+    if (originalPort === undefined) delete process.env.PORT;
+    else process.env.PORT = originalPort;
+  }
+});
+
 test('rejects malformed service URLs, wrong protocols, and invalid ports', () => {
   for (const override of [
     { DATABASE_URL: undefined }, { DATABASE_URL: 'invalid-url' },
