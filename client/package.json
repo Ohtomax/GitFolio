@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "prebuild": "npm run build --workspace=@gitfolio/shared",
     "build": "tsc -b && vite build",
     "typecheck": "tsc -b --pretty false",
     "test": "node --experimental-strip-types --test test/*.test.ts",
