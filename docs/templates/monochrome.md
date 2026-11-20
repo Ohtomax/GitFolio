@@ -4,7 +4,7 @@ Category: `developer` · Audience: Developers and students building a personal o
 
 Inspired by the OnlineCv portfolio: bold black-and-white typography, a glass portrait frame, constellation details, a moving toolkit strip, and spacious project stories.
 
-Inspired by the owner-supplied OnlineCv reference: black-and-white typography, a two-column hero, an editable portrait with initials fallback, a constellation background, a scrolling toolkit strip, glass project cards, biography, skills, career entries, certificates, and a direct-contact close.
+Inspired by the owner-supplied OnlineCv reference: black-and-white typography, a two-column hero, an editable portrait with initials fallback, a viewport-sized constellation background, a scrolling toolkit strip, glass project cards, biography, skills, career entries, certificates, and a direct-contact close. Motion follows the reference with staggered entrances, shimmering headings, an editable looping typewriter, floating portrait, rotating rings, scan line, breathing glow, mouse-following spotlight and card tilt, repeated scroll reveals, and staggered toolkit chips. The sticky header offers Pause motion. Effects run only in interactive previews and exports, follow live reduced-motion preferences, and stop when their area or the document is hidden. Content and native mobile navigation remain available without JavaScript.
 
 ## Design tokens
 

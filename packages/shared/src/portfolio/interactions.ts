@@ -160,69 +160,201 @@ export function mountPortfolioInteractions(root: ParentNode): () => void {
       shell.querySelectorAll<HTMLDetailsElement>('[data-dossier-menu]').forEach((menu) => { menu.open = false; });
     });
   });
-  root.querySelectorAll<HTMLDetailsElement>('[data-monochrome-menu]').forEach((menu) => {
-    const close = (event: Event) => { if ((event.target as Element).closest('a')) menu.open = false; };
-    menu.addEventListener('click', close);
-    cleanups.push(() => menu.removeEventListener('click', close));
-  });
-  root.querySelectorAll<HTMLCanvasElement>('canvas[data-monochrome-particles]').forEach((canvas) => {
-    const context = canvas.getContext('2d');
-    const parent = canvas.parentElement;
-    if (!context || !parent) return;
+  root.querySelectorAll<HTMLElement>('[data-monochrome-page]').forEach((page) => {
     const preference = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const color = getComputedStyle(parent).getPropertyValue('--pf-text').trim() || '#ffffff';
-    const points = Array.from({ length: 28 }, (_, index) => ({ x: ((index * 137 + 29) % 997) / 997,
-      y: ((index * 239 + 71) % 991) / 991, dx: index % 2 ? .0002 : -.00015, dy: index % 3 ? .00012 : -.0002 }));
-    let width = 1, height = 1, frame = 0, visible = false, previousTime = 0;
-    let pointer: { x: number; y: number } | undefined;
-    const draw = (move: boolean) => {
+    const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
+    const button = page.querySelector<HTMLButtonElement>('[data-monochrome-motion]');
+    const reveals = Array.from(page.querySelectorAll<HTMLElement>('[data-monochrome-reveal]'));
+    const intros = Array.from(page.querySelectorAll<HTMLElement>('[data-monochrome-intro]'));
+    const chips = Array.from(page.querySelectorAll<HTMLElement>('.pf-skills>.pf-tags li'));
+    const tilts = Array.from(page.querySelectorAll<HTMLElement>('[data-monochrome-tilt]'));
+    const animated = Array.from(page.querySelectorAll<HTMLElement>('.pf-monochrome-title,.pf-monochrome-badge,.pf-monochrome-profile-float,.pf-monochrome-ticker,.pf-monochrome-typebar,.pf-monochrome-scroll-cue'));
+    const background = page.querySelector<HTMLElement>('[data-monochrome-background]');
+    const spotlight = page.querySelector<HTMLElement>('.pf-monochrome-spotlight');
+    const canvas = page.querySelector<HTMLCanvasElement>('canvas[data-monochrome-particles]');
+    const context = canvas?.getContext('2d');
+    const color = getComputedStyle(page).getPropertyValue('--pf-text').trim() || '#ffffff';
+    let scrollPort = page.parentElement;
+    while (scrollPort && !['auto', 'scroll'].includes(getComputedStyle(scrollPort).overflowY)) scrollPort = scrollPort.parentElement;
+    if (scrollPort === document.body || scrollPort === document.documentElement) scrollPort = null;
+    let width = 1, height = 1, frame = 0, pointerFrame = 0, visible = false, paused = false, previousTime = 0;
+    let pointer: { x: number; y: number } | undefined, activeTilt: HTMLElement | null = null;
+    const canAnimate = () => visible && !document.hidden && !preference.matches && !paused;
+    const tiltProperties = ['--pf-tilt-x', '--pf-tilt-y', '--pf-light-x', '--pf-light-y'];
+    const resetPointer = () => {
+      cancelAnimationFrame(pointerFrame); pointerFrame = 0; pointer = undefined; activeTilt = null;
+      tilts.forEach((element) => tiltProperties.forEach((property) => element.style.removeProperty(property)));
+      spotlight?.style.removeProperty('--pf-pointer-x'); spotlight?.style.removeProperty('--pf-pointer-y');
+      page.removeAttribute('data-monochrome-pointer');
+    };
+    const points = Array.from({ length: 70 }, (_, index) => ({ x: ((index * 137 + 29) % 997) / 997,
+      y: ((index * 239 + 71) % 991) / 991, dx: (index % 2 ? 1 : -1) * (.00008 + index % 5 * .00004),
+      dy: (index % 3 ? 1 : -1) * (.00008 + index % 4 * .00004), size: .7 + index % 5 * .35 }));
+    const draw = (step: number) => {
+      if (!context) return;
       context.clearRect(0, 0, width, height);
-      context.fillStyle = color; context.strokeStyle = color; context.lineWidth = .6;
-      points.forEach((point, index) => {
-        if (move) { point.x = (point.x + point.dx + 1) % 1; point.y = (point.y + point.dy + 1) % 1; }
+      context.fillStyle = color; context.strokeStyle = color; context.lineWidth = .7;
+      const count = Math.min(70, Math.max(12, Math.floor(width * height / 18000)));
+      for (let index = 0; index < count; index++) {
+        const point = points[index];
+        point.x = (point.x + point.dx * step + 1) % 1; point.y = (point.y + point.dy * step + 1) % 1;
         const x = point.x * width, y = point.y * height;
-        context.globalAlpha = .3; context.beginPath(); context.arc(x, y, 1.5, 0, Math.PI * 2); context.fill();
-        for (let next = index + 1; next < points.length; next++) {
+        context.globalAlpha = .2 + index % 6 * .09; context.beginPath(); context.arc(x, y, point.size, 0, Math.PI * 2); context.fill();
+        for (let next = index + 1; next < count; next++) {
           const other = points[next], distance = Math.hypot(x - other.x * width, y - other.y * height);
-          if (distance < 130) { context.globalAlpha = (1 - distance / 130) * .12; context.beginPath();
+          if (distance < 130) { context.globalAlpha = (1 - distance / 130) * .14; context.beginPath();
             context.moveTo(x, y); context.lineTo(other.x * width, other.y * height); context.stroke(); }
         }
         if (pointer) {
           const distance = Math.hypot(x - pointer.x, y - pointer.y);
-          if (distance < 160) { context.globalAlpha = (1 - distance / 160) * .25; context.beginPath();
+          if (distance < 180) { context.globalAlpha = (1 - distance / 180) * .35; context.beginPath();
             context.moveTo(x, y); context.lineTo(pointer.x, pointer.y); context.stroke(); }
         }
-      });
+      }
       context.globalAlpha = 1;
     };
     const animate = (time: number) => {
-      if (time - previousTime >= 32) { draw(true); previousTime = time; }
+      frame = 0;
+      if (!canAnimate()) return;
+      draw(previousTime ? Math.min(3, (time - previousTime) / (1000 / 60)) : 1); previousTime = time;
       frame = requestAnimationFrame(animate);
     };
+    type Typewriter = { node: HTMLElement; bar: HTMLElement; original: string; phrases: string[][];
+      index: number; length: number; deleting: boolean; started: boolean; timer: number };
+    const typewriters: Typewriter[] = Array.from(page.querySelectorAll<HTMLElement>('[data-monochrome-type]')).map((node) => {
+      const original = node.textContent || '';
+      return { node, bar: node.closest<HTMLElement>('.pf-monochrome-typebar')!, original,
+        phrases: original.split(/\n+|(?<=[.!?])\s+/u).map((phrase) => Array.from(phrase.trim())).filter((phrase) => phrase.length),
+        index: 0, length: 0, deleting: false, started: false, timer: 0 };
+    });
+    const canType = (state: Typewriter) => canAnimate() && state.bar.hasAttribute('data-monochrome-active') && state.phrases.length > 0;
+    const tickType = (state: Typewriter) => {
+      state.timer = 0;
+      if (!canType(state)) return;
+      const phrase = state.phrases[state.index];
+      state.length += state.deleting ? -1 : 1;
+      state.node.textContent = phrase.slice(0, state.length).join('');
+      let delay = state.deleting ? 35 : 70;
+      if (!state.deleting && state.length === phrase.length) { state.deleting = true; delay = 1400; }
+      else if (state.deleting && state.length === 0) {
+        state.deleting = false; state.index = (state.index + 1) % state.phrases.length; delay = 350;
+      }
+      state.timer = window.setTimeout(() => tickType(state), delay);
+    };
     const refresh = () => {
-      cancelAnimationFrame(frame); frame = 0; draw(false);
-      if (visible && !document.hidden && !preference.matches) frame = requestAnimationFrame(animate);
+      page.toggleAttribute('data-monochrome-reduced', preference.matches);
+      page.toggleAttribute('data-monochrome-paused', paused);
+      page.toggleAttribute('data-monochrome-running', canAnimate());
+      if (!canAnimate() || !finePointer.matches) resetPointer();
+      if (canAnimate() && context) { if (!frame) frame = requestAnimationFrame(animate); }
+      else { cancelAnimationFrame(frame); frame = 0; previousTime = 0; draw(0); }
+      typewriters.forEach((state) => {
+        if (!canType(state)) { clearTimeout(state.timer); state.timer = 0; }
+        if (preference.matches || paused) {
+          state.node.textContent = state.original; state.started = false; state.index = 0; state.length = 0; state.deleting = false;
+        } else if (canType(state) && !state.timer) {
+          if (!state.started) { state.node.textContent = ''; state.started = true; }
+          state.timer = window.setTimeout(() => tickType(state), state.deleting ? 35 : 70);
+        }
+      });
+      if (button) {
+        button.textContent = preference.matches ? 'Reduced motion' : paused ? 'Resume motion' : 'Pause motion';
+        button.setAttribute('aria-pressed', String(preference.matches || paused));
+        button.setAttribute('aria-disabled', String(preference.matches));
+      }
     };
     const resize = () => {
-      width = Math.max(1, Math.min(parent.clientWidth, 1600)); height = Math.max(1, Math.min(parent.clientHeight, 1200));
-      const ratio = Math.min(window.devicePixelRatio || 1, 1.5);
-      canvas.width = Math.round(width * ratio); canvas.height = Math.round(height * ratio);
-      context.setTransform(ratio, 0, 0, ratio, 0, 0); refresh();
+      width = Math.max(1, Math.min(page.clientWidth, 1600)); height = Math.max(1, Math.min(scrollPort?.clientHeight ?? window.innerHeight, 1200));
+      page.style.setProperty('--pf-monochrome-viewport', height + 'px');
+      if (canvas && context) {
+        const ratio = Math.min(window.devicePixelRatio || 1, 1.5);
+        canvas.width = Math.round(width * ratio); canvas.height = Math.round(height * ratio);
+        context.setTransform(ratio, 0, 0, ratio, 0, 0);
+      }
+      refresh();
     };
     const move = (event: PointerEvent) => {
-      if (preference.matches || event.pointerType !== 'mouse') return;
-      const rect = canvas.getBoundingClientRect();
-      pointer = { x: (event.clientX - rect.left) * width / Math.max(1, rect.width), y: (event.clientY - rect.top) * height / Math.max(1, rect.height) };
+      if (!canAnimate() || !finePointer.matches || event.pointerType !== 'mouse') return;
+      cancelAnimationFrame(pointerFrame);
+      const x = event.clientX, y = event.clientY;
+      const tilt = (event.target as Element).closest<HTMLElement>('[data-monochrome-tilt]');
+      pointerFrame = requestAnimationFrame(() => {
+        pointerFrame = 0;
+        if (!canAnimate() || !finePointer.matches) return;
+        const rect = background?.getBoundingClientRect();
+        if (rect) {
+          pointer = { x: (x - rect.left) * width / Math.max(1, rect.width), y: (y - rect.top) * height / Math.max(1, rect.height) };
+          spotlight?.style.setProperty('--pf-pointer-x', (x - rect.left).toFixed(1) + 'px');
+          spotlight?.style.setProperty('--pf-pointer-y', (y - rect.top).toFixed(1) + 'px');
+          page.setAttribute('data-monochrome-pointer', '');
+        }
+        if (activeTilt && activeTilt !== tilt) tiltProperties.forEach((property) => activeTilt?.style.removeProperty(property));
+        activeTilt = tilt;
+        if (tilt) {
+          const box = tilt.getBoundingClientRect();
+          const horizontal = Math.max(0, Math.min(1, (x - box.left) / Math.max(1, box.width)));
+          const vertical = Math.max(0, Math.min(1, (y - box.top) / Math.max(1, box.height)));
+          tilt.style.setProperty('--pf-tilt-x', ((vertical - .5) * -12).toFixed(2) + 'deg');
+          tilt.style.setProperty('--pf-tilt-y', ((horizontal - .5) * 12).toFixed(2) + 'deg');
+          tilt.style.setProperty('--pf-light-x', (horizontal * 100).toFixed(1) + '%');
+          tilt.style.setProperty('--pf-light-y', (vertical * 100).toFixed(1) + '%');
+        }
+      });
     };
-    const leave = () => { pointer = undefined; };
-    const resizeObserver = new ResizeObserver(resize); resizeObserver.observe(parent);
-    const visibilityObserver = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; refresh(); }); visibilityObserver.observe(canvas);
-    parent.addEventListener('pointermove', move); parent.addEventListener('pointerleave', leave);
-    preference.addEventListener('change', refresh); document.addEventListener('visibilitychange', refresh); resize();
+    const toggle = () => { if (!preference.matches) { paused = !paused; refresh(); } };
+    const click = (event: MouseEvent) => {
+      const link = (event.target as Element).closest<HTMLAnchorElement>('a');
+      if (!link || event.defaultPrevented || event.button > 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+      const menu = link.closest<HTMLDetailsElement>('[data-monochrome-menu]');
+      if (menu) menu.open = false;
+      const href = link.getAttribute('href');
+      if (!href?.startsWith('#')) return;
+      const target = Array.from(page.querySelectorAll<HTMLElement>('[id]')).find((element) => '#' + element.id === href);
+      if (!target) return;
+      event.preventDefault();
+      const margin = parseFloat(getComputedStyle(target).scrollMarginTop) || 0;
+      const top = target.getBoundingClientRect().top - (scrollPort?.getBoundingClientRect().top ?? 0) + (scrollPort?.scrollTop ?? window.scrollY) - margin;
+      (scrollPort ?? window).scrollTo({ top, behavior: preference.matches || paused ? 'instant' : 'smooth' });
+      if (link.classList.contains('pf-skip')) target.focus({ preventScroll: true });
+    };
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(({ target, isIntersecting }) => {
+        if (target === page) visible = isIntersecting;
+        else {
+          if (target.hasAttribute('data-monochrome-reveal')) target.toggleAttribute('data-monochrome-in-view', isIntersecting);
+          if (animated.includes(target as HTMLElement)) target.toggleAttribute('data-monochrome-active', isIntersecting);
+        }
+      });
+      refresh();
+    }, { threshold: .12 });
+    new Set([page, ...reveals, ...animated]).forEach((element) => observer.observe(element));
+    intros.forEach((element) => element.style.setProperty('--pf-intro-index', element.getAttribute('data-monochrome-intro') || '0'));
+    reveals.forEach((element) => element.style.setProperty('--pf-reveal-delay', (element.getAttribute('data-monochrome-reveal') || '0') + 'ms'));
+    chips.forEach((element, index) => element.style.setProperty('--pf-chip-delay', Math.min(index, 24) * 45 + 'ms'));
+    const resizeObserver = new ResizeObserver(resize); resizeObserver.observe(page);
+    if (scrollPort) resizeObserver.observe(scrollPort);
+    window.addEventListener('resize', resize, { passive: true });
+    page.addEventListener('pointermove', move, { passive: true }); page.addEventListener('pointerleave', resetPointer);
+    page.addEventListener('click', click); button?.addEventListener('click', toggle);
+    preference.addEventListener('change', refresh); finePointer.addEventListener('change', refresh);
+    document.addEventListener('visibilitychange', refresh);
+    page.setAttribute('data-monochrome-enhanced', ''); resize();
     cleanups.push(() => {
-      cancelAnimationFrame(frame); resizeObserver.disconnect(); visibilityObserver.disconnect();
-      parent.removeEventListener('pointermove', move); parent.removeEventListener('pointerleave', leave);
-      preference.removeEventListener('change', refresh); document.removeEventListener('visibilitychange', refresh);
+      cancelAnimationFrame(frame); resetPointer(); resizeObserver.disconnect(); observer.disconnect();
+      typewriters.forEach((state) => { clearTimeout(state.timer); state.node.textContent = state.original; });
+      window.removeEventListener('resize', resize); page.removeEventListener('pointermove', move); page.removeEventListener('pointerleave', resetPointer);
+      page.removeEventListener('click', click); button?.removeEventListener('click', toggle);
+      preference.removeEventListener('change', refresh); finePointer.removeEventListener('change', refresh);
+      document.removeEventListener('visibilitychange', refresh);
+      ['enhanced', 'reduced', 'paused', 'running'].forEach((name) => page.removeAttribute('data-monochrome-' + name));
+      page.style.removeProperty('--pf-monochrome-viewport');
+      reveals.forEach((element) => { element.removeAttribute('data-monochrome-in-view'); element.style.removeProperty('--pf-reveal-delay'); });
+      animated.forEach((element) => element.removeAttribute('data-monochrome-active'));
+      intros.forEach((element) => element.style.removeProperty('--pf-intro-index'));
+      chips.forEach((element) => element.style.removeProperty('--pf-chip-delay'));
+      page.querySelectorAll<HTMLDetailsElement>('[data-monochrome-menu]').forEach((menu) => { menu.open = false; });
+      if (button) { button.textContent = 'Pause motion'; button.setAttribute('aria-pressed', 'false'); button.removeAttribute('aria-disabled'); }
+      draw(0);
     });
   });
   root.querySelectorAll<HTMLFormElement>('form[data-portfolio-shell]').forEach((form) => {
