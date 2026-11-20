@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://gitfolio-backend.onrender.com/api/:path*"
+      "destination": "https://gitfolio-qhdz.onrender.com/api/:path*"
     },
     {
       "source": "/(.*)",
